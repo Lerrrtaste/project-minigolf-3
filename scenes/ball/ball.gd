@@ -4,8 +4,9 @@ extends KinematicBody2D
 # physics https://www.tutelman.com/golf/swing/index.php
 
 var velocity := Vector2()
-var stroke_force_max := 20
-var friction := 0.98 #later based on ground type
+var stroke_force_max := 15
+var stroke_distance_max := 100
+var friction := 0.97 #later based on ground type
 var stroke_ready := true
 
 var current_collision:KinematicCollision2D
@@ -58,15 +59,21 @@ func _collide(collision:KinematicCollision2D):
 	velocity = reflect_vector(velocity,wall_normal)
 	
 	#move remainder
+	
 	if collision.remainder.length() != 0:
-		move(collision.remainder)
+		if !test_move(Transform2D(),collision.remainder):
+			move(collision.remainder)
+		else:
+			velocity = Vector2()
 
 
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT:
 			if stroke_ready:
-				velocity = get_local_mouse_position().clamped(stroke_force_max)
+				var strength = get_local_mouse_position().length() / stroke_distance_max
+				var force = stroke_force_max * strength
+				velocity = get_local_mouse_position().normalized() * force
 			#apply_central_impulse(get_local_mouse_position().rotated(rotation))
 
 func reflect_vector(vector:Vector2, normal:Vector2)->Vector2:
@@ -75,4 +82,7 @@ func reflect_vector(vector:Vector2, normal:Vector2)->Vector2:
 
 func _draw():
 	if stroke_ready:
-		draw_line(Vector2(), get_local_mouse_position(), ColorN("red"), 3.0, true)
+		var c = "black"
+		if get_local_mouse_position().length() >= stroke_distance_max:
+			c = "red"
+		draw_line(Vector2(), get_local_mouse_position(), ColorN(c), 3.0, true)
