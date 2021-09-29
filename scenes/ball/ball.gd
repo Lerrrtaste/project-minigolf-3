@@ -6,12 +6,14 @@ var velocity := Vector2()
 var friction := 0.7 #later based on ground type
 const FLOAT_ROUNDING = 1
 
+
 func _physics_process(delta)->void:
 	if floor(velocity.length()) == 0.0:
 		velocity = Vector2()
 	
 	_move(velocity*delta)
 	_friction(delta)
+
 
 func _move(movement:Vector2)->void:
 	var collision = move_and_collide(movement)
@@ -49,12 +51,11 @@ func _collide(collision:KinematicCollision2D):
 		_move(velocity.normalized() * collision.remainder.length())
 
 
-
-
 func _friction(delta:float) -> void:
 	var friction_force := Vector2()
 	friction_force = -velocity * friction * delta
 	velocity += friction_force #apply
+
 
 func impact(force:Vector2) -> void:
 	velocity += force

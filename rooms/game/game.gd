@@ -6,6 +6,11 @@ var stroke_distance_max := 150
 
 onready var ball = $Ball2
 
+# load map
+# load players
+# start game
+# stroke turns
+# finish when all in hole
 
 func _ready():
 	pass # Replace with function body.
