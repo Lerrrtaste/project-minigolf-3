@@ -99,12 +99,13 @@ _global_script_class_icons={
 [application]
 
 config/name="Minigolf"
-run/main_scene="res://rooms/game/Game.tscn"
+run/main_scene="res://rooms/login/Login.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
 Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
+Global="*res://global.gd"
 
 [display]
 
