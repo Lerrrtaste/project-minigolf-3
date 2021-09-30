@@ -6,7 +6,11 @@ var _client:NakamaClient
 var _session:NakamaSession
 
 func _ready():
-	_client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL)
+	var log_level = NakamaLogger.LOG_LEVEL.ERROR
+	if Global.DEBUGING:
+		log_level = NakamaLogger.LOG_LEVEL.DEBUG
+		
+	_client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL, Global.NK_TIMEOUT, log_level)
 
 func authenticate_custom_async(customid:String)->bool:
 	var new_session:NakamaSession

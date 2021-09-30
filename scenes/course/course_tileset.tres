@@ -1,6 +1,15 @@
-[gd_resource type="TileSet" load_steps=2 format=2]
+[gd_resource type="TileSet" load_steps=5 format=2]
 
 [ext_resource path="res://scenes/course/course_spritesheet.png" type="Texture" id=1]
+
+[sub_resource type="ConvexPolygonShape2D" id=1]
+points = PoolVector2Array( 15.0011, 29.3059, 29.1489, 37.0582, 14.032, 44.4228, 0.271751, 36.8643 )
+
+[sub_resource type="ConvexPolygonShape2D" id=2]
+points = PoolVector2Array( 14.6535, 30.0811, 29.3828, 36.8643, 14.6535, 44.0352, 0.117981, 36.4767 )
+
+[sub_resource type="ConvexPolygonShape2D" id=3]
+points = PoolVector2Array( 14.8873, 28.5307, 29.6166, 36.6705, 14.6935, 44.229, 0.158005, 37.0582 )
 
 [resource]
 resource_local_to_scene = true
@@ -15,14 +24,8 @@ resource_local_to_scene = true
 0/shape_offset = Vector2( 0, 0 )
 0/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
 0/shape_one_way = false
-0/shape_one_way_margin = 1.0
-0/shapes = [ {
-"autotile_coord": Vector2( 0, 0 ),
-"one_way": false,
-"one_way_margin": 1.0,
-"shape": null,
-"shape_transform": Transform2D( 1, 0, 0, 1, 0, 0 )
-} ]
+0/shape_one_way_margin = 0.0
+0/shapes = [  ]
 0/z_index = 0
 1/name = "course_spritesheet.png 1"
 1/texture = ExtResource( 1 )
@@ -60,11 +63,18 @@ resource_local_to_scene = true
 3/tile_mode = 0
 3/occluder_offset = Vector2( 0, 0 )
 3/navigation_offset = Vector2( 0, 0 )
-3/shape_offset = Vector2( 0, 0 )
-3/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+3/shape_offset = Vector2( 0, -30 )
+3/shape_transform = Transform2D( 1, 0, 0, 1, 0, -30 )
+3/shape = SubResource( 1 )
 3/shape_one_way = false
-3/shape_one_way_margin = 0.0
-3/shapes = [  ]
+3/shape_one_way_margin = 1.0
+3/shapes = [ {
+"autotile_coord": Vector2( 0, 0 ),
+"one_way": false,
+"one_way_margin": 1.0,
+"shape": SubResource( 1 ),
+"shape_transform": Transform2D( 1, 0, 0, 1, 0, -30 )
+} ]
 3/z_index = 0
 4/name = "course_spritesheet.png 4"
 4/texture = ExtResource( 1 )
@@ -74,11 +84,18 @@ resource_local_to_scene = true
 4/tile_mode = 0
 4/occluder_offset = Vector2( 0, 0 )
 4/navigation_offset = Vector2( 0, 0 )
-4/shape_offset = Vector2( 0, 0 )
-4/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+4/shape_offset = Vector2( 0, -30 )
+4/shape_transform = Transform2D( 1, 0, 0, 1, 0, -30 )
+4/shape = SubResource( 2 )
 4/shape_one_way = false
-4/shape_one_way_margin = 0.0
-4/shapes = [  ]
+4/shape_one_way_margin = 1.0
+4/shapes = [ {
+"autotile_coord": Vector2( 0, 0 ),
+"one_way": false,
+"one_way_margin": 1.0,
+"shape": SubResource( 2 ),
+"shape_transform": Transform2D( 1, 0, 0, 1, 0, -30 )
+} ]
 4/z_index = 0
 5/name = "course_spritesheet.png 5"
 5/texture = ExtResource( 1 )
@@ -88,9 +105,16 @@ resource_local_to_scene = true
 5/tile_mode = 0
 5/occluder_offset = Vector2( 0, 0 )
 5/navigation_offset = Vector2( 0, 0 )
-5/shape_offset = Vector2( 0, 0 )
-5/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+5/shape_offset = Vector2( 0, -30 )
+5/shape_transform = Transform2D( 1, 0, 0, 1, 0, -30 )
+5/shape = SubResource( 3 )
 5/shape_one_way = false
-5/shape_one_way_margin = 0.0
-5/shapes = [  ]
+5/shape_one_way_margin = 1.0
+5/shapes = [ {
+"autotile_coord": Vector2( 0, 0 ),
+"one_way": false,
+"one_way_margin": 1.0,
+"shape": SubResource( 3 ),
+"shape_transform": Transform2D( 1, 0, 0, 1, 0, -30 )
+} ]
 5/z_index = 0

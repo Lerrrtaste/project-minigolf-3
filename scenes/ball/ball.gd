@@ -15,8 +15,8 @@ func _physics_process(delta)->void:
 	_friction(delta)
 
 
-func _move(movement:Vector2)->void:
-	var collision = move_and_collide(movement)
+func _move(movement:Vector2)->void: #eig motion genannt
+	var collision = move_and_collide(movement.length()*isometric_normalize(movement))
 	
 	# kollidiert
 	if is_instance_valid(collision):
@@ -65,3 +65,22 @@ func impact(force:Vector2) -> void:
 func reflect_vector(vector:Vector2, normal:Vector2)->Vector2:
 	assert(normal.is_normalized())
 	return vector - 2 * vector.dot(normal) * normal
+
+
+# Converts any Vector2 coordinates or motion from the cartesian to the isometric system
+func cartesian_to_isometric(cartesian):
+	return Vector2(cartesian.x - cartesian.y, (cartesian.x + cartesian.y) / 2)
+
+
+# useful to convert mouse coordinates back to screen-space, and detect where the player wants to know.
+# If we want to add mouse-based controls, we'll need this function
+func isometric_to_cartesian(iso):
+	var cart_pos = Vector2()
+	cart_pos.x = (iso.x + iso.y * 2) / 2
+	cart_pos.y = - iso.x + cart_pos.x
+	return cart_pos
+
+
+func isometric_normalize(direction:Vector2)->Vector2:
+	direction = direction.normalized()
+	return direction * Vector2(1,0.6)
