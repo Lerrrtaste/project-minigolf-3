@@ -7,7 +7,7 @@ var _session:NakamaSession
 
 func _ready():
 	var log_level = NakamaLogger.LOG_LEVEL.ERROR
-	if Global.DEBUGING:
+	if Global.DEBUGGING:
 		log_level = NakamaLogger.LOG_LEVEL.DEBUG
 		
 	_client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL, Global.NK_TIMEOUT, log_level)
@@ -21,4 +21,5 @@ func authenticate_custom_async(customid:String)->bool:
 		return false
 	
 	_session = new_session
+	Analytics.setup(_session.user_id)
 	return true

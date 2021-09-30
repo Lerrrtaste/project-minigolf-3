@@ -13,6 +13,8 @@ onready var ball = $Ball2
 # finish when all in hole
 
 func _ready():
+	Analytics.event_match_started($Course.metadata.id)
+	Analytics.event_error("info","helo")
 	pass # Replace with function body.
 
 
@@ -23,6 +25,7 @@ func _process(delta):
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.pressed:
+			Analytics.event_match_completed($Course.metadata.id,6)
 			if stroke_ready:
 				var strength = min(get_local_mouse_position().distance_to(ball.position),stroke_distance_max) / stroke_distance_max
 				var force = stroke_force_max * strength * (get_local_mouse_position()-ball.position).normalized()

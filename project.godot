@@ -106,20 +106,22 @@ config/icon="res://icon.png"
 
 Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 Global="*res://global.gd"
+Analytics="*res://helper/analytics/Analytics.tscn"
+ServerConnection="*res://helper/server_connection/ServerConnection.tscn"
 
 [display]
 
-window/size/width=600
-window/size/height=1000
-window/stretch/mode="viewport"
-
-[editor_plugins]
-
-enabled=PoolStringArray(  )
+window/size/width=800
+window/size/height=900
+window/stretch/mode="2d"
 
 [gdnative]
 
 singletons=[  ]
+
+[global]
+
+plugi=false
 
 [importer_defaults]
 
