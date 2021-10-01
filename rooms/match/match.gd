@@ -13,8 +13,7 @@ onready var ball = $Ball2
 # finish when all in hole
 
 func _ready():
-	Analytics.event_match_started($Course.metadata.id)
-	Analytics.event_error("info","helo")
+	emit_signal("match_created")
 	pass # Replace with function body.
 
 

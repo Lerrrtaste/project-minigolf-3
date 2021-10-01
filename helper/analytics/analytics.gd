@@ -6,6 +6,8 @@ var ready := false
 func setup(user_id:String) -> bool:
 	_ga_configure(user_id)
 	_ga_initialize()
+	
+	connect("error",self,"_on_Error")
 	return true
 
 
@@ -50,7 +52,8 @@ func event_match_completed(map_id:String, score) -> void:
 	"score": -1,
 	})
 
-func event_error(severity:String,message:String)->void:
+
+func _on_Error(severity:String,message:String)->void:
 	GA.addErrorEvent({
 		"severity": "Info", #Debug,Info,Warning,Error,Critical
 		"message": "Something went bad in some of the smelly code!",
