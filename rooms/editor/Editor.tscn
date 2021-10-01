@@ -1,16 +1,106 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://rooms/editor/editor.gd" type="Script" id=1]
 [ext_resource path="res://scenes/map/Map.tscn" type="PackedScene" id=2]
+[ext_resource path="res://helper/map_storage/MapStorage.tscn" type="PackedScene" id=3]
 
 [node name="Editor" type="Node2D"]
 script = ExtResource( 1 )
 
 [node name="Map" parent="." instance=ExtResource( 2 )]
 
-[node name="UI" type="Control" parent="."]
+[node name="LoadingUI" type="Control" parent="."]
 margin_right = 40.0
 margin_bottom = 40.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="ListMapfiles" type="ItemList" parent="LoadingUI"]
+margin_left = 70.4492
+margin_top = 170.122
+margin_right = 241.449
+margin_bottom = 391.122
+same_column_width = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BtnLoad" type="Button" parent="LoadingUI"]
+anchor_right = 0.024
+margin_left = 74.5717
+margin_top = 391.755
+margin_right = 237.468
+margin_bottom = 411.755
+text = "Load Selected"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BtnCreate" type="Button" parent="LoadingUI"]
+margin_left = 506.23
+margin_top = 262.656
+margin_right = 589.23
+margin_bottom = 295.656
+text = "Create new"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LineCreateID" type="LineEdit" parent="LoadingUI"]
+margin_left = 483.0
+margin_top = 226.0
+margin_right = 649.0
+margin_bottom = 250.0
+placeholder_text = "newmap uid"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LineCreateTitle" type="LineEdit" parent="LoadingUI"]
+margin_left = 484.122
+margin_top = 188.959
+margin_right = 650.122
+margin_bottom = 212.959
+placeholder_text = "newmap title"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MapStorage" parent="." instance=ExtResource( 3 )]
+
+[node name="EditingUI" type="Control" parent="."]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ListBlocks" type="ItemList" parent="EditingUI"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="ListTools" type="ItemList" parent="EditingUI"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="BtnSave" type="Button" parent="EditingUI"]
+margin_left = 408.576
+margin_top = 4.48984
+margin_right = 484.576
+margin_bottom = 34.4898
+text = "save"
+
+[node name="PopSavePath" type="FileDialog" parent="EditingUI"]
+margin_right = 315.0
+margin_bottom = 130.0
+popup_exclusive = true
+resizable = true
+show_hidden_files = true
+
+[connection signal="pressed" from="LoadingUI/BtnLoad" to="." method="_on_BtnLoad_pressed"]
+[connection signal="pressed" from="LoadingUI/BtnCreate" to="." method="_on_BtnCreate_pressed"]
+[connection signal="pressed" from="EditingUI/BtnSave" to="." method="_on_BtnSave_pressed"]
+[connection signal="dir_selected" from="EditingUI/PopSavePath" to="." method="_on_PopSavePath_dir_selected"]
+[connection signal="file_selected" from="EditingUI/PopSavePath" to="." method="_on_PopSavePath_file_selected"]
