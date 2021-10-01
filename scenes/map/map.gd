@@ -2,10 +2,11 @@ extends Node2D
 
 enum States {
 	INVALID = -1, # not loaded
+	LOADED,
 	PLAYING,
 	EDITING,
 }
-var state:int = States.INVALID
+var _state:int = States.INVALID
 
 
 var metadata := { #keys here are required when loading, values here are placeholders
@@ -19,26 +20,36 @@ func _ready():
 	set_process(false)
 
 
-func setup(new_course:Dictionary):
+func load_from_coursedata(coursedata:Dictionary):
+	_load_from_dictionary(coursedata)
+	state_change(States.LOADED)
+
+
+func state_change(new_state:int)->void:
+	match new_state:
+		States.LOADED:
+			print("Map loaded")
+		States.PLAYING:
+			print("Map playing")
+		States.EDITING:
+			print("Map editing")
 	
-	_load_from_dictionary(new_course)
+	_state = new_state
 
 
-func _load_from_dictionary(course:Dictionary)->bool:
-	if !course.has("metadata"):
+func _load_from_dictionary(coursedata:Dictionary)->bool:
+	if !coursedata.has("metadata"):
 		return false
 	
-	if course.has("map"):
+	if coursedata.has("map"):
 		return false
 	
 	# metadata
-	var metadata_new = course["metadata"]
+	var metadata_new = coursedata["metadata"]
 	for key in metadata.keys(): # validate all required keys
 		if !metadata_new.has(key):
 			return false
 	metadata = metadata_new
-	
-	#assert()
 	
 	#map
 	

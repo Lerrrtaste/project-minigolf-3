@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/course_spritesheet.png-0aa3d612bf56b0aaa4728ed36009bf6d.stex"
+path="res://.import/block_spritesheet.png-13e3292675f8f5ee53095f28905cf165.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://scenes/course/course_spritesheet.png"
-dest_files=[ "res://.import/course_spritesheet.png-0aa3d612bf56b0aaa4728ed36009bf6d.stex" ]
+source_file="res://scenes/building_blocks/block_spritesheet.png"
+dest_files=[ "res://.import/block_spritesheet.png-13e3292675f8f5ee53095f28905cf165.stex" ]
 
 [params]
 

@@ -5,7 +5,8 @@ onready var btn_login = $LoginName/Button
 
 
 func _ready():
-	pass#_on_Button_pressed()
+	if Global.DEBUGGING:
+		_on_Button_pressed()
 
 
 func _on_Button_pressed():

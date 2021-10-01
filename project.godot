@@ -108,6 +108,7 @@ Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 Global="*res://global.gd"
 Analytics="*res://helper/analytics/Analytics.tscn"
 ServerConnection="*res://helper/server_connection/ServerConnection.tscn"
+Signals="*res://signals.gd"
 
 [display]
 
