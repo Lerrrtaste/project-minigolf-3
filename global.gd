@@ -9,7 +9,11 @@ const DEBUGGING = true
 #### Maps ####
 const MAPFILES_PATH_USER = "user://maps/"
 const MAPFILES_PATH_BUILTIN = "res://scenes/map/builtin_mapfiles/"
-
+const BLOCK_SCENE_PATHS = [
+	"res://scenes/building_blocks/error/BlockError.tscn",
+	"res://scenes/building_blocks/wall/BlockWall.tscn",
+	"res://scenes/building_blocks/grass/BlockGrass.tscn",
+]
 
 #### Nakama ####
 # https://github.com/heroiclabs/nakama-godot

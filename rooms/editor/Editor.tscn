@@ -78,12 +78,16 @@ __meta__ = {
 }
 
 [node name="ListBlocks" type="ItemList" parent="EditingUI"]
-margin_right = 40.0
-margin_bottom = 40.0
+margin_left = 30.1606
+margin_top = -7.93698
+margin_right = 246.161
+margin_bottom = 76.063
 
 [node name="ListTools" type="ItemList" parent="EditingUI"]
-margin_right = 40.0
-margin_bottom = 40.0
+margin_left = 592.0
+margin_top = -3.0
+margin_right = 788.0
+margin_bottom = 37.0
 
 [node name="BtnSave" type="Button" parent="EditingUI"]
 margin_left = 408.576

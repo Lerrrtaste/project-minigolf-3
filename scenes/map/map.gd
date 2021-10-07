@@ -19,15 +19,14 @@ var metadata := {
 }#keys here are required when loading, values here are placeholders
 
 
-var block_classes = {
-	"grass": preload("res://scenes/building_blocks/grass/Grass.tscn"),
-	"wall": preload("res://scenes/building_blocks/wall/Wall.tscn"),
-}
-
+var block_scenes:Dictionary
 onready var blocks = $Blocks
 
 
 func _ready():
+	for i in Global.BLOCK_SCENE_PATHS:
+		var scene = load(i)
+		block_scenes[i.replace] = scene
 	set_process(false)
 
 
@@ -119,7 +118,7 @@ func _load_from_dictionary(packed_map:Dictionary)->bool:
 	
 	#map
 	for key in packed_map.keys():
-		if !block_classes.has(packed_map[key]):
+		if !block_scenes.has(packed_map[key]):
 			Signals.emit_signal("error","Error","Mapdata contains unknown blocks")
 			return false
 	
@@ -129,7 +128,7 @@ func _load_from_dictionary(packed_map:Dictionary)->bool:
 
 func _spawn_map()->void:
 	for i in mapdata.keys():
-		var inst = block_classes[mapdata[i]].instance()
+		var inst = block_scenes[mapdata[i]].instance()
 		inst.position = cartesian_to_isometric(i)
 		blocks.add_child(inst)
 

@@ -20,12 +20,12 @@ func _ready():
 	Signals.connect("map_started_editing",self,"_on_Map_started_editing")
 
 
+# load / create 
 func _populate_mapfiles_list() -> void:
 	var mapfiles = map_storage.list_builtin_map_ids()
 	
 	for i in mapfiles:
 		list_mapfiles.add_item(i)
-	
 
 
 func _on_BtnLoad_pressed():
@@ -44,8 +44,10 @@ func _on_BtnCreate_pressed():
 func _on_Map_loaded(map_id):
 	loading_ui.visible = false
 
+
 func _on_Map_started_editing(map_id):
 	editing_ui.visible = true
+
 
 func _on_BtnSave_pressed():
 	pop_save_path.popup_centered()

@@ -9,6 +9,21 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Sprite",
+"class": "BlockError",
+"language": "GDScript",
+"path": "res://scenes/building_blocks/error/block_error.gd"
+}, {
+"base": "StaticBody2D",
+"class": "BlockGrass",
+"language": "GDScript",
+"path": "res://scenes/building_blocks/grass/block_grass.gd"
+}, {
+"base": "StaticBody2D",
+"class": "BlockWall",
+"language": "GDScript",
+"path": "res://scenes/building_blocks/wall/block_wall.gd"
+}, {
 "base": "Node2D",
 "class": "Map",
 "language": "GDScript",
@@ -85,6 +100,9 @@ _global_script_classes=[ {
 "path": "res://addons/com.heroiclabs.nakama/api/NakamaWriteStorageObject.gd"
 } ]
 _global_script_class_icons={
+"BlockError": "",
+"BlockGrass": "",
+"BlockWall": "",
 "Map": "",
 "NakamaAPI": "",
 "NakamaAsyncResult": "",
