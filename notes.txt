@@ -1,0 +1,4 @@
+Muss mit gameanalytics modul kompiliert werden
+
+win editor:
+scons p=windows -j6 
