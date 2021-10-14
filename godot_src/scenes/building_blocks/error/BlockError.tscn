@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scenes/building_blocks/error/block_error.gd" type="Script" id=1]
+[ext_resource path="res://scenes/building_blocks/error/block_error-export.png" type="Texture" id=2]
+
+[node name="BlockError" type="Sprite"]
+texture = ExtResource( 2 )
+script = ExtResource( 1 )
