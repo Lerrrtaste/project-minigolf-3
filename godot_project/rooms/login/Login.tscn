@@ -1,31 +1,26 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=2 format=3 uid="uid://dqxyo7eqxj6af"]
 
-[ext_resource path="res://rooms/login/login.gd" type="Script" id=1]
+[ext_resource type="Script" path="res://rooms/login/login.gd" id="1"]
 
 [node name="Login" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 1 )
+script = ExtResource( "1" )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="LoginName" type="LineEdit" parent="."]
-margin_left = 94.2868
-margin_top = 130.206
-margin_right = 291.287
-margin_bottom = 163.206
 text = "dev_default"
+structured_text_bidi_override_options = []
+script = null
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Button" type="Button" parent="LoginName"]
-margin_left = 17.9594
-margin_top = 44.8985
-margin_right = 173.959
-margin_bottom = 131.898
 text = "login custom id"
+script = null
 __meta__ = {
 "_edit_use_anchors_": false
 }
