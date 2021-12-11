@@ -18,8 +18,13 @@ const DEBUGGING = true
 #### Nakama ####
 # https://github.com/heroiclabs/nakama-godot
 const NK_KEY = "defaultkey"
-const NK_ADDRESS = "157.230.101.127"
+const NK_ADDRESS = "127.0.0.1"
 const NK_PORT = 7350
 const NK_PROTOCOL = "http"
-const NK_TIMEOUT = 3
 const NK_ADDON_VERSION = "2.1.0" # primarily note for me
+
+
+#### Match State Op codes ####
+enum OP_CODES {
+	moved
+}
