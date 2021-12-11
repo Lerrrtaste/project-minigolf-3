@@ -17,7 +17,6 @@ var local_ball
 
 
 
-
 func _ready():
 	Networker.connect("match_joined", self,"_on_Networker_match_joined")
 	Networker.connect("match_presences_updated", self, "_on_Networker_presences_updated")

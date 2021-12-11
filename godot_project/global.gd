@@ -7,6 +7,7 @@ const DEBUGGING = true
 
 
 #### Maps ####
+# MAP SIZE
 #const MAPFILES_PATH_USER = "user://maps/"
 #const MAPFILES_PATH_BUILTIN = "res://scenes/map/builtin_mapfiles/"
 #const BLOCK_SCENE_PATHS = [
