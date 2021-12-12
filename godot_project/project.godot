@@ -108,6 +108,10 @@ Global="*res://global.gd"
 Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 Networker="*res://helpers/networker/Networker.tscn"
 
+[global]
+
+scale=false
+
 [importer_defaults]
 
 texture={
