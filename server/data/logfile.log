@@ -967,3 +967,6 @@
 {"level":"debug","ts":"2021-12-11T19:27:00.224Z","caller":"server/session_ws.go:466","msg":"Could not send close message","uid":"41fddc29-c9f6-41b5-a6ad-9f995ef3cb84","sid":"0c133cb9-5aa8-11ec-8351-7106fdcb5b46","error":"websocket: close sent"}
 {"level":"debug","ts":"2021-12-11T19:27:00.224Z","caller":"server/tracker.go:835","msg":"Processing presence event","joins":0,"leaves":1}
 {"level":"info","ts":"2021-12-11T19:27:00.224Z","caller":"server/session_ws.go:473","msg":"Closed client connection","uid":"41fddc29-c9f6-41b5-a6ad-9f995ef3cb84","sid":"0c133cb9-5aa8-11ec-8351-7106fdcb5b46"}
+{"level":"info","ts":"2021-12-12T14:56:13.950Z","caller":"main.go:190","msg":"Shutdown started"}
+{"level":"info","ts":"2021-12-12T14:56:13.998Z","caller":"main.go:197","msg":"All authoritative matches stopped"}
+{"level":"info","ts":"2021-12-12T14:56:14.170Z","caller":"main.go:226","msg":"Shutdown complete"}

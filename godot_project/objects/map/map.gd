@@ -4,16 +4,55 @@ extends Node2D
 Tile Size
 32*44
 """
-const TILE_X = 16
+const TILE_X = 32
 const TILE_Y = 16
 
-var grid:Vector2
+var map_objects:Dictionary
+
+ 
+const TILE_DATA = { #id has to be the index in the tilemap
+	"empty": {"id":-1, "texture_path":null},
+	"grass": {"id":0, "texture_path":"res://objects/map/grass.png"},
+	"wall": {"id":1, "texture_path":"res://objects/map/wall.png"},
+	"dirt": {"id":2, "texture_path":null},
+	"water": {"id":3, "texture_path":null},
+}
+onready var tilemap = get_node("TileMap")
+
 
 func _ready():
 	pass
 
-func editor_add_object(grid_coord:Vector2,object_id:int):
+
+func _process(delta):
 	pass
+
+
+func editor_add_object(world_pos:Vector2,object_id:int):
+	pass
+
+
+func editor_tile_remove(world_pos:Vector2):
+	pass
+
+
+func editor_cursor_show(world_pos:Vector2):
+	pass
+
+
+func editor_cursor_hide(world_pos:Vector2):
+	pass
+
+
+func _unhandled_input(event):
+	if event is InputEventMouse:
+		pass
+
+
+#### Loading / Saving
+
+
+
 
 
 #### Helper Functions

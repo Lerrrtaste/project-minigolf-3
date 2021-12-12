@@ -16,6 +16,7 @@ const DEBUGGING = true
 #	"res://scenes/building_blocks/grass/BlockGrass.tscn",
 #]
 
+
 #### Nakama ####
 # https://github.com/heroiclabs/nakama-godot
 const NK_KEY = "defaultkey"
