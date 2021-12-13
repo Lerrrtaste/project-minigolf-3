@@ -14,12 +14,16 @@ func _ready():
 	Networker.connect("socket_connected", self, "_on_Networker_socket_connected")
 	Networker.connect("matchmaking_matched", self, "_on_Networker_matchmaking_matched")
 	
+	Networker.connect("authentication_successfull", self, "_on_Networker_authentication_successfull")
+	Networker.connect("authentication_failed", self, "_on_Networker_authentication_failed")
+	
+	_on_BtnLogin_pressed()
+	
 
 #### Event Callbacks
 
 func _on_BtnLogin_pressed():
-	var result = Networker.login_async(line_customId.text)
-	lbl_loginStatus.text = "Freshly Logged in :)" if result else "NOT logged in!!!"
+	Networker.login_async(line_customId.text)
 
 
 func _on_BtnMatchmaking_pressed():
@@ -49,3 +53,14 @@ func _on_Networker_socket_connected():
 
 func _on_Networker_matchmaking_matched(matched):
 	get_tree().change_scene("res://scenes/match/Match.tscn")
+
+
+func _on_Networker_authentication_failed():
+	lbl_loginStatus.text =  "Could NOT log in!!!"
+	
+func _on_Networker_authentication_successfull():
+	lbl_loginStatus.text =  "Freshly Logged in :)"
+
+
+func _on_BtnEditor_pressed():
+	get_tree().change_scene("res://scenes/editor/Editor.tscn")

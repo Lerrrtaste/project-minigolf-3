@@ -2,12 +2,13 @@ extends Node
 
 
 #### Game ####
-const VERSION = "0.0.1"
+const GAME_VERSION = "0.0.2"
 const DEBUGGING = true
 
 
 #### Maps ####
 # MAP SIZE
+const MAPFOLDER_PATH = "user://maps/"
 #const MAPFILES_PATH_USER = "user://maps/"
 #const MAPFILES_PATH_BUILTIN = "res://scenes/map/builtin_mapfiles/"
 #const BLOCK_SCENE_PATHS = [

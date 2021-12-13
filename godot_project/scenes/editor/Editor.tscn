@@ -17,6 +17,9 @@ tile_set = ExtResource( 4 )
 cell_size = Vector2( 32, 16 )
 format = 1
 
+[node name="LineBorder" type="Line2D" parent="Map"]
+width = 5.0
+
 [node name="CameraEditor" type="Camera2D" parent="."]
 current = true
 zoom = Vector2( 0.5, 0.5 )
@@ -34,21 +37,39 @@ __meta__ = {
 }
 
 [node name="BtnSave" type="Button" parent="CanvasLayer/UI"]
-margin_left = 971.0
-margin_top = 9.0
-margin_right = 1012.0
-margin_bottom = 29.0
+margin_left = 910.0
+margin_top = 40.0
+margin_right = 951.0
+margin_bottom = 60.0
+disabled = true
 text = "Save"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="EditMapName" type="LineEdit" parent="CanvasLayer/UI/BtnSave"]
+margin_left = -52.0
+margin_top = -32.0
+margin_right = 107.0
+margin_bottom = -8.0
+placeholder_text = "Enter Map Name"
+
 [node name="BtnLoad" type="Button" parent="CanvasLayer/UI"]
-margin_left = 974.0
-margin_top = 34.0
-margin_right = 1016.0
-margin_bottom = 54.0
+margin_left = 923.0
+margin_top = 187.0
+margin_right = 965.0
+margin_bottom = 207.0
+disabled = true
 text = "Load"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SelectLoad" type="OptionButton" parent="CanvasLayer/UI/BtnLoad"]
+margin_left = -49.0
+margin_top = -31.0
+margin_right = 97.0
+margin_bottom = -11.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -83,4 +104,9 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[connection signal="pressed" from="CanvasLayer/UI/BtnSave" to="." method="_on_BtnSave_pressed"]
+[connection signal="text_changed" from="CanvasLayer/UI/BtnSave/EditMapName" to="." method="_on_EditMapName_text_changed"]
+[connection signal="pressed" from="CanvasLayer/UI/BtnLoad" to="." method="_on_BtnLoad_pressed"]
+[connection signal="item_selected" from="CanvasLayer/UI/BtnLoad/SelectLoad" to="." method="_on_SelectLoad_item_selected"]
 [connection signal="item_selected" from="CanvasLayer/UI/SelectTool" to="." method="_on_SelectTool_item_selected"]
+[connection signal="item_selected" from="CanvasLayer/UI/SelectObject" to="." method="_on_SelectObject_item_selected"]
