@@ -104,6 +104,8 @@ func editor_tile_change(world_pos:Vector2, tile_id:int):
 #### Loading / Saving
 
 func serialize()->String:
+	assert(metadata["id"] != null) # should be set by editor
+	
 	var mapdict := {
 		"game_version": "",
 		"cells": {}, # vector keys are saved with var2str

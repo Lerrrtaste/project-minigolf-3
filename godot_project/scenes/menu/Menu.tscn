@@ -49,11 +49,20 @@ __meta__ = {
 }
 
 [node name="BtnEditor" type="Button" parent="."]
-margin_left = 422.0
-margin_top = 319.0
-margin_right = 536.0
-margin_bottom = 346.0
+margin_left = 425.0
+margin_top = 538.0
+margin_right = 539.0
+margin_bottom = 565.0
 text = "Map Editor"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SelectMap" type="OptionButton" parent="."]
+margin_left = 415.0
+margin_top = 321.0
+margin_right = 552.0
+margin_bottom = 351.0
 __meta__ = {
 "_edit_use_anchors_": false
 }

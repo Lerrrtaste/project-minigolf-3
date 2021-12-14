@@ -21,7 +21,7 @@ signal authentication_failed
 
 signal match_join_failed
 signal match_joined(presences)
-signal match_presences_updated(connected_presences)
+signal match_presences_updated(joined_match)
 signal match_state(state)
 
 func _ready():
@@ -43,6 +43,7 @@ func socket_connect()->void:
 	socket.connect("received_match_presence", self, "_on_match_presence")
 	socket.connect("received_match_state", self, "_on_match_state")
 
+
 func login_async(custom_id:String)->void:
 	if is_logged_in():
 		return
@@ -61,7 +62,11 @@ func login_async(custom_id:String)->void:
 	return true
 
 
-func matchmaking_start_async()->void:
+func matchmaking_start_async(map_id:int)->void:
+	#temporary dbg
+	print(yield(socket.rpc_async("rpc_test",{"Hello": "World"}), "completed"))
+	
+	
 	if !is_socket_connected():
 		printerr("Not connected")
 		return
@@ -73,8 +78,8 @@ func matchmaking_start_async()->void:
 	var query = "*"
 	var min_count = 2
 	var max_count = 2
-	var string_properties = { "region": "europe" }
-	var numeric_properties = { "rank": 1 }
+	var string_properties = {} # Note: Properties dont affect matchmaking and are shared with opponents
+	var numeric_properties = {} 
 	matchmaker_ticket = yield(
 	  socket.add_matchmaker_async(query, min_count, max_count, string_properties, numeric_properties),
 	  "completed"
@@ -115,7 +120,7 @@ func match_join_async(matchmaker_token)->void:
 		print("User id %s name %s'." % [presence.user_id, presence.username])
 		connected_presences[presence.user_id] = presence
 	
-	emit_signal("match_joined",connected_presences)
+	emit_signal("match_joined",joined_match)
 
 
 func match_send_state_async(op_code:int,new_state)->void:
@@ -162,6 +167,7 @@ func is_in_match()->bool:
 	
 	return false
 
+
 #### Callbacks
 
 func _on_matchmaker_matched(matched : NakamaRTAPI.MatchmakerMatched):
@@ -181,6 +187,6 @@ func _on_match_presence(p_presence : NakamaRTAPI.MatchPresenceEvent):
 
 
 func _on_match_state(p_state : NakamaRTAPI.MatchData):
-	print("Received match state with opcode %s, data %s" % [p_state.op_code, parse_json(p_state.data)])
+	print(" -> Received match state with opcode %s, data %s" % [p_state.op_code, parse_json(p_state.data)])
 	emit_signal("match_state", p_state)
 

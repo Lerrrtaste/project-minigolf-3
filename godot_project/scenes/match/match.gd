@@ -54,7 +54,8 @@ func player_remote_leave(user_id)->void:
 
 #### Callbacks
 
-func _on_Networker_match_joined(presences)->void:
+func _on_Networker_match_joined(joined_match)->void:
+	print(joined_match)
 	start_game()
 
 func _on_Networker_presences_updated(connected_presences)->void:
