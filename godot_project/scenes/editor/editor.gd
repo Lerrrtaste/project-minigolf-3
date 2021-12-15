@@ -212,5 +212,6 @@ func _on_BtnLoad_pressed():
 		return
 	
 	map.deserialize(file.get_as_text())
+	file.close()
 	btn_load.disabled = true
 	select_map_load.disabled = true

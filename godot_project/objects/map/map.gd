@@ -78,7 +78,7 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 		snapped_pos.y -= TILE_Y/2 # center on cell
 		obj.position = snapped_pos
 		add_child(obj)
-		spawned_objects[cell] = obj
+		spawned_objects[snapped_pos] = obj
 
 
 func editor_object_remove(world_pos:Vector2):
@@ -100,6 +100,16 @@ func editor_tile_change(world_pos:Vector2, tile_id:int):
 	
 	#TODO remove potential object on this tile
 
+
+#### Match
+
+func match_get_starting_position()->Vector2:
+	for i in spawned_objects:
+		if spawned_objects[i].OBJECT_ID == OBJECT_DATA["start"]["id"]:
+			return i
+	
+	printerr("No Startpoint found, defaulting to (0,0)")
+	return Vector2()
 
 #### Loading / Saving
 

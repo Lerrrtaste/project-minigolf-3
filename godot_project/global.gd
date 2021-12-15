@@ -28,6 +28,24 @@ const NK_ADDON_VERSION = "2.1.0" # primarily note for me
 
 
 #### Match State Op codes ####
-enum OP_CODES {
-	moved
+# 100-199 forward to match
+enum OpCodes {
+	MOVED = 5, # for testing
+	MATCH_CONFIG = 101,
+	MATCH_START = 102,
+	# when match starts
+	# contains map_id, tuŕn_order
+	
 }
+
+
+#### Scene Change Parameter
+var _params := {}
+
+func get_scene_parameter()->Dictionary:
+	var ret = _params
+	_params = {}
+	return ret
+
+func set_scene_parameters(params:Dictionary):
+	_params = params

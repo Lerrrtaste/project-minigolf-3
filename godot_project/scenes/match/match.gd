@@ -8,34 +8,101 @@ Connected to server
 
 """
 
+onready var map = get_node("Map")
+onready var camera = get_node("Camera")
+
 var Ball = preload("res://objects/ball/Ball.tscn")
 var PlayerControllerLocal = preload("res://helpers/player_controller_local/PlayerControllerLocal.tscn")
 var PlayerControllerRemote = preload("res://helpers/player_controller_remote/PlayerControllerRemote.tscn")
+var MatchCamera = preload("res://helpers/cameras/match_camera/MatchCamera.tscn")
 
 var remote_balls:Dictionary
 var local_ball
 
+var turn_order = null # list of player ids
+var turn_current = null # current player id
+
+var map_id 
+
+enum States {
+	INVALID = -1,
+	LOADING, # waiting for players to join
+	PLAYING, # playing a match
+	FINISHED, # match finished
+	
+	PRACTICE, # playing solo
+}
+var current_state = States.INVALID
 
 
 func _ready():
 	Networker.connect("match_joined", self,"_on_Networker_match_joined")
 	Networker.connect("match_presences_updated", self, "_on_Networker_presences_updated")
-	Networker.match_join_async(Networker.matched_match) 
+	Networker.connect("match_state", self, "_on_Networker_match_state")
+	
+	
+	var params = Global.get_scene_parameter()
+	if params.has("practice"):
+		map_id = params["practice"]
+		change_state(States.PRACTICE)
+	else:
+		Networker.match_join_async(Networker.matched_match) 
+	# now wait for MATCH_CONFIG data from server or practive_mode() call
 
 
-func start_game():
+func change_state(new_state:int):
+	assert(current_state != new_state)
+	match new_state:
+		States.LOADING:
+			load_map(map_id)
+		States.PLAYING:
+			_start_match()
+		States.PRACTICE:
+			load_map(map_id)
+			_start_practice()
+		States.FINISHED:
+			pass
+		_:
+			printerr("Trying to change to nonexistent state")
+			return
+	
+	current_state = new_state
+
+
+func _start_match():
 	# spawn self
 	var new_ball = Ball.instance()
 	new_ball.setup_playercontroller(PlayerControllerLocal)
 	add_child(new_ball)
 	local_ball = new_ball
 	
+	# attach camera
+	var cam = MatchCamera.instance()
+	local_ball.add_child(cam)
+	cam.make_current()
+	
 	#spawn remote
 	for p in Networker.connected_presences:
 		player_remote_spawn(p)
 
 
+func _start_practice():
+	# spawn self
+	var new_ball = Ball.instance()
+	new_ball.setup_playercontroller(PlayerControllerLocal)
+	add_child(new_ball)
+	local_ball = new_ball
+	local_ball.position = map.match_get_starting_position()
+	
+	# attach camera
+	var cam = MatchCamera.instance()
+	local_ball.add_child(cam)
+	cam.make_current()
+	
+
+
 func player_remote_spawn(user_id)->void:
+	assert(current_state == States.LOADING)
 	if user_id == Networker.session.user_id:
 		return
 	var new_ball = Ball.instance()
@@ -52,11 +119,22 @@ func player_remote_leave(user_id)->void:
 	remote_balls.erase(user_id)
 
 
+func load_map(map_id:int)->void: # todo use map storage helper some time in the futureeee
+	var file = File.new()
+	var error = file.open("%s%s.map"%[Global.MAPFOLDER_PATH,map_id],File.READ)
+	if error != OK:
+		printerr("Could not load file!!!")
+		assert(false)
+	
+	map.deserialize(file.get_as_text())
+	file.close()
+
+
 #### Callbacks
 
 func _on_Networker_match_joined(joined_match)->void:
-	print(joined_match)
-	start_game()
+	pass
+
 
 func _on_Networker_presences_updated(connected_presences)->void:
 	var spawned_players = remote_balls.keys()
@@ -71,5 +149,15 @@ func _on_Networker_presences_updated(connected_presences)->void:
 	
 	for _user_id in spawned_players:
 		player_remote_leave(_user_id)
+
+
+func _on_Networker_match_state(state):
+	match state.op_code:
+		Global.OpCodes.MATCH_CONFIG:
+			var data_dict = JSON.parse(state.data).result
+			map_id = int(data_dict["map_id"])
+			turn_order = data_dict["expected_players"]
+			change_state(States.LOADING)
 		
-	
+		Global.OpCodes.MATCH_START:
+			change_state(States.PLAYING)

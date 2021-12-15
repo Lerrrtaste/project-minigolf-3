@@ -95,4 +95,10 @@ func _on_Networker_authentication_successfull():
 
 
 func _on_BtnEditor_pressed():
-	get_tree().change_scene("res://scenes/editor/Editor.tscn")
+	if Networker.is_socket_connected():
+		get_tree().change_scene("res://scenes/editor/Editor.tscn")
+
+
+func _on_BtnPractice_pressed():
+	Global.set_scene_parameters({ "practice": select_map.get_selected_id() })
+	get_tree().change_scene("res://scenes/match/Match.tscn")

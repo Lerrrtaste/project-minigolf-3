@@ -63,10 +63,6 @@ func login_async(custom_id:String)->void:
 
 
 func matchmaking_start_async(map_id:int)->void:
-	#temporary dbg
-	print(yield(socket.rpc_async("rpc_test",{"Hello": "World"}), "completed"))
-	
-	
 	if !is_socket_connected():
 		printerr("Not connected")
 		return
@@ -75,11 +71,15 @@ func matchmaking_start_async(map_id:int)->void:
 		printerr("Already in Matchmaking (has ticket)")
 		return
 		
-	var query = "*"
+	var query = "+properties.map_id:%s"%String(map_id)
 	var min_count = 2
 	var max_count = 2
-	var string_properties = {} # Note: Properties dont affect matchmaking and are shared with opponents
-	var numeric_properties = {} 
+	var string_properties = {
+		"map_id": String(map_id)
+	}
+	var numeric_properties = { # broken atm
+		
+	} 
 	matchmaker_ticket = yield(
 	  socket.add_matchmaker_async(query, min_count, max_count, string_properties, numeric_properties),
 	  "completed"

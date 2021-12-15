@@ -1,8 +1,12 @@
 extends Node2D
 
-var connected_pc #has active player controller attached
-
 onready var lbl_player_name = get_node("LblPlayerName")
+
+var connected_pc #has active player controller attached
+var direction: Vector2
+var speed: float
+var max_speed: float = 100
+var friction: float = 1
 
 
 func _ready():
@@ -20,10 +24,25 @@ func _ready():
 
 func _process(delta):
 	update()
+	if speed > 0.0:
+		var movement_step := Vector2()
+		movement_step = direction
+		movement_step.y /= 2
+		movement_step *= speed * delta
+		
+		speed -= friction * delta
+		position += movement_step
+		
 
 
-func _on_PlayerController_move(pos):
-	position = pos
+#TODO "hard set" position for sync after move ended from remote pc
+
+func _on_PlayerController_move(_clicked_screen):
+	var pos_delta:Vector2 =  _clicked_screen
+	direction = pos_delta.normalized()
+	speed = max_speed
+	
+	print("Clicked at %s - current %s  --->  Delta %s"%[_clicked_screen,global_position,pos_delta])
 
 
 func setup_playercontroller(pc_scene:PackedScene,remote_user_id=null)->void:
@@ -44,5 +63,5 @@ func setup_playercontroller(pc_scene:PackedScene,remote_user_id=null)->void:
 
 
 func _draw():
-	draw_circle(Vector2(),10,ColorN("red"))
-	
+	draw_line(Vector2(),get_local_mouse_position(),ColorN("red"))
+

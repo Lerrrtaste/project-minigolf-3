@@ -14,6 +14,9 @@ func register_remote_user_id(_remote_user_id):
 
 
 func _on_Networker_match_state(state:NakamaRTAPI.MatchData)->void:
+	if not state.has("presence"):
+		return # message from server, orobably not relevant
+	
 	if not state.presence.user_id == remote_user_id:
 		return #message irrelevant for this pc
 	

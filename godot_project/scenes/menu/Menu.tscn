@@ -67,6 +67,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="BtnPractice" type="Button" parent="."]
+margin_left = 441.0
+margin_top = 366.0
+margin_right = 521.0
+margin_bottom = 386.0
+text = "Practice"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="LoginForm/BtnLogin" to="." method="_on_BtnLogin_pressed"]
 [connection signal="pressed" from="BtnMatchmaking" to="." method="_on_BtnMatchmaking_pressed"]
 [connection signal="pressed" from="BtnEditor" to="." method="_on_BtnEditor_pressed"]
+[connection signal="pressed" from="BtnPractice" to="." method="_on_BtnPractice_pressed"]

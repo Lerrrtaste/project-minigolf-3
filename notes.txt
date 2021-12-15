@@ -1,6 +1,6 @@
 Next Todos:
 
-- server side code to hold data like the mapid of the match
+
 - load map in match
 - add stroke functionality to local pc
 - ball physics
@@ -8,3 +8,10 @@ Next Todos:
 - stroke counter ui
 - win condition
 - simple match end screen
+- store maps in nakama collection
+- map storage node to handle downloading / loading mapfile
+
+
+
+done
+- server side code to hold data like the mapid of the match
