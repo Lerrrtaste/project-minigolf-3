@@ -10,6 +10,6 @@ func _ready():
 func _unhandled_input(event):
 	if event is InputEventMouse:
 		if event.button_mask == BUTTON_MASK_LEFT:
-			emit_signal("move", event.position)
+			emit_signal("move", get_global_mouse_position())
 #			var data = {"x": event.position.x, "y":event.position.y}
 #			Networker.match_send_state_async(Global.OP_CODES.moved, data)

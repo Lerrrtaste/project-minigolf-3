@@ -1,17 +1,10 @@
 Next Todos:
 
 
-- load map in match
-- add stroke functionality to local pc
-- ball physics
+- ball physics (vector reflection)
 - networked ball movement (remote pc) + synchronize at the end
 - stroke counter ui
 - win condition
 - simple match end screen
 - store maps in nakama collection
 - map storage node to handle downloading / loading mapfile
-
-
-
-done
-- server side code to hold data like the mapid of the match
