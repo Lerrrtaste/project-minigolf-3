@@ -30,7 +30,7 @@ const NK_ADDON_VERSION = "2.1.0" # primarily note for me
 #### Match State Op codes ####
 # 100-199 forward to match
 enum OpCodes {
-	MOVED = 5, # for testing
+	BALL_IMPACT = 201,
 	MATCH_CONFIG = 101,
 	MATCH_START = 102,
 	# when match starts

@@ -3,10 +3,13 @@ extends KinematicBody2D
 onready var lbl_player_name = get_node("LblPlayerName")
 
 var connected_pc #has active player controller attached
-var direction: Vector2
+var direction: Vector2 # cartesian direction
 var speed: float
 var max_speed: float = 150
 var friction: float = 50
+
+var dbg_line_start := Vector2()
+var dbg_line_end := Vector2()
 
 
 func _ready():
@@ -19,33 +22,22 @@ func _ready():
 	else:
 		var remote_name = Networker.connected_presences[connected_pc.remote_user_id].username
 		lbl_player_name.text = remote_name
-	
 
 
 func _process(delta):
 	update()
+
+func _physics_process(delta):
+	if speed > 0:
+		move_step(delta)
 	
-	if speed > 0.0:
-		var movement_step := Vector2()
-		movement_step = direction
-		movement_step.y /= 2
-		movement_step *= speed * delta
-		
-		speed -= friction * delta 
-		# position += movement_step
-		
-		_move(movement_step)
-	
-		
 
-
-#TODO "hard set" position for sync after move ended from remote pc
-
-func _on_PlayerController_move(_clicked_screen):
-	var pos_delta:Vector2 = _clicked_screen - position
-	direction = pos_delta.normalized()
-	speed = max_speed
-	print("Clicked at %s - current %s  --->  Delta %s"%[_clicked_screen,position,pos_delta])
+var target = Vector2()
+func _draw():
+	pass
+#	draw_line(Vector2(),target,ColorN("red"))
+#	draw_line(Vector2(),direction * (speed/max_speed)*50, ColorN("blue"),4)
+#	draw_line(dbg_line_start, dbg_line_end, ColorN("grey"), 5)
 
 
 func setup_playercontroller(pc_scene:PackedScene,remote_user_id=null)->void:
@@ -60,56 +52,47 @@ func setup_playercontroller(pc_scene:PackedScene,remote_user_id=null)->void:
 		
 	add_child(new_pc)
 	
-
 	# connect pc signals
-	new_pc.connect("move",self,"_on_PlayerController_move")
+	new_pc.connect("impact",self,"_on_PlayerController_move")
 
 
-func _draw():
-	draw_line(Vector2(),get_local_mouse_position(),ColorN("red"))
+#### Movement
 
-
-func _move(motion:Vector2)->void: #eig motion genannt
+func move_step(delta:float):
+	var movement = direction * speed
+	
+	
+	move_and_slide(movement)
+	
+	if get_slide_count() > 0:
+		#wall normal berechnen
+		var collision = get_slide_collision(0)
 		
-	var collision = move_and_collide(motion)
-	
-	# kollidiert
-	if is_instance_valid(collision):
-		_collide(collision)
-
-
-# from last minigolf attempt
-func _collide(collision:KinematicCollision2D):
-	print("Collision: ",collision.remainder)
-	#wall normal berechnen
-	var coll_pos_delta := collision.position - position
-	var collision_normal := coll_pos_delta.normalized()
-	var wall_normal := Vector2()
-	if coll_pos_delta.x > 0:
-		if coll_pos_delta.y > 0: 
-			# right down
-			wall_normal = Vector2(-1,-1).normalized()
+		var coll_pos_delta = collision.position - position
+		var collision_normal = coll_pos_delta.normalized()
+		
+		var wall_normal := Vector2()
+		if coll_pos_delta.x > 0:
+			if coll_pos_delta.y > 0: 
+				# right down
+				wall_normal = Vector2(-1,-1).normalized()
+			else:
+				# right up
+				wall_normal = Vector2(-1,1).normalized()
 		else:
-			# right up
-			wall_normal = Vector2(-1,1).normalized()
-	else:
-		if coll_pos_delta.y > 0:
-			# left down
-			wall_normal = Vector2(1,-1).normalized()
-		else:
-			# left up
-			wall_normal = Vector2(1,1).normalized()
+			if coll_pos_delta.y > 0:
+				# left down
+				wall_normal = Vector2(1,-1).normalized()
+			else:
+				# left up
+				wall_normal = Vector2(1,1).normalized()
+		
+		
+		direction = isometric_normalize(reflect_vector(direction,wall_normal))
+		dbg_line_start = Vector2()
+		dbg_line_end = isometric_normalize(wall_normal) * 50
 
-	#set new direction
-	#direction = reflect_vector(direction,wall_normal) v2 = v1 – 2(v1.n)n
-	direction = reflect_vector(direction,collision.normal)
-	
-	#move remainder
-	if !is_zero_approx(collision.remainder.length()):
-		var remaining_motion := collision.remainder.normalized()
-		remaining_motion *= direction
-		remaining_motion.y /= 2
-		_move(remaining_motion)
+	speed -= friction * delta
 
 
 #### Helpers
@@ -123,14 +106,17 @@ func cartesian_to_isometric(cart:Vector2)->Vector2:
 
 
 func reflect_vector(vector:Vector2, normal:Vector2)->Vector2:
-	assert(normal.is_normalized())
 	return vector - 2 * vector.dot(normal) * normal
 
 
 func isometric_normalize(direction:Vector2)->Vector2:
 	direction = direction.normalized()
-	return direction * Vector2(1,0.6)
+	return direction * Vector2(1,0.5)
 
 
 #### Callbacks
 
+func _on_PlayerController_move(_clicked_screen):
+	target = _clicked_screen
+	direction = _clicked_screen.normalized()
+	speed = max_speed

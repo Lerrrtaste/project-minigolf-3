@@ -1,6 +1,6 @@
 extends Node2D
 
-signal move(pos)
+signal impact(pos)
 const LOCAL = true
 
 
@@ -10,6 +10,6 @@ func _ready():
 func _unhandled_input(event):
 	if event is InputEventMouse:
 		if event.button_mask == BUTTON_MASK_LEFT:
-			emit_signal("move", get_global_mouse_position())
-#			var data = {"x": event.position.x, "y":event.position.y}
-#			Networker.match_send_state_async(Global.OP_CODES.moved, data)
+			emit_signal("impact", get_local_mouse_position())
+			var send_data = JSON.print({"target_pos": var2str(get_local_mouse_position())})
+			Networker.match_send_state_async(Global.OpCodes.BALL_IMPACT,send_data)

@@ -9,7 +9,6 @@ Connected to server
 """
 
 onready var map = get_node("Map")
-onready var camera = get_node("Camera")
 
 var Ball = preload("res://objects/ball/Ball.tscn")
 var PlayerControllerLocal = preload("res://helpers/player_controller_local/PlayerControllerLocal.tscn")
@@ -75,6 +74,7 @@ func _start_match():
 	new_ball.setup_playercontroller(PlayerControllerLocal)
 	add_child(new_ball)
 	local_ball = new_ball
+	local_ball.position = map.match_get_starting_position()
 	
 	# attach camera
 	var cam = MatchCamera.instance()
@@ -82,8 +82,8 @@ func _start_match():
 	cam.make_current()
 	
 	#spawn remote
-	for p in Networker.connected_presences:
-		player_remote_spawn(p)
+	for i in Networker.connected_presences:
+		player_remote_spawn(i)
 
 
 func _start_practice():
@@ -102,17 +102,19 @@ func _start_practice():
 
 
 func player_remote_spawn(user_id)->void:
-	assert(current_state == States.LOADING)
 	if user_id == Networker.session.user_id:
+		printerr("trying to spawn local ball as remote")
 		return
 	var new_ball = Ball.instance()
 	new_ball.setup_playercontroller(PlayerControllerRemote,user_id)
 	remote_balls[user_id] = new_ball
 	add_child(new_ball)
+	new_ball.position = map.match_get_starting_position()
 
 
 func player_remote_leave(user_id)->void:
 	if user_id == Networker.session.user_id:
+		printerr("trying to remove local ball")
 		return
 	remote_balls[user_id].queue_free()
 	remote_balls[user_id].visible = false
@@ -137,18 +139,19 @@ func _on_Networker_match_joined(joined_match)->void:
 
 
 func _on_Networker_presences_updated(connected_presences)->void:
-	var spawned_players = remote_balls.keys()
-	
-	connected_presences.erase(Networker.session.user_id)
-	
-	for _user_id in connected_presences:
-		if spawned_players.has(_user_id): #player did nothing
-			spawned_players.erase(_user_id)
-		else: #player joined
-			player_remote_spawn(_user_id)
-	
-	for _user_id in spawned_players:
-		player_remote_leave(_user_id)
+	pass
+#	var spawned_players = remote_balls.keys()
+#
+#	connected_presences.erase(Networker.session.user_id)
+#
+#	for _user_id in connected_presences:
+#		if spawned_players.has(_user_id): #player did nothing
+#			spawned_players.erase(_user_id)
+#		else: #player joined
+#			player_remote_spawn(_user_id)
+#
+#	for _user_id in spawned_players:
+#		player_remote_leave(_user_id)
 
 
 func _on_Networker_match_state(state):
@@ -156,7 +159,7 @@ func _on_Networker_match_state(state):
 		Global.OpCodes.MATCH_CONFIG:
 			var data_dict = JSON.parse(state.data).result
 			map_id = int(data_dict["map_id"])
-			turn_order = data_dict["expected_players"]
+			turn_order = data_dict["turn_order"]
 			change_state(States.LOADING)
 		
 		Global.OpCodes.MATCH_START:

@@ -87,7 +87,7 @@ func matchmaking_start_async(map_id:int)->void:
 	if matchmaker_ticket.is_exception():
 	  printerr("An error occured: %s" % matchmaker_ticket)
 	  return
-	print("Got ticket for matchmaking: %s" % [matchmaker_ticket])
+	#print("Got ticket for matchmaking: %s" % [matchmaker_ticket])
 	emit_signal("matchmaking_started")
 
 
@@ -100,7 +100,7 @@ func matchmaking_cancel_async()->void:
 	if removed.is_exception():
 	  printerr("An error occured: %s" % removed)
 	  return
-	print("Removed from matchmaking %s" % [matchmaker_ticket.ticket])
+	#print("Removed from matchmaking %s" % [matchmaker_ticket.ticket])
 	matchmaker_ticket = null
 	emit_signal("matchmaking_ended")
 
@@ -113,11 +113,11 @@ func match_join_async(matchmaker_token)->void:
 		joined_match = null
 		return
 		
-	print("Joined match: %s" % [joined_match])
+	#print("Joined match: %s" % [joined_match])
 
 	# collect already connected presences
 	for presence in joined_match.presences:
-		print("User id %s name %s'." % [presence.user_id, presence.username])
+		#print("User id %s name %s'." % [presence.user_id, presence.username])
 		connected_presences[presence.user_id] = presence
 	
 	emit_signal("match_joined",joined_match)
@@ -172,7 +172,7 @@ func is_in_match()->bool:
 
 func _on_matchmaker_matched(matched : NakamaRTAPI.MatchmakerMatched):
 	#print("Received MatchmakerMatched message: %s" % [matched])
-	print("Matched opponents: %s" % [matched.users])
+	#print("Matched opponents: %s" % [matched.users])
 	matched_match = matched
 	emit_signal("matchmaking_matched", matched)
 
@@ -182,7 +182,7 @@ func _on_match_presence(p_presence : NakamaRTAPI.MatchPresenceEvent):
 		connected_presences[p.user_id] = p
 	for p in p_presence.leaves:
 		connected_presences.erase(p.user_id)
-	print("Connected opponents: %s" % [connected_presences])
+	#print("Connected opponents: %s" % [connected_presences])
 	emit_signal("match_presences_updated",connected_presences)
 
 

@@ -19,7 +19,7 @@ func _ready():
 	Networker.connect("authentication_successfull", self, "_on_Networker_authentication_successfull")
 	Networker.connect("authentication_failed", self, "_on_Networker_authentication_failed")
 	
-	#_on_BtnLogin_pressed() #autologin for dbg
+	
 	
 	# ONLY TEMPORARY, later random map dictated by server
 	# populate load dropdown
@@ -49,6 +49,9 @@ func _ready():
 		var map_id = parse.result["metadata"]["id"] 
 		
 		select_map.add_item(map_name,map_id)
+		
+	
+	#_on_BtnPractice_pressed() #autologin for dbg
 
 
 #### Event Callbacks
