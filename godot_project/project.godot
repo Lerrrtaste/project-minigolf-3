@@ -108,9 +108,22 @@ Global="*res://global.gd"
 Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 Networker="*res://helpers/networker/Networker.tscn"
 
+[debug]
+
+multirun/number_of_windows=2
+multirun/window_distance=600
+multirun/add_custom_args=false
+multirun/first_window_args="listen"
+multirun/other_window_args="join"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/multirun/plugin.cfg" )
+
 [global]
 
 scale=false
+inst=false
 
 [importer_defaults]
 

@@ -117,6 +117,10 @@ func isometric_normalize(direction:Vector2)->Vector2:
 #### Callbacks
 
 func _on_PlayerController_move(_clicked_screen):
+	if _clicked_screen is String:
+		_clicked_screen = var2str(_clicked_screen)
+		assert(_clicked_screen is Vector2)
+		
 	target = _clicked_screen
 	direction = _clicked_screen.normalized()
 	speed = max_speed
