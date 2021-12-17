@@ -8,11 +8,13 @@ var speed: float
 var max_speed: float = 150
 var friction: float = 50
 var turn_ready: = false
+var finished := false
 
 var dbg_line_start := Vector2()
 var dbg_line_end := Vector2()
 
 signal finished_moving()
+signal reached_finish(user_id)
 
 func _ready():
 	if not is_instance_valid(connected_pc):
@@ -22,8 +24,7 @@ func _ready():
 	if connected_pc.LOCAL:
 		lbl_player_name.text = "YOU"
 	else:
-		var remote_name = Networker.connected_presences[connected_pc.remote_user_id].username
-		lbl_player_name.text = remote_name
+		lbl_player_name.text = Networker.get_username(connected_pc.user_id)
 
 
 func _process(delta):
@@ -35,21 +36,29 @@ func _physics_process(delta):
 		move_step(delta)
 	
 
-func setup_playercontroller(pc_scene:PackedScene,remote_user_id=null)->void:
+func setup_playercontroller(pc_scene:PackedScene,user_id)->void:
 	if is_instance_valid(connected_pc):
 		printerr("Ball is already controlled")
 		return
 	
 	var new_pc = pc_scene.instance()
 	connected_pc = new_pc
-	if remote_user_id != null and new_pc.has_method("register_remote_user_id"):
-		new_pc.register_remote_user_id(remote_user_id)
+	if new_pc.has_method("register_user_id"):
+		new_pc.register_user_id(user_id)
 		
 	add_child(new_pc)
 	
 	# connect pc signals
 	new_pc.connect("impact",self,"_on_PlayerController_impact")
 	new_pc.connect("sync_position", self, "_on_PlayerController_sync_position")
+	
+	
+
+
+func reached_finish():
+	finished = true
+	if connected_pc.LOCAL:
+		emit_signal("reached_finish",connected_pc.user_id)
 
 
 #### Movement
@@ -86,13 +95,17 @@ func move_step(delta:float):
 		direction = isometric_normalize(reflect_vector(direction,wall_normal))
 		dbg_line_start = Vector2()
 		dbg_line_end = isometric_normalize(wall_normal) * 50
-		
+	
 	speed -= friction * delta
+	
+	if finished:
+		speed = 0
 	
 	if speed <= 0 and connected_pc.LOCAL:
 		connected_pc.send_sync_position(position)
 		emit_signal("finished_moving")
-
+	
+	
 
 #### Helpers
 

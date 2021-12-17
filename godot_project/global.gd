@@ -36,6 +36,8 @@ enum OpCodes {
 	MATCH_START = 102,
 	NEXT_TURN = 103,
 	TURN_FINISHED = 104,
+	REACHED_FINISH = 105,
+	MATCH_END = 106
 	# when match starts
 	# contains map_id, tuŕn_order
 	

@@ -6,6 +6,8 @@ OpCodes = {
    MATCH_START = 102,
    NEXT_TURN = 103,
    FINISHED_TURN = 104,
+   REACHED_FINISH = 105,
+   MATCH_END = 106,
    BALL_IMPACT = 201,
    BALL_SYNC = 202,
 }
@@ -16,7 +18,7 @@ function match_handler.match_init(context, setupstate)
         expected_players = {}, -- numbered presences
         joined_players = {}, -- key=user_id val=presence
         turn_order = {}, -- numbered user_ids
-
+        turn_count = {},
         player_positions = {}, -- key=user_id val=var2str string
         next_player_idx = 1,
 
@@ -112,9 +114,29 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
                 state.player_positions[msg.sender] = nk.json_decode(msg.data)["synced_pos"]
 
             elseif msg.op_code == OpCodes.FINISHED_TURN then
+                if state.turn_count[msg.sender.user_id] == nil then
+                    state.turn_count[msg.sender.user_id] = 0
+                end
+                state.turn_count[msg.sender.user_id] = state.turn_count[msg.sender.user_id] + 1
                 state.next_player_idx = ((state.next_player_idx) % #state.turn_order) +1 -- indices start at 1
                 local data = nk.json_encode({next_player = state.turn_order[state.next_player_idx]})
                 dispatcher.broadcast_message(OpCodes.NEXT_TURN, data, nil)
+
+            elseif msg.op_code == OpCodes.REACHED_FINISH then
+                -- gets sent before the associated FINISHED_TURN
+                for k, user_id in ipairs(state.turn_order) do
+                    if user_id == msg.sender.user_id then
+                        table.remove(state.turn_order,k) -- TODO decrement next_player_idx to account for more than 2 players
+                        state.next_player_idx = state.next_player_idx -1 -- only possible this way because it gets incremented directly afterwards (in FINISHED_TURN)
+                        break
+                    end
+                end
+                dispatcher.broadcast_message(OpCodes.REACHED_FINISH, msg.data, nil, msg.sender)
+                if #state.turn_order == 0 then -- maybe someday configurable remaining players till end match-parameter
+                    local data = nk.json_encode({scores = state.turn_count})
+                    dispatcher.broadcast_message(OpCodes.MATCH_END, data)
+                    return nil
+                end
             end
         end
     end

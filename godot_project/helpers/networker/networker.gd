@@ -137,6 +137,10 @@ func get_user_id()->String:
 	return session.user_id
 
 
+func get_username(user_id:String)->String:
+	return connected_presences[user_id]["username"]
+
+
 func is_socket_connected()->bool:
 	if !is_logged_in():
 		printerr("Not even logged in")

@@ -5,7 +5,7 @@ signal sync_position(pos)
 const LOCAL = true
 
 var active := false
-
+var user_id:String
 
 
 func _ready():
@@ -20,6 +20,10 @@ func _unhandled_input(event):
 				var send_data = {"target_pos": var2str(get_local_mouse_position())}
 				Networker.match_send_state_async(Global.OpCodes.BALL_IMPACT,send_data)
 				active = false
+
+
+func register_user_id(_user_id):
+	user_id = _user_id
 
 
 func activate():

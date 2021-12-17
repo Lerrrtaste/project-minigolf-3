@@ -1,29 +1,31 @@
-Next Todos:
+#### TODOS
 
-- authorative turns
-- consolidate ball spawn code
-- stroke counter ui
+- FINISH_MOVE does not get sent reliable after sending REACHED_FINISH, is that is fixed, the win condition should work
 - win condition
 - simple match end screen
 - water tiles + ball reset
 - sand tiles + speed slowdown
 - store maps in nakama collection
 - map storage node to handle downloading / loading mapfile
+- variable shot strenght
+- wait for map to (down)load before starting match
 
-
-
-DONE
+#### DONE
 - ball physics (vector reflection)
 - BALL_IMPACT broadcast state data is not deserialized correctly yet, then:
 - networked ball movement (remote pc) + synchronize at the end
+- authorative turns
+- consolidate ball spawn code
+- stroke counter ui
 
 
 
-IDEAS
+#### IDEAS
 - Ball to Wall collision normal with 4 spheres / ray casts? Only if current does not work
+- Match camera follows current player instead of local player
 
 
-OP CODES
+#### OP CODES
 101 MATCH_CONFIG (map_id:int)
 
 102 MATCH_START (joined_players:List presences, turn_order:List user_ids )
@@ -32,6 +34,10 @@ OP CODES
 103 NEXT_TURN (next_player:Dictionary presence)
 
 104 FINISHED_TURN ()
+
+105 REACHED_FINISH (finished_user: user_id)
+
+106 MATCH_END (scores:Dictionary key userid, value shots)
 
 201 BALL_IMPACT (target_pos:Vector2 relative click)
 		note: impact meaining local player initiated move (not collision from another player)

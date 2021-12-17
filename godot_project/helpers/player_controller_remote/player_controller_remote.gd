@@ -4,7 +4,7 @@ signal impact(pos)
 signal sync_position(pos)
 const LOCAL = false
 
-var remote_user_id
+var user_id:String
 var active := false
 
 
@@ -12,8 +12,8 @@ func _ready():
 	Networker.connect("match_state",self,"_on_Networker_match_state")
 
 
-func register_remote_user_id(_remote_user_id):
-	remote_user_id = _remote_user_id
+func register_user_id(_user_id):
+	user_id = _user_id
 
 
 func activate():
@@ -27,7 +27,7 @@ func _on_Networker_match_state(state:NakamaRTAPI.MatchData)->void:
 		return # message from server, orobably not relevant
 	
 	
-	if not state.presence.user_id == remote_user_id:
+	if not state.presence.user_id == user_id:
 		return #message irrelevant for this pc
 	
 	

@@ -83,15 +83,18 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 
 func editor_object_remove(world_pos:Vector2):
 	var cell = tilemap.world_to_map(world_pos)
-	
-	if not spawned_objects.keys().has(cell):
+	var snapped_pos = tilemap.map_to_world(cell)
+	snapped_pos.y -= TILE_Y/2 # center on cell
+
+	if not spawned_objects.keys().has(snapped_pos):
+		print("Note: %s has no object"%snapped_pos)
 		return
 		
-	var obj = spawned_objects[cell]
+	var obj = spawned_objects[snapped_pos]
 	obj.visible = false
 	obj.set_process(false)
 	obj.queue_free()
-	spawned_objects.erase(cell)
+	spawned_objects.erase(snapped_pos)
 
 
 func editor_tile_change(world_pos:Vector2, tile_id:int):
