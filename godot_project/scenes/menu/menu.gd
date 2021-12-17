@@ -51,7 +51,11 @@ func _ready():
 		select_map.add_item(map_name,map_id)
 		
 	
-	#_on_BtnPractice_pressed() #autologin for dbg
+	
+	if true: # autologin
+		if not OS.get_cmdline_args().empty():
+			line_customId.text = OS.get_cmdline_args()[0]
+			_on_BtnLogin_pressed() #autologin for dbg
 
 
 #### Event Callbacks

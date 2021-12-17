@@ -5,6 +5,7 @@ OpCodes = {
    ANNOUNCE_MATCH_CONFIG = 101,
    MATCH_START = 102,
    BALL_IMPACT = 201,
+   BALL_SYNC = 202,
 }
 
 function match_handler.match_init(context, setupstate)
@@ -12,6 +13,7 @@ function match_handler.match_init(context, setupstate)
         map_id = setupstate.map_id,
         expected_players = {},
         joined_players = {},
+        player_positions = {},
         started = false,
     }
 
@@ -66,6 +68,7 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
     --   },
     --   ...
     -- }
+
     -- match loading
     if state.started ~= true then
         for _, user in pairs(state.expected_players) do
@@ -81,12 +84,14 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
         dispatcher.broadcast_message(OpCodes.MATCH_START, data, nil) -- send match start to all presences
     end
 
-    -- match started
+    -- match is started from here
     if messages ~= nil then
         for _, msg in ipairs(messages) do
-            -- forward ball impacts to everyone
-            if msg.op_code == OpCodes.BALL_IMPACT then
+            if msg.op_code == OpCodes.BALL_IMPACT then -- forward ball impacts to everyone
                 dispatcher.broadcast_message(OpCodes.BALL_IMPACT, msg.data, nil, msg.sender)
+            elseif msg.op_code == OpCodes.BALL_SYNC then -- after local ball finished this is sent to sync
+                dispatcher.broadcast_message(OpCodes.BALL_SYNC, msg.data, nil, msg.sender)
+                state.player_positions[msg.sender] = nk.json_decode(msg.data)["synced_pos"]
             end
         end
     end

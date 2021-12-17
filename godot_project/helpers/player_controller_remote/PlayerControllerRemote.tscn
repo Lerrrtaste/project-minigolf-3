@@ -2,5 +2,5 @@
 
 [ext_resource path="res://helpers/player_controller_remote/player_controller_remote.gd" type="Script" id=1]
 
-[node name="PlayerControllerRemote" type="Node"]
+[node name="PlayerControllerRemote" type="Node2D"]
 script = ExtResource( 1 )

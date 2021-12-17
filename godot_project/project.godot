@@ -111,10 +111,10 @@ Networker="*res://helpers/networker/Networker.tscn"
 [debug]
 
 multirun/number_of_windows=2
-multirun/window_distance=600
-multirun/add_custom_args=false
-multirun/first_window_args="listen"
-multirun/other_window_args="join"
+multirun/window_distance=900
+multirun/add_custom_args=true
+multirun/first_window_args="dev_user_1"
+multirun/other_window_args="dev_user_2"
 
 [editor_plugins]
 

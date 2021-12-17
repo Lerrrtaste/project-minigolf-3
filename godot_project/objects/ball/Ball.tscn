@@ -4,7 +4,7 @@
 [ext_resource path="res://objects/ball/ball_white.png" type="Texture" id=2]
 
 [sub_resource type="CircleShape2D" id=1]
-radius = 5.0
+radius = 2.0
 
 [node name="Ball" type="KinematicBody2D"]
 script = ExtResource( 1 )

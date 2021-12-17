@@ -12,6 +12,7 @@ var dbg_line_start := Vector2()
 var dbg_line_end := Vector2()
 
 
+
 func _ready():
 	if not is_instance_valid(connected_pc):
 		printerr("Ball without PC entered Tree")
@@ -53,14 +54,14 @@ func setup_playercontroller(pc_scene:PackedScene,remote_user_id=null)->void:
 	add_child(new_pc)
 	
 	# connect pc signals
-	new_pc.connect("impact",self,"_on_PlayerController_move")
+	new_pc.connect("impact",self,"_on_PlayerController_impact")
+	new_pc.connect("sync_position", self, "_on_PlayerController_sync_position")
 
 
 #### Movement
 
 func move_step(delta:float):
 	var movement = direction * speed
-	
 	
 	move_and_slide(movement)
 	
@@ -91,9 +92,12 @@ func move_step(delta:float):
 		direction = isometric_normalize(reflect_vector(direction,wall_normal))
 		dbg_line_start = Vector2()
 		dbg_line_end = isometric_normalize(wall_normal) * 50
-
+		
 	speed -= friction * delta
-
+	
+	if speed <= 0 and connected_pc.LOCAL:
+		connected_pc.send_sync_position(position)
+		
 
 #### Helpers
 
@@ -116,11 +120,11 @@ func isometric_normalize(direction:Vector2)->Vector2:
 
 #### Callbacks
 
-func _on_PlayerController_move(_clicked_screen):
-	if _clicked_screen is String:
-		_clicked_screen = var2str(_clicked_screen)
-		assert(_clicked_screen is Vector2)
-		
+func _on_PlayerController_impact(_clicked_screen):
 	target = _clicked_screen
 	direction = _clicked_screen.normalized()
 	speed = max_speed
+
+
+func _on_PlayerController_sync_position(pos):
+	position = pos

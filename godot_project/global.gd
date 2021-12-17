@@ -31,6 +31,7 @@ const NK_ADDON_VERSION = "2.1.0" # primarily note for me
 # 100-199 forward to match
 enum OpCodes {
 	BALL_IMPACT = 201,
+	BALL_SYNC = 202,
 	MATCH_CONFIG = 101,
 	MATCH_START = 102,
 	# when match starts
