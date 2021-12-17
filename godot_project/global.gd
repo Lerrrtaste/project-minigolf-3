@@ -34,6 +34,8 @@ enum OpCodes {
 	BALL_SYNC = 202,
 	MATCH_CONFIG = 101,
 	MATCH_START = 102,
+	NEXT_TURN = 103,
+	TURN_FINISHED = 104,
 	# when match starts
 	# contains map_id, tuŕn_order
 	

@@ -133,6 +133,10 @@ func match_send_state_async(op_code:int,new_state)->void:
 
 # Getset
 
+func get_user_id()->String:
+	return session.user_id
+
+
 func is_socket_connected()->bool:
 	if !is_logged_in():
 		printerr("Not even logged in")

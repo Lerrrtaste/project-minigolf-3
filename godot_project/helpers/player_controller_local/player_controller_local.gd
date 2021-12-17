@@ -4,6 +4,8 @@ signal impact(pos)
 signal sync_position(pos)
 const LOCAL = true
 
+var active := false
+
 
 
 func _ready():
@@ -13,9 +15,17 @@ func _ready():
 func _unhandled_input(event):
 	if event is InputEventMouse:
 		if event.button_mask == BUTTON_MASK_LEFT and event.is_pressed():
-			emit_signal("impact", get_local_mouse_position())
-			var send_data = {"target_pos": var2str(get_local_mouse_position())}
-			Networker.match_send_state_async(Global.OpCodes.BALL_IMPACT,send_data)
+			if active:
+				emit_signal("impact", get_local_mouse_position())
+				var send_data = {"target_pos": var2str(get_local_mouse_position())}
+				Networker.match_send_state_async(Global.OpCodes.BALL_IMPACT,send_data)
+				active = false
+
+
+func activate():
+	if active:
+		printerr("Local Player Controller was already active!")
+	active = true
 
 
 # Called from physics process if LOCAL == true

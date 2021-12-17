@@ -7,11 +7,12 @@ var direction: Vector2 # cartesian direction
 var speed: float
 var max_speed: float = 150
 var friction: float = 50
+var turn_ready: = false
 
 var dbg_line_start := Vector2()
 var dbg_line_end := Vector2()
 
-
+signal finished_moving()
 
 func _ready():
 	if not is_instance_valid(connected_pc):
@@ -28,18 +29,11 @@ func _ready():
 func _process(delta):
 	update()
 
+
 func _physics_process(delta):
 	if speed > 0:
 		move_step(delta)
 	
-
-var target = Vector2()
-func _draw():
-	pass
-#	draw_line(Vector2(),target,ColorN("red"))
-#	draw_line(Vector2(),direction * (speed/max_speed)*50, ColorN("blue"),4)
-#	draw_line(dbg_line_start, dbg_line_end, ColorN("grey"), 5)
-
 
 func setup_playercontroller(pc_scene:PackedScene,remote_user_id=null)->void:
 	if is_instance_valid(connected_pc):
@@ -97,7 +91,8 @@ func move_step(delta:float):
 	
 	if speed <= 0 and connected_pc.LOCAL:
 		connected_pc.send_sync_position(position)
-		
+		emit_signal("finished_moving")
+
 
 #### Helpers
 
@@ -121,7 +116,6 @@ func isometric_normalize(direction:Vector2)->Vector2:
 #### Callbacks
 
 func _on_PlayerController_impact(_clicked_screen):
-	target = _clicked_screen
 	direction = _clicked_screen.normalized()
 	speed = max_speed
 

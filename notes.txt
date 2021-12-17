@@ -1,14 +1,39 @@
 Next Todos:
 
-
-- BALL_IMPACT broadcast state data is not deserialized correctly yet, then:
-- networked ball movement (remote pc) + synchronize at the end
+- authorative turns
+- consolidate ball spawn code
 - stroke counter ui
 - win condition
 - simple match end screen
+- water tiles + ball reset
+- sand tiles + speed slowdown
 - store maps in nakama collection
 - map storage node to handle downloading / loading mapfile
 
 
 
-DONE- ball physics (vector reflection)
+DONE
+- ball physics (vector reflection)
+- BALL_IMPACT broadcast state data is not deserialized correctly yet, then:
+- networked ball movement (remote pc) + synchronize at the end
+
+
+
+IDEAS
+- Ball to Wall collision normal with 4 spheres / ray casts? Only if current does not work
+
+
+OP CODES
+101 MATCH_CONFIG (map_id:int)
+
+102 MATCH_START (joined_players:List presences, turn_order:List user_ids )
+		note: implies next turn for first player in turn_order
+
+103 NEXT_TURN (next_player:Dictionary presence)
+
+104 FINISHED_TURN ()
+
+201 BALL_IMPACT (target_pos:Vector2 relative click)
+		note: impact meaining local player initiated move (not collision from another player)
+
+202 BALL_SYNC (synced_pos:Vector2 absolute new pos)

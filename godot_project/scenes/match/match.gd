@@ -18,8 +18,9 @@ var MatchCamera = preload("res://helpers/cameras/match_camera/MatchCamera.tscn")
 var remote_balls:Dictionary
 var local_ball
 
-var turn_order = null # list of player ids
-var turn_current = null # current player id
+var joined_players := {} # presences (key is user_id)
+var turn_order := [] # list of user ids
+var turn_current_idx = 0 # current player id
 
 var map_id 
 
@@ -74,6 +75,7 @@ func _start_match():
 	new_ball.setup_playercontroller(PlayerControllerLocal)
 	add_child(new_ball)
 	local_ball = new_ball
+	local_ball.connect("finished_moving", self, "_on_Ball_finished_moving")
 	local_ball.position = map.match_get_starting_position()
 	
 	# attach camera
@@ -82,7 +84,7 @@ func _start_match():
 	cam.make_current()
 	
 	#spawn remote
-	for i in Networker.connected_presences:
+	for i in joined_players:
 		player_remote_spawn(i)
 
 
@@ -98,7 +100,6 @@ func _start_practice():
 	var cam = MatchCamera.instance()
 	local_ball.add_child(cam)
 	cam.make_current()
-	
 
 
 func player_remote_spawn(user_id)->void:
@@ -109,6 +110,7 @@ func player_remote_spawn(user_id)->void:
 	new_ball.setup_playercontroller(PlayerControllerRemote,user_id)
 	remote_balls[user_id] = new_ball
 	add_child(new_ball)
+	# new_ball.connect("finished_moving", self, "_on_Ball_finished_moving") only needed from local pc
 	new_ball.position = map.match_get_starting_position()
 
 
@@ -138,8 +140,8 @@ func _on_Networker_match_joined(joined_match)->void:
 	pass
 
 
-func _on_Networker_presences_updated(connected_presences)->void:
-	pass
+# Currently not sent by server at all
+#func _on_Networker_presences_updated(connected_presences)->void:
 #	var spawned_players = remote_balls.keys()
 #
 #	connected_presences.erase(Networker.session.user_id)
@@ -159,8 +161,46 @@ func _on_Networker_match_state(state):
 		Global.OpCodes.MATCH_CONFIG:
 			var data_dict = JSON.parse(state.data).result
 			map_id = int(data_dict["map_id"])
-			turn_order = data_dict["turn_order"]
+			
 			change_state(States.LOADING)
 		
 		Global.OpCodes.MATCH_START:
+			var data_dict = JSON.parse(state.data).result
+			turn_order = data_dict["turn_order"]
+			joined_players = data_dict["joined_players"]
+
 			change_state(States.PLAYING)
+			
+			if(turn_order[turn_current_idx] == Networker.get_user_id()): #copied from below only used for first turn
+				print("Local players turn (FIRST TURN)")
+				local_ball.connected_pc.activate()
+			else:
+				var starting_player = joined_players[turn_order[turn_current_idx]]
+				print("Other players turn: ", starting_player["username"])
+				remote_balls[starting_player["user_id"]].connected_pc.activate()
+		
+		Global.OpCodes.NEXT_TURN:
+			var data_dict = JSON.parse(state.data).result
+			var next_turn_idx = (turn_current_idx+1)%turn_order.size()
+			
+			if turn_order[next_turn_idx] != data_dict["next_player"]:
+				printerr("Next player is different from local turn_order")
+			
+			turn_current_idx = next_turn_idx
+			
+			if(turn_order[turn_current_idx] == Networker.get_user_id()):
+				print("Local players turn")
+				local_ball.connected_pc.activate()
+			else:
+				print("Other players turn: ", joined_players[data_dict["next_player"]]["username"])
+				remote_balls[data_dict["next_player"]].connected_pc.activate()
+
+
+func _on_Ball_finished_moving():
+	if not turn_order[turn_current_idx] == Networker.get_user_id():
+		print("aborting tough")
+		return
+	print("sending finished moving from match")
+	var op_code = Global.OpCodes.TURN_FINISHED
+	var data = {}
+	Networker.match_send_state_async(op_code, data)
