@@ -52,14 +52,12 @@ func setup_playercontroller(pc_scene:PackedScene,user_id)->void:
 	new_pc.connect("impact",self,"_on_PlayerController_impact")
 	new_pc.connect("sync_position", self, "_on_PlayerController_sync_position")
 	
-	
-
 
 func reached_finish():
 	finished = true
+	speed = 0
 	if connected_pc.LOCAL:
-		emit_signal("reached_finish",connected_pc.user_id)
-
+		emit_signal("reached_finish",position)
 
 #### Movement
 
@@ -98,13 +96,9 @@ func move_step(delta:float):
 	
 	speed -= friction * delta
 	
-	if finished:
-		speed = 0
-	
-	if speed <= 0 and connected_pc.LOCAL:
+	if not finished and speed <= 0 and connected_pc.LOCAL:
 		connected_pc.send_sync_position(position)
 		emit_signal("finished_moving")
-	
 	
 
 #### Helpers

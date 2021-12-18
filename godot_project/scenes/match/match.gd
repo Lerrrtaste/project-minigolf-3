@@ -220,8 +220,10 @@ func _on_Networker_match_state(state):
 			turn_counter[previous_player] += 1
 		
 		Global.OpCodes.REACHED_FINISH:
-			var data_dict = JSON.parse(state.data).result
-			turn_order.erase(data_dict["finished_user"])
+			#var state_dict = JSON.parse(state).result
+			print("Player %s has reached the finish"%state.presence.username)
+			turn_order.erase(state.presence.user_id)
+			turn_current_idx = (turn_current_idx-1) % turn_order.size()
 		
 		Global.OpCodes.MATCH_END:
 			change_state(States.FINISHED)
@@ -233,13 +235,12 @@ func _on_Ball_finished_moving():
 #	if not turn_order[turn_current_idx] == Networker.get_user_id():
 #		print("Warning sending FINISHED_MOVING even though not in turn_order (only valid when finished)")
 	var op_code = Global.OpCodes.TURN_FINISHED
-	var data = {}
+	var data = {"reached_finish": false}
 	Networker.match_send_state_async(op_code, data)
 
 
-func _on_Ball_reached_finish(user_id):
-	turn_order.erase(user_id)
-	turn_current_idx = (turn_current_idx-1) % turn_order.size()
-	var op_code = Global.OpCodes.REACHED_FINISH
-	var data = {"finished_user": user_id}
+func _on_Ball_reached_finish(final_pos):
+	#turn_order.erase(user_id) # happens when msg comes back
+	var op_code = Global.OpCodes.TURN_FINISHED
+	var data = {"reached_finish": true}
 	Networker.match_send_state_async(op_code, data)

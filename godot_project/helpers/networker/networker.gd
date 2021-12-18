@@ -195,6 +195,7 @@ func _on_match_presence(p_presence : NakamaRTAPI.MatchPresenceEvent):
 
 
 func _on_match_state(p_state : NakamaRTAPI.MatchData):
-	print(" -> Received match state with opcode %s, data %s" % [p_state.op_code, parse_json(p_state.data)])
+
+	print(" -> Received match state with opcode %s, data %s" % [p_state.op_code, p_state.data])
 	emit_signal("match_state", p_state)
 
