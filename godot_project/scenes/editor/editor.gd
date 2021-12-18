@@ -129,7 +129,6 @@ func use_tool()->void:
 	match select_tool.selected:
 		Tools.tile_change:
 			map.editor_tile_change(get_global_mouse_position(),select_tile.selected-1)
-			print("Placing tile id %s"%(select_tile.selected-1))
 		Tools.object_place:
 			map.editor_object_place(get_global_mouse_position(),select_object.selected)
 		Tools.object_remove:

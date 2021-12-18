@@ -10,5 +10,7 @@ script = ExtResource( 1 )
 mode = 1
 tile_set = ExtResource( 2 )
 cell_size = Vector2( 32, 16 )
+cell_tile_origin = 2
 collision_mask = 0
 format = 1
+tile_data = PoolIntArray( 458781, 0, 0 )

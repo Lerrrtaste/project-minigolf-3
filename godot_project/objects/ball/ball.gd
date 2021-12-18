@@ -18,7 +18,6 @@ var friction: float = 50
 var turn_ready: = false
 var finished := false
 
-
 signal finished_moving()
 signal reached_finish(user_id)
 
@@ -46,7 +45,13 @@ func _physics_process(delta):
 	
 	if speed > 0:  # seperate because update_tile_properties can change speed (if ball resets)
 		move_step(delta)
-	
+
+
+func _draw():
+	if connected_pc.active and connected_pc.LOCAL:
+		var dist = min(get_local_mouse_position().length(), connected_pc.MAX_SPEED_DISTANCE)
+		draw_line(Vector2(),get_local_mouse_position().normalized() * dist, ColorN("black"))
+
 
 func setup_playercontroller(pc_scene:PackedScene,user_id)->void:
 	if is_instance_valid(connected_pc):
@@ -63,7 +68,7 @@ func setup_playercontroller(pc_scene:PackedScene,user_id)->void:
 	# connect pc signals
 	new_pc.connect("impact",self,"_on_PlayerController_impact")
 	new_pc.connect("sync_position", self, "_on_PlayerController_sync_position")
-	
+
 
 func reached_finish():
 	finished = true
@@ -150,7 +155,8 @@ func isometric_normalize(direction:Vector2)->Vector2:
 func _on_PlayerController_impact(_clicked_screen):
 	starting_position = position
 	direction = _clicked_screen.normalized()
-	speed = max_speed
+	var dist = min(_clicked_screen.length(), connected_pc.MAX_SPEED_DISTANCE)
+	speed = max_speed * (dist/connected_pc.MAX_SPEED_DISTANCE)
 
 
 func _on_PlayerController_sync_position(pos):

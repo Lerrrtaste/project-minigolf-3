@@ -7,6 +7,7 @@ const LOCAL = false
 var user_id:String
 var active := false
 
+const MAX_SPEED_DISTANCE = 100 # for impact force calculation (will be changed to only send normalized vectors over the network in the future, until then quick fix)
 
 func _ready():
 	Networker.connect("match_state",self,"_on_Networker_match_state")

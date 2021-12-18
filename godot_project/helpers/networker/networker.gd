@@ -73,7 +73,7 @@ func matchmaking_start_async(map_id:int)->void:
 		
 	var query = "+properties.map_id:%s"%String(map_id)
 	var min_count = 2
-	var max_count = 2
+	var max_count = 3
 	var string_properties = {
 		"map_id": String(map_id)
 	}

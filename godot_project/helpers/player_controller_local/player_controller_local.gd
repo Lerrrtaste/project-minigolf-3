@@ -7,6 +7,9 @@ const LOCAL = true
 var active := false
 var user_id:String
 
+const MAX_SPEED_DISTANCE = 100  # mouse distance till full force
+
+
 
 func _ready():
 	pass	
@@ -17,7 +20,8 @@ func _unhandled_input(event):
 		if event.button_mask == BUTTON_MASK_LEFT and event.is_pressed():
 			if active:
 				emit_signal("impact", get_local_mouse_position())
-				var send_data = {"target_pos": var2str(get_local_mouse_position())}
+				var dist = min(get_local_mouse_position().length(), MAX_SPEED_DISTANCE)
+				var send_data = {"target_pos": var2str(get_local_mouse_position().normalized() * dist)}
 				Networker.match_send_state_async(Global.OpCodes.BALL_IMPACT,send_data)
 				active = false
 

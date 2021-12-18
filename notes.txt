@@ -1,23 +1,25 @@
 #### TODOS
 
 
-- fix bug if incorrect player sents finished turn 104 it should not be recognized by server
 - simple match end screen
-- water tiles + ball reset
-- sand tiles + speed slowdown
 - Button Sprite (Disabled, Normal, Hovered, Clicked)
 - 9 Patch Panel (InGame)
 - Editor Icons (PlaceObj, RemoveObj, PlaceTile, RemoveTile)
 - Editor Tool Bar
 - Background 
+
 - store maps in nakama collection
 - map storage node to handle downloading / loading mapfile
-- variable shot strenght
+
 - wait for map to (down)load before starting match
+- player move impact should be normalized and controller by server (so mouse distance till max force can be client independent)
+- ball to ball collisison (turned off when reached finished and before first shot)
+- handle presence events (only leaves)
+- use alternative wall normal calculation (old implementaion wonky at some angles)
 - Final MVP export :)
 
 #### DONE
-
+- variable shot strenght
 
 - ball physics (vector reflection)
 - BALL_IMPACT broadcast state data is not deserialized correctly yet, then:
@@ -27,7 +29,9 @@
 - FINISH_MOVE does not l spawn code
 - stroke counter uiget sent reliable after sending REACHED_FINISH, is that is fixed, the win condition should work
 - win condition
-
+- fix bug if incorrect player sents finished turn 104 it should not be recognized by server
+- water tiles + ball reset
+- sand tiles + speed slowdown
 
 #### Notes
 Atm solid only solid tiles have a collision shape on tilemap (solid TILE_DATA prop does nothing)
@@ -37,7 +41,8 @@ Wall sprite verdeckt wasser, etwas niedriger?
 #### IDEAS
 - Ball to Wall collision normal with 4 spheres / ray casts? Only if current does not work
 - Match camera follows current player instead of local player
-
+- every player gets a color
+- screen border / ingame stats panel borader in current players color
 
 #### OP CODES
 101 MATCH_CONFIG (map_id:int)
