@@ -114,36 +114,39 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
                 state.player_positions[msg.sender] = nk.json_decode(msg.data)["synced_pos"]
 
             elseif msg.op_code == OpCodes.FINISHED_TURN then
-                if state.turn_count[msg.sender.user_id] == nil then -- initialize turn counter (if not already)
-                    state.turn_count[msg.sender.user_id] = 0
-                end
+                if msg.sender.user_id ~= state.turn_order[state.next_player_idx] then -- verify the sender is the next player in turn order
+                    nk.logger_error("Recieved FINISHED_TURN from wrong player (not his turn)")
+                else
+                    if state.turn_count[msg.sender.user_id] == nil then -- initialize turn counter (if not already)
+                        state.turn_count[msg.sender.user_id] = 0
+                    end
 
-                state.turn_count[msg.sender.user_id] = state.turn_count[msg.sender.user_id] + 1 -- count turns
+                    state.turn_count[msg.sender.user_id] = state.turn_count[msg.sender.user_id] + 1 -- count turns
 
-                if nk.json_decode(msg.data)["reached_finish"] then -- player is finished with map
-                    for k, user_id in ipairs(state.turn_order) do -- remove him from turn_order
-                        if user_id == msg.sender.user_id then
-                            table.remove(state.turn_order,k) -- TODO decrement next_player_idx to account for more than 2 players
-                            state.next_player_idx = state.next_player_idx -1 -- only possible this way because it gets incremented directly afterwards (below)
-                            break
+                    if nk.json_decode(msg.data)["reached_finish"] then -- player is finished with map
+                        for k, user_id in ipairs(state.turn_order) do -- remove him from turn_order
+                            if user_id == msg.sender.user_id then
+                                table.remove(state.turn_order,k) -- TODO decrement next_player_idx to account for more than 2 players
+                                state.next_player_idx = state.next_player_idx -1 -- only possible this way because it gets incremented directly afterwards (below)
+                                break
+                            end
                         end
+                        if #state.turn_order == 0 then -- end game if no players remain (maybe someday configurable remaining players till end match-parameter)
+                            local data = nk.json_encode({scores = state.turn_count})
+                            dispatcher.broadcast_message(OpCodes.MATCH_END, data)
+                            return nil
+                        end
+                        dispatcher.broadcast_message(OpCodes.REACHED_FINISH, nil, nil, msg.sender)-- broadcast FINISHED_TURN
                     end
-                    if #state.turn_order == 0 then -- end game if no players remain (maybe someday configurable remaining players till end match-parameter)
-                        local data = nk.json_encode({scores = state.turn_count})
-                        dispatcher.broadcast_message(OpCodes.MATCH_END, data)
-                        return nil
-                    end
-                    dispatcher.broadcast_message(OpCodes.REACHED_FINISH, nil, nil, msg.sender)-- broadcast FINISHED_TURN
+
+                    state.next_player_idx = ((state.next_player_idx) % #state.turn_order) +1 -- increment next player idx (indices start at 1)
+
+                    -- broadcast next player
+                    local data = nk.json_encode({next_player = state.turn_order[state.next_player_idx]})
+                    dispatcher.broadcast_message(OpCodes.NEXT_TURN, data, nil)
                 end
-
-                state.next_player_idx = ((state.next_player_idx) % #state.turn_order) +1 -- increment next player idx (indices start at 1)
-
-                -- broadcast next player
-                local data = nk.json_encode({next_player = state.turn_order[state.next_player_idx]})
-                dispatcher.broadcast_message(OpCodes.NEXT_TURN, data, nil)
-
             elseif msg.op_code == OpCodes.REACHED_FINISH then
-                nk.logger_error("Recieved REACHED_FINISH which must not be sent by clients")
+                nk.logger_error("Recieved REACHED_FINISH which must not be sent by clients (Announce in FINISHED_MOVING data)")
             end
         end
     end
