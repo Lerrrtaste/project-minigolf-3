@@ -113,7 +113,7 @@ func _unhandled_input(event):
 						spr_object_cursor.position = map.get_center_cell_position(get_global_mouse_position())
 					Tools.tile_change:
 						tilemap_cursor.set_cell(selected_cell.x,selected_cell.y,-1)
-						tilemap_cursor.set_cell(coord.x,coord.y,select_tile.selected-1)
+						tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id(select_tile.selected-1))
 						selected_cell = coord
 						if tool_dragged:
 							use_tool()
@@ -121,16 +121,15 @@ func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		# bisschen wonky
 		if event.button_mask == BUTTON_LEFT:
-			print(event.button_mask)
 			use_tool()
 		tool_dragged = event.pressed
-
 
 
 func use_tool()->void:
 	match select_tool.selected:
 		Tools.tile_change:
 			map.editor_tile_change(get_global_mouse_position(),select_tile.selected-1)
+			print("Placing tile id %s"%(select_tile.selected-1))
 		Tools.object_place:
 			map.editor_object_place(get_global_mouse_position(),select_object.selected)
 		Tools.object_remove:
@@ -215,3 +214,4 @@ func _on_BtnLoad_pressed():
 	file.close()
 	btn_load.disabled = true
 	select_map_load.disabled = true
+	edit_map_name_save.text = map.metadata["name"]

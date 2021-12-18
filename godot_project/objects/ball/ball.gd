@@ -3,15 +3,21 @@ extends KinematicBody2D
 onready var lbl_player_name = get_node("LblPlayerName")
 
 var connected_pc #has active player controller attached
+var map # set by match before entering tree
+var current_cell:Vector2
+
+# movement
+var starting_position: Vector2
 var direction: Vector2 # cartesian direction
 var speed: float
 var max_speed: float = 150
+var friction_modifier: float = 1.0 # changed by tile 
 var friction: float = 50
+
+# match
 var turn_ready: = false
 var finished := false
 
-var dbg_line_start := Vector2()
-var dbg_line_end := Vector2()
 
 signal finished_moving()
 signal reached_finish(user_id)
@@ -33,6 +39,12 @@ func _process(delta):
 
 func _physics_process(delta):
 	if speed > 0:
+		var _cell = map.get_cell_position(position)
+		if _cell != current_cell: # moved to new cell
+			current_cell = _cell
+			update_tile_properties()
+	
+	if speed > 0:  # seperate because update_tile_properties can change speed (if ball resets)
 		move_step(delta)
 	
 
@@ -55,9 +67,10 @@ func setup_playercontroller(pc_scene:PackedScene,user_id)->void:
 
 func reached_finish():
 	finished = true
-	speed = 0
 	if connected_pc.LOCAL:
 		emit_signal("reached_finish",position)
+	finish_moving()
+
 
 #### Movement
 
@@ -89,16 +102,28 @@ func move_step(delta:float):
 				# left up
 				wall_normal = Vector2(1,1).normalized()
 		
-		
 		direction = isometric_normalize(reflect_vector(direction,wall_normal))
-		dbg_line_start = Vector2()
-		dbg_line_end = isometric_normalize(wall_normal) * 50
 	
-	speed -= friction * delta
+	speed -= (friction*friction_modifier) * delta
 	
-	if not finished and speed <= 0 and connected_pc.LOCAL:
+	if speed <= 0:
+		finish_moving()
+		print("Sent because of physics")
+
+
+func finish_moving():
+	speed = 0
+	if connected_pc.LOCAL:
 		connected_pc.send_sync_position(position)
 		emit_signal("finished_moving")
+
+
+func update_tile_properties():
+	if map.get_tile_resets_ball(position):
+		position = starting_position
+		finish_moving()
+		print("Sent because of tile property")
+	friction_modifier = map.get_tile_friction(position)
 	
 
 #### Helpers
@@ -123,9 +148,17 @@ func isometric_normalize(direction:Vector2)->Vector2:
 #### Callbacks
 
 func _on_PlayerController_impact(_clicked_screen):
+	starting_position = position
 	direction = _clicked_screen.normalized()
 	speed = max_speed
 
 
 func _on_PlayerController_sync_position(pos):
 	position = pos
+	finish_moving()
+
+
+#### Setget
+
+func set_map(_map):
+	map = _map

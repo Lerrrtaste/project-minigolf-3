@@ -1,24 +1,38 @@
 #### TODOS
 
-- FINISH_MOVE does not get sent reliable after sending REACHED_FINISH, is that is fixed, the win condition should work
-- win condition
+
+- fix bug if incorrect player sents finished turn 104 it should not be recognized by server
 - simple match end screen
 - water tiles + ball reset
 - sand tiles + speed slowdown
+- Button Sprite (Disabled, Normal, Hovered, Clicked)
+- 9 Patch Panel (InGame)
+- Editor Icons (PlaceObj, RemoveObj, PlaceTile, RemoveTile)
+- Editor Tool Bar
+- Background 
 - store maps in nakama collection
 - map storage node to handle downloading / loading mapfile
 - variable shot strenght
 - wait for map to (down)load before starting match
+- Final MVP export :)
 
 #### DONE
+
+
 - ball physics (vector reflection)
 - BALL_IMPACT broadcast state data is not deserialized correctly yet, then:
 - networked ball movement (remote pc) + synchronize at the end
 - authorative turns
-- consolidate ball spawn code
-- stroke counter ui
+- consolidate bal
+- FINISH_MOVE does not l spawn code
+- stroke counter uiget sent reliable after sending REACHED_FINISH, is that is fixed, the win condition should work
+- win condition
 
 
+#### Notes
+Atm solid only solid tiles have a collision shape on tilemap (solid TILE_DATA prop does nothing)
+
+Wall sprite verdeckt wasser, etwas niedriger?
 
 #### IDEAS
 - Ball to Wall collision normal with 4 spheres / ray casts? Only if current does not work

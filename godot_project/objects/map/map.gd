@@ -8,13 +8,48 @@ Tile Size
 const TILE_X = 32
 const TILE_Y = 16
 
-const TILE_DATA = { #id has to be the index in the tilemap
-	"empty": {"id":-1, "texture_path":null},
-	"grass": {"id":0, "texture_path":"res://objects/map/grass.png"},
-	"wall": {"id":1, "texture_path":"res://objects/map/wall.png"},
-	"dirt": {"id":2, "texture_path":null},
-	"water": {"id":3, "texture_path":null},
+var TILE_DATA = { #id has to be the index in the tilemap
+		"empty": {
+				"id":-1, # "tile id" for saving/loading
+				"tilemap_id": null, # tileset index of
+				"solid": true, # not used yet (planning to use this instead of tilemap collision shape)
+				"ball_reset": true, # maybe it doesnt work (sold and reset) 
+				"texture_path":null # for editor icon
+		},
+		"grass": {
+				"id":0,
+				"tilemap_id": null,
+				"solid": false,
+				"ball_reset": false,
+				"friction": 1.0, 
+				"texture_path":"res://objects/map/grass.png"
+				},
+		"wall": {
+				"id":1,
+				"tilemap_id": null,
+				"solid": true,
+				"ball_reset": false,
+				"friction": 1.0, 
+				"texture_path":"res://objects/map/wall.png"
+		},
+		"sand": {
+				"id":2,
+				"tilemap_id": null,
+				"solid": false,
+				"ball_reset": false,
+				"friction": 4.0, 
+				"texture_path":"res://objects/map/sand.png"
+		},
+		"water": {
+				"id":3,
+				"tilemap_id": null,
+				"solid": false,
+				"ball_reset": true,
+				"friction": 1.0, 
+				"texture_path":"res://objects/map/water.png"
+		},
 }
+
 
 const OBJECT_DATA = {
 		"start": {
@@ -42,6 +77,11 @@ var spawned_objects:Dictionary
 onready var tilemap = get_node("TileMap")
 
 
+func _ready():
+	# update tileset tile ids
+	for i in TILE_DATA:
+		var real_id = tilemap.tile_set.find_tile_by_name(i)
+		TILE_DATA[i]["tilemap_id"] = real_id
 
 #### Editor Actions
 
@@ -97,10 +137,12 @@ func editor_object_remove(world_pos:Vector2):
 	spawned_objects.erase(snapped_pos)
 
 
-func editor_tile_change(world_pos:Vector2, tile_id:int):
+func editor_tile_change(world_pos:Vector2, id:int):
 	var cell = tilemap.world_to_map(world_pos)
-	tilemap.set_cell(cell.x,cell.y,tile_id)
-	
+	for i in TILE_DATA:
+		if TILE_DATA[i]["id"] == id:
+			tilemap.set_cell(cell.x,cell.y,TILE_DATA[i]["tilemap_id"])
+
 	#TODO remove potential object on this tile
 
 
@@ -113,6 +155,7 @@ func match_get_starting_position()->Vector2:
 	
 	printerr("No Startpoint found, defaulting to (0,0)")
 	return Vector2()
+
 
 #### Loading / Saving
 
@@ -134,7 +177,9 @@ func serialize()->String:
 	# tile
 	var cells = tilemap.get_used_cells()
 	for i in cells:
-		mapdict["cells"][var2str(i)] = tilemap.get_cell(i.x,i.y)
+		for j in TILE_DATA:
+			if TILE_DATA[j]["tilemap_id"] == tilemap.get_cell(i.x,i.y):
+				mapdict["cells"][var2str(i)] = TILE_DATA[j]["id"]
 	
 	# objects
 	for i in spawned_objects:
@@ -164,7 +209,10 @@ func deserialize(jstring:String)->void:
 	# cells
 	for i in parse.result["cells"]:
 		var coord:Vector2 = str2var(i)
-		tilemap.set_cell(coord.x,coord.y,parse.result["cells"][i])
+		for j in TILE_DATA:
+			if TILE_DATA[j]["id"] == parse.result["cells"][i]:
+				tilemap.set_cell(coord.x,coord.y,TILE_DATA[j]["tilemap_id"])
+				break
 		
 	# objects
 	for i in parse.result["objects"]:
@@ -215,19 +263,51 @@ func isometric_to_cartesion(iso:Vector2)->Vector2:
 	cart.y = (2 * iso.y - iso.x) / 2
 	return cart
 
-#
-#func is_loaded()->bool:
-#	return (not metadata["id"] == null)
 
-#
-#func get_map_size()->Vector2:
-#	var size
-#	size = tilemap.get_used_rect().size
-#	size.x *= TILE_X
-#	size.y *= TILE_Y
-#	print(size)
-#	return size
-#
-#func get_origin_cell_worldpos()->Vector2:
-#	print(tilemap.get_used_rect().position)
-#	return tilemap.map_to_world(tilemap.get_used_rect().position)
+#### Setget
+
+func get_cell_position(world_pos:Vector2)->Vector2:
+	return tilemap.world_to_map(world_pos)
+
+
+func get_tile_friction(world_pos:Vector2)->float:
+	var cell = tilemap.get_cellv(tilemap.world_to_map(world_pos))
+	for i in TILE_DATA:
+		if TILE_DATA[i]["tilemap_id"] == cell:
+			if not TILE_DATA[i].has("friction"):
+				printerr("Cell %s has no friction property"%i)
+				return 0.0
+			return TILE_DATA[i]["friction"]
+	printerr("Cell %s not found in TILE_DATA"%cell)
+	return 0.0
+
+
+func get_tile_resets_ball(world_pos:Vector2)->bool:
+	var cell = tilemap.get_cellv(tilemap.world_to_map(world_pos))
+	for i in TILE_DATA:
+		if TILE_DATA[i]["tilemap_id"] == cell:
+			if not TILE_DATA[i].has("ball_reset"):
+				printerr("Cell %s has no ball_reset property"%i)
+				return false
+			return TILE_DATA[i]["ball_reset"]
+	printerr("Cell %s not found in TILE_DATA"%cell)
+	return false
+
+
+func get_tile_solid(world_pos:Vector2)->bool:
+	var cell = tilemap.get_cellv(tilemap.world_to_map(world_pos))
+	for i in TILE_DATA:
+		if TILE_DATA[i]["tilemap_id"] == cell:
+			if not TILE_DATA[i].has("solid"):
+				printerr("Cell %s has no solid property"%i)
+				return false
+			return TILE_DATA[i]["solid"]
+	printerr("Cell %s not found in TILE_DATA"%cell)
+	return false
+
+func get_tilemap_id(tile_id:int)->int:
+	for i in TILE_DATA:
+		if TILE_DATA[i]["id"] == tile_id:
+			return TILE_DATA[i]["tilemap_id"]
+	printerr("Could not find tile with id %s"%tile_id)
+	return -1

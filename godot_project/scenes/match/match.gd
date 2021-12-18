@@ -92,7 +92,8 @@ func spawn_ball(local:bool, user_id:String):
 	else:
 		new_ball.setup_playercontroller(PlayerControllerRemote,user_id)
 		remote_balls[user_id] = new_ball
-		
+	
+	new_ball.set_map(map)
 	add_child(new_ball)
 	new_ball.position = map.match_get_starting_position()
 	new_ball.connect("reached_finish", self, "_on_Ball_reached_finish")
