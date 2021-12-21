@@ -1,12 +1,10 @@
 #### TODOS
 
-
-- simple match end screen
-- Button Sprite (Disabled, Normal, Hovered, Clicked)
-- 9 Patch Panel (InGame)
 - Editor Icons (PlaceObj, RemoveObj, PlaceTile, RemoveTile)
 - Editor Tool Bar
 - Background 
+- ball name tag
+- simple match end screen
 
 - store maps in nakama collection
 - map storage node to handle downloading / loading mapfile
@@ -18,8 +16,11 @@
 - use alternative wall normal calculation (old implementaion wonky at some angles)
 - Final MVP export :)
 
+
 #### DONE
 - variable shot strenght
+- Button Sprite (Disabled, Normal, Hovered, Clicked)
+- 9 Patch Panel (InGame)
 
 - ball physics (vector reflection)
 - BALL_IMPACT broadcast state data is not deserialized correctly yet, then:
@@ -38,11 +39,15 @@ Atm solid only solid tiles have a collision shape on tilemap (solid TILE_DATA pr
 
 Wall sprite verdeckt wasser, etwas niedriger?
 
+UI Pixel Scale 400%
+
 #### IDEAS
 - Ball to Wall collision normal with 4 spheres / ray casts? Only if current does not work
 - Match camera follows current player instead of local player
 - every player gets a color
 - screen border / ingame stats panel borader in current players color
+- "in matchmaking" screen
+- "loading map" screen
 
 #### OP CODES
 101 MATCH_CONFIG (map_id:int)

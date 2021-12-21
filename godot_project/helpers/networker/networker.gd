@@ -73,7 +73,7 @@ func matchmaking_start_async(map_id:int)->void:
 		
 	var query = "+properties.map_id:%s"%String(map_id)
 	var min_count = 2
-	var max_count = 3
+	var max_count = 2
 	var string_properties = {
 		"map_id": String(map_id)
 	}
@@ -120,6 +120,7 @@ func match_join_async(matchmaker_token)->void:
 		#print("User id %s name %s'." % [presence.user_id, presence.username])
 		connected_presences[presence.user_id] = presence
 	
+	matchmaker_ticket = null
 	emit_signal("match_joined",joined_match)
 
 

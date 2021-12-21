@@ -8,8 +8,9 @@ Tile Size
 const TILE_X = 32
 const TILE_Y = 16
 
-var TILE_DATA = { #id has to be the index in the tilemap
+var TILE_DATA = { # TODO refactor to use tile enum as key
 		"empty": {
+				"name": "Empty",
 				"id":-1, # "tile id" for saving/loading
 				"tilemap_id": null, # tileset index of
 				"solid": true, # not used yet (planning to use this instead of tilemap collision shape)
@@ -17,6 +18,7 @@ var TILE_DATA = { #id has to be the index in the tilemap
 				"texture_path":null # for editor icon
 		},
 		"grass": {
+				"name": "Grass",
 				"id":0,
 				"tilemap_id": null,
 				"solid": false,
@@ -25,6 +27,7 @@ var TILE_DATA = { #id has to be the index in the tilemap
 				"texture_path":"res://objects/map/grass.png"
 				},
 		"wall": {
+				"name": "Wall",
 				"id":1,
 				"tilemap_id": null,
 				"solid": true,
@@ -33,6 +36,7 @@ var TILE_DATA = { #id has to be the index in the tilemap
 				"texture_path":"res://objects/map/wall.png"
 		},
 		"sand": {
+				"name": "Sand",
 				"id":2,
 				"tilemap_id": null,
 				"solid": false,
@@ -41,6 +45,7 @@ var TILE_DATA = { #id has to be the index in the tilemap
 				"texture_path":"res://objects/map/sand.png"
 		},
 		"water": {
+				"name": "Water",
 				"id":3,
 				"tilemap_id": null,
 				"solid": false,
@@ -53,12 +58,14 @@ var TILE_DATA = { #id has to be the index in the tilemap
 
 const OBJECT_DATA = {
 		"start": {
+				"name": "Spawn",
 				"id": 0,
 				"limit": 1, #only one
 				"scene_path":"res://objects/map_objects/start/Start.tscn",
 				"texture_path":"res://objects/map_objects/start/start.png"
 				},
 		"finish": {
+				"name": "Finish",
 				"id": 1,
 				"limit": 1,
 				"scene_path":"res://objects/map_objects/finish/Finish.tscn",
@@ -85,7 +92,7 @@ func _ready():
 
 #### Editor Actions
 
-func editor_object_place(world_pos:Vector2,object_id:int):
+func editor_object_place(world_pos:Vector2,object_id):
 	var cell = tilemap.world_to_map(world_pos)
 	
 	# TODO check if outside of map border
@@ -304,6 +311,15 @@ func get_tile_solid(world_pos:Vector2)->bool:
 			return TILE_DATA[i]["solid"]
 	printerr("Cell %s not found in TILE_DATA"%cell)
 	return false
+
+
+func get_cell_from_world(world_pos:Vector2)->Vector2:
+	return tilemap.world_to_map(world_pos)
+
+
+func get_tile_id_at(world_pos:Vector2)->int:
+	return tilemap.get_cellv(tilemap.world_to_map(world_pos))
+
 
 func get_tilemap_id(tile_id:int)->int:
 	for i in TILE_DATA:

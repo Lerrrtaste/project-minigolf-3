@@ -22,7 +22,7 @@ var local_ball
 var joined_players := {} # presences (key is user_id)
 var turn_order := [] # list of user ids
 var turn_current_idx = 0 # current player id
-var turn_counter := {}
+var turn_counter := {} # userid -> shots count
 
 var map_id 
 
@@ -54,6 +54,7 @@ func _ready():
 
 func _process(delta):
 	update_ui()
+
 
 func change_state(new_state:int):
 	assert(current_state != new_state)
@@ -116,7 +117,10 @@ func _start_match():
 
 
 func _start_practice():
-	spawn_ball(true,"")
+	# TODO need to simulate the server messages (next turn etc) 
+	spawn_ball(true,"me")
+	turn_counter["me"] = 0
+	turn_order[0] = "me"
 
 
 func player_remote_leave(user_id)->void:
@@ -144,16 +148,21 @@ func update_ui():
 	
 	match current_state:
 		States.LOADING:
-			text += "Waiting for Match to start..."
+			text += "[b]Waiting for Match to start...[/b]"
 		States.PLAYING:
-			text += "%s's turn\n\n"%joined_players[turn_order[turn_current_idx]]["username"]
+			var current_name
+			if turn_order[turn_current_idx] == Networker.get_user_id():
+				current_name = "YOUR"
+			else:
+				current_name = joined_players[turn_order[turn_current_idx]]["username"] + "´s"
+			text += "[b]%s turn[/b]\n\n"%current_name
 			text += "Shots:\n"
 			for i in turn_order:
 				if turn_order[turn_current_idx] == i:
 					text += "->"
 				text += "\t%s:\t%s\n" % [joined_players[i]["username"],turn_counter[i]]
 	
-	text_score.text = text
+	text_score.bbcode_text = text
 
 
 #### Callbacks
@@ -163,7 +172,7 @@ func _on_Networker_match_joined(joined_match)->void:
 
 
 # Currently not sent by server at all
-#func _on_Networker_presences_updated(connected_presences)->void:
+func _on_Networker_presences_updated(connected_presences)->void:
 #	var spawned_players = remote_balls.keys()
 #
 #	connected_presences.erase(Networker.session.user_id)
@@ -176,6 +185,7 @@ func _on_Networker_match_joined(joined_match)->void:
 #
 #	for _user_id in spawned_players:
 #		player_remote_leave(_user_id)
+	pass
 
 
 func _on_Networker_match_state(state):
@@ -229,7 +239,7 @@ func _on_Networker_match_state(state):
 		Global.OpCodes.MATCH_END:
 			change_state(States.FINISHED)
 			Global.set_scene_parameters(JSON.parse(state.data).result)
-			
+
 
 
 func _on_Ball_finished_moving():

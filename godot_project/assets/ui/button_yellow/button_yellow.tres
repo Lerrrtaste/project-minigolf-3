@@ -1,0 +1,57 @@
+[gd_resource type="Theme" load_steps=8 format=2]
+
+[ext_resource path="res://assets/ui/button_yellow/button_yellow_sheet.png" type="Texture" id=1]
+[ext_resource path="res://assets/ui/fonts/font_big_button.tres" type="DynamicFont" id=2]
+
+[sub_resource type="StyleBoxTexture" id=1]
+texture = ExtResource( 1 )
+region_rect = Rect2( 4, 4, 68, 72 )
+margin_left = 12.0
+margin_right = 12.0
+margin_top = 12.0
+margin_bottom = 20.0
+
+[sub_resource type="StyleBoxTexture" id=2]
+texture = ExtResource( 1 )
+region_rect = Rect2( 80, 4, 68, 72 )
+margin_left = 12.0
+margin_right = 12.0
+margin_top = 12.0
+margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id=3]
+texture = ExtResource( 1 )
+region_rect = Rect2( 156, 4, 68, 72 )
+margin_left = 12.0
+margin_right = 12.0
+margin_top = 12.0
+margin_bottom = 20.0
+
+[sub_resource type="StyleBoxTexture" id=4]
+texture = ExtResource( 1 )
+region_rect = Rect2( 232, 4, 68, 72 )
+margin_left = 12.0
+margin_right = 12.0
+margin_top = 12.0
+margin_bottom = 20.0
+
+[sub_resource type="StyleBoxTexture" id=5]
+texture = ExtResource( 1 )
+region_rect = Rect2( 308, 4, 68, 72 )
+margin_left = 12.0
+margin_right = 12.0
+margin_top = 20.0
+margin_bottom = 12.0
+
+[resource]
+Button/colors/font_color = Color( 0.262745, 0.262745, 0.262745, 1 )
+Button/colors/font_color_disabled = Color( 0, 0, 0, 0.176471 )
+Button/colors/font_color_focus = Color( 1, 1, 1, 1 )
+Button/colors/font_color_hover = Color( 0.117647, 0.117647, 0.117647, 1 )
+Button/colors/font_color_pressed = Color( 0.101961, 0.101961, 0.101961, 0.784314 )
+Button/fonts/font = ExtResource( 2 )
+Button/styles/disabled = SubResource( 1 )
+Button/styles/focus = SubResource( 2 )
+Button/styles/hover = SubResource( 3 )
+Button/styles/normal = SubResource( 4 )
+Button/styles/pressed = SubResource( 5 )

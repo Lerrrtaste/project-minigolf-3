@@ -5,11 +5,15 @@ onready var line_customId = get_node("LoginForm/LineCustomId")
 onready var lbl_loginStatus = get_node("LoginForm/LblLoginStatus")
 onready var btn_matchmaking = get_node("BtnMatchmaking")
 onready var select_map = get_node("SelectMap")
+onready var btn_login = get_node("LoginForm/BtnLogin")
 
 func _ready():
 	# resume previous states
 	lbl_loginStatus.text = "Logged in from before" if Networker.is_logged_in() else "NOT logged in!!!"
-	btn_matchmaking.disabled = Networker.is_socket_connected()
+	if Networker.is_logged_in():
+		btn_login.disabled = true
+		Networker.socket_connect()
+	#btn_matchmaking.disabled = not Networker.is_socket_connected()
 	
 	Networker.connect("matchmaking_started", self,"_on_Networker_matchmaking_started")
 	Networker.connect("matchmaking_ended", self, "_on_Networker_matchmaking_ended")
@@ -80,12 +84,12 @@ func _on_Networker_matchmaking_started():
 
 
 func _on_Networker_matchmaking_ended():
-	btn_matchmaking.text = "Battle"
+	btn_matchmaking.text = "BATTLE"
 	btn_matchmaking.disabled = false
 
 
 func _on_Networker_socket_connected():
-	btn_matchmaking.text = "Battle"
+	btn_matchmaking.text = "BATTLE"
 	btn_matchmaking.disabled = false
 
 
@@ -99,6 +103,7 @@ func _on_Networker_authentication_failed():
 
 func _on_Networker_authentication_successfull():
 	lbl_loginStatus.text =  "Freshly Logged in :)"
+	btn_login.disabled = true
 
 
 func _on_BtnEditor_pressed():

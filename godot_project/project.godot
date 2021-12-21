@@ -110,7 +110,7 @@ Networker="*res://helpers/networker/Networker.tscn"
 
 [debug]
 
-multirun/number_of_windows=3
+multirun/number_of_windows=2
 multirun/window_distance=900
 multirun/add_custom_args=true
 multirun/first_window_args="dev_user_1"
@@ -124,6 +124,7 @@ enabled=PoolStringArray( "res://addons/multirun/plugin.cfg" )
 
 scale=false
 inst=false
+multi=false
 
 [importer_defaults]
 
