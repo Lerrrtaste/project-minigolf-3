@@ -13,4 +13,3 @@ cell_size = Vector2( 32, 16 )
 cell_tile_origin = 2
 collision_mask = 0
 format = 1
-tile_data = PoolIntArray( 262177, 1, 0, 262178, 1, 0, 327711, 1, 0, 327712, 1, 0, 393245, 1, 0, 393246, 1, 0, 393247, 1, 0, 393251, 1, 0, 458781, 0, 0, 458783, 0, 0 )

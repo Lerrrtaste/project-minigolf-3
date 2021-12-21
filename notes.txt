@@ -1,8 +1,6 @@
 #### TODOS
 
-- Editor Tool Bar
-- Background 
-- ball name tag
+
 - simple match end screen
 
 - store maps in nakama collection
@@ -14,10 +12,19 @@
 - handle presence events (only leaves)
 - use alternative wall normal calculation (old implementaion wonky at some angles)
 - ingame info popup (for limit reached, ingame events, errors etc)
+- walls shouldnt hide water
+- enforce objects only non solid, non resetting tiles (and remove when tile removed)
+- Background 
+- fix practive mode
+- dont remove finished players from ingame panel (maybe icon prefix)
 - Final MVP export :)
 
 
 #### DONE
+- Editor Tool Bar
+- ball name tag
+- simple match end screen
+
 - refactor map and editor to use only id as key
 - variable shot strenght
 - Button Sprite (Disabled, Normal, Hovered, Clicked)
@@ -49,6 +56,7 @@ UI Pixel Scale 400%
 - screen border / ingame stats panel borader in current players color
 - "in matchmaking" screen
 - "loading map" screen
+- emotes (zb kenney pack)
 
 #### OP CODES
 101 MATCH_CONFIG (map_id:int)

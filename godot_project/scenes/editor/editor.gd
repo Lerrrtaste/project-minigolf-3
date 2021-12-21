@@ -67,6 +67,8 @@ func _ready():
 	
 	# populate tile dropdown
 	for i in map.TILE_DATA:
+		if i == map.Tiles.EMPTY:
+			continue
 		if map.TILE_DATA[i]["texture_path"] != null:
 			var icon = load(map.TILE_DATA[i]["texture_path"])
 			select_tile.add_icon_item(icon)
@@ -79,7 +81,7 @@ func _ready():
 	for i in map.OBJECT_DATA:
 		if map.OBJECT_DATA[i]["texture_path"] != null:
 			var icon = load(map.OBJECT_DATA[i]["texture_path"])
-			select_object.add_icon_item(icon)
+			select_object.add_item(map.OBJECT_DATA[i]["name"], icon)
 		else:
 			select_object.add_item(map.OBJECT_DATA[i]["name"])
 		select_object.set_item_metadata(select_object.get_item_count()-1,i)

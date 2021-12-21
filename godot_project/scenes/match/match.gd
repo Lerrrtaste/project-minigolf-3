@@ -212,7 +212,7 @@ func _on_Networker_match_state(state):
 				remote_balls[starting_player["user_id"]].connected_pc.activate()
 		
 		Global.OpCodes.NEXT_TURN:
-			var data_dict = JSON.parse(state.data).result			
+			var data_dict = JSON.parse(state.data).result
 			var previous_player = turn_order[turn_current_idx]
 			var next_turn_idx = (turn_current_idx+1)%turn_order.size()
 			
@@ -238,8 +238,12 @@ func _on_Networker_match_state(state):
 		
 		Global.OpCodes.MATCH_END:
 			change_state(States.FINISHED)
-			Global.set_scene_parameters(JSON.parse(state.data).result)
-
+			var params = {
+				"joined_players": joined_players,
+				"results": JSON.parse(state.data).result,
+				"map_metadata": map.metadata,
+			}
+			Global.set_scene_parameters(params)
 
 
 func _on_Ball_finished_moving():

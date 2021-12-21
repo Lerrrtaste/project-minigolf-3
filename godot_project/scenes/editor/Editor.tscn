@@ -1,14 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://scenes/editor/editor.gd" type="Script" id=1]
 [ext_resource path="res://objects/map_objects/finish/finish.png" type="Texture" id=2]
 [ext_resource path="res://objects/map/Map.tscn" type="PackedScene" id=3]
 [ext_resource path="res://objects/map/map_tileset.tres" type="TileSet" id=4]
-[ext_resource path="res://scenes/editor/editor_tool_selected.png" type="Texture" id=5]
-
-[sub_resource type="StyleBoxTexture" id=1]
-texture = ExtResource( 5 )
-region_rect = Rect2( 0, 0, 64, 64 )
+[ext_resource path="res://scenes/editor/theme_editor.tres" type="Theme" id=6]
 
 [node name="Editor" type="Node2D"]
 script = ExtResource( 1 )
@@ -84,19 +80,19 @@ margin_right = 315.0
 margin_bottom = 130.0
 
 [node name="ContainerMapEdit" type="VBoxContainer" parent="CanvasLayer/UI"]
-margin_right = 374.0
+margin_right = 338.0
 margin_bottom = 146.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="SelectTool" type="ItemList" parent="CanvasLayer/UI/ContainerMapEdit"]
-margin_right = 374.0
-margin_bottom = 9.0
-custom_styles/selected_focus = SubResource( 1 )
-custom_styles/selected = SubResource( 1 )
+margin_right = 338.0
+margin_bottom = 40.0
+theme = ExtResource( 6 )
 auto_height = true
 max_columns = 0
+icon_mode = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -106,16 +102,22 @@ visible = false
 margin_top = 13.0
 margin_right = 374.0
 margin_bottom = 22.0
+theme = ExtResource( 6 )
 auto_height = true
 max_columns = 0
+icon_mode = 0
+icon_scale = 4.0
 
 [node name="SelectTile" type="ItemList" parent="CanvasLayer/UI/ContainerMapEdit"]
 visible = false
 margin_top = 13.0
 margin_right = 374.0
 margin_bottom = 22.0
+theme = ExtResource( 6 )
 auto_height = true
 max_columns = 0
+icon_mode = 0
+icon_scale = 2.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
