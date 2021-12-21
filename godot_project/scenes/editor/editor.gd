@@ -67,24 +67,22 @@ func _ready():
 	
 	# populate tile dropdown
 	for i in map.TILE_DATA:
-		var tile_id = map.TILE_DATA[i]["id"]
 		if map.TILE_DATA[i]["texture_path"] != null:
 			var icon = load(map.TILE_DATA[i]["texture_path"])
 			select_tile.add_icon_item(icon)
 		else:
 			select_tile.add_item(map.TILE_DATA[i]["name"])
-		select_tile.set_item_metadata(select_tile.get_item_count()-1, tile_id)
+		select_tile.set_item_metadata(select_tile.get_item_count()-1, i)
 		select_tile.set_item_tooltip(select_tile.get_item_count()-1, map.TILE_DATA[i]["name"])
 	
 	# populate object dropdown
 	for i in map.OBJECT_DATA:
-		var object_id = map.OBJECT_DATA[i].id
 		if map.OBJECT_DATA[i]["texture_path"] != null:
 			var icon = load(map.OBJECT_DATA[i]["texture_path"])
 			select_object.add_icon_item(icon)
 		else:
 			select_object.add_item(map.OBJECT_DATA[i]["name"])
-		select_object.set_item_metadata(select_object.get_item_count()-1,object_id)
+		select_object.set_item_metadata(select_object.get_item_count()-1,i)
 	
 	# populate tool dropdown
 	for i in TOOL_DATA:
@@ -184,11 +182,7 @@ func tool_draw(coord:Vector2)->void:
 				return
 			spr_object_cursor.position = map.get_center_cell_position(get_global_mouse_position())
 			var obj_id = select_object.get_item_metadata(select_object.get_selected_items()[0])
-			var path
-			for i in map.OBJECT_DATA:
-				if map.OBJECT_DATA[i]["id"] == obj_id:
-					path = map.OBJECT_DATA[i]["texture_path"]
-					break
+			var path = map.OBJECT_DATA[obj_id]["texture_path"]
 			var icon = load(path)
 			spr_object_cursor.texture = icon
 		Tools.tile_place:
@@ -198,7 +192,7 @@ func tool_draw(coord:Vector2)->void:
 			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id(select_tile.get_item_metadata(select_tile.get_selected_items()[0])))
 		Tools.tile_remove:
 			tilemap_cursor.set_cell(selected_cell.x,selected_cell.y,-1)
-			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tile_id_at(get_global_mouse_position()))
+			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id_at(get_global_mouse_position()))
 
 
 # Signal Callbacks
@@ -212,9 +206,8 @@ func _on_SelectTool_item_selected(index):
 
 
 func _on_SelectObject_item_selected(index):
-	for i in map.OBJECT_DATA:
-		if map.OBJECT_DATA[i]["id"] == index:
-			spr_object_cursor.texture = load(map.OBJECT_DATA[i]["texture_path"])
+	var obj_id = select_object.get_item_metadata(index)
+	spr_object_cursor.texture = load(map.OBJECT_DATA[obj_id]["texture_path"])
 
 
 func _on_BtnSave_pressed():

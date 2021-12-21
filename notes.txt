@@ -1,6 +1,5 @@
 #### TODOS
 
-- Editor Icons (PlaceObj, RemoveObj, PlaceTile, RemoveTile)
 - Editor Tool Bar
 - Background 
 - ball name tag
@@ -14,14 +13,16 @@
 - ball to ball collisison (turned off when reached finished and before first shot)
 - handle presence events (only leaves)
 - use alternative wall normal calculation (old implementaion wonky at some angles)
+- ingame info popup (for limit reached, ingame events, errors etc)
 - Final MVP export :)
 
 
 #### DONE
+- refactor map and editor to use only id as key
 - variable shot strenght
 - Button Sprite (Disabled, Normal, Hovered, Clicked)
 - 9 Patch Panel (InGame)
-
+- Editor Icons (PlaceObj, RemoveObj, PlaceTile, RemoveTile)
 - ball physics (vector reflection)
 - BALL_IMPACT broadcast state data is not deserialized correctly yet, then:
 - networked ball movement (remote pc) + synchronize at the end
