@@ -107,6 +107,7 @@ config/icon="res://icon.png"
 Global="*res://global.gd"
 Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 Networker="*res://helpers/networker/Networker.tscn"
+MapStorage="*res://helpers/map_storage/MapStorage.tscn"
 
 [debug]
 

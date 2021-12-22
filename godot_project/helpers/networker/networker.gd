@@ -24,6 +24,19 @@ signal match_joined(presences)
 signal match_presences_updated(joined_match)
 signal match_state(state)
 
+#signal completed
+
+enum ReadPermissions {
+	NOONE = 0,
+	OWNER = 1,
+	PUBLIC = 2,
+}
+
+enum WritePermissions {
+	NOONE = 0,
+	OWNER = 1,
+}
+
 func _ready():
 	client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL)
 
@@ -61,6 +74,8 @@ func login_async(custom_id:String)->void:
 	socket_connect()
 	return true
 
+
+#### Matches
 
 func matchmaking_start_async(map_id:int)->void:
 	if !is_socket_connected():
@@ -132,7 +147,70 @@ func match_send_state_async(op_code:int,new_state)->void:
 	socket.send_match_state_async(joined_match.match_id, op_code, JSON.print(new_state))
 
 
-# Getset
+#### Collections
+
+func collection_write_object_async(collection:String, key:String, value:String, public_read:bool): # -> ApiStorageObjectAck
+	if not is_logged_in():
+		printerr("Cant save to collection, NOT LOGGED IN")
+		return
+	
+	var can_read =  ReadPermissions.PUBLIC if public_read else ReadPermissions.OWNER
+	var can_write = WritePermissions.OWNER
+	var acks : NakamaAPI.ApiStorageObjectAcks = yield(client.write_storage_objects_async(session, [
+		NakamaWriteStorageObject.new(collection, key, can_read, can_write, value, "")
+	]), "completed")
+	
+	if acks.is_exception():
+		printerr("An error occured while writing to collection: %s" % acks)
+		return
+		
+	print("Successfully stored objects:")
+	for a in acks.acks:
+		print("%s" % a)
+	
+	return acks.acks[0]
+
+
+func collection_read_object_async(collection:String,key:String): # -> ApiStorageObject
+	var result : NakamaAPI.ApiStorageObjects = yield(client.read_storage_objects_async(session, [
+	NakamaStorageObjectId.new(collection, key, session.user_id)
+	]), "completed")
+	
+	if result.is_exception():
+		printerr("An error occured: %s" % result)
+		return
+		
+	print("Read objects:")
+	for o in result.objects:
+		print("%s" % o)
+	
+	return result.objects[0]
+
+
+func collection_remove_object_asnyc(collection:String,key:String): # -> NakamaAsyncResult
+	var del : NakamaAsyncResult = yield(client.delete_storage_objects_async(session, [
+		NakamaStorageObjectId.new(collection, key)
+	]), "completed")
+	
+	if del.is_exception():
+		printerr("An error occured: %s" % del)
+		return
+		
+	print("Deleted objects.")
+	return del
+
+
+func collection_list_owned_objects_async(collection:String)->Array: # -> Array : ApiStorageObject
+	# "objects" has cursor (for paging later)
+	var limit = 100 # default is 10.
+	var objects : NakamaAPI.ApiStorageObjectList = yield(client.list_storage_objects_async(session, collection, session.user_id, limit), "completed")
+	if objects.is_exception():
+		print("An error occured: %s" % objects)
+		return
+	return objects.objects
+
+
+#### Getset
 
 func get_user_id()->String:
 	return session.user_id

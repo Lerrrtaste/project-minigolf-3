@@ -1,10 +1,46 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://scenes/editor/editor.gd" type="Script" id=1]
 [ext_resource path="res://objects/map_objects/finish/finish.png" type="Texture" id=2]
 [ext_resource path="res://objects/map/Map.tscn" type="PackedScene" id=3]
 [ext_resource path="res://objects/map/map_tileset.tres" type="TileSet" id=4]
+[ext_resource path="res://assets/ui/button_blue/button_blue.tres" type="Theme" id=5]
 [ext_resource path="res://scenes/editor/theme_editor.tres" type="Theme" id=6]
+[ext_resource path="res://assets/ui/fonts/font_small_button.tres" type="DynamicFont" id=7]
+[ext_resource path="res://assets/ui/fonts/font_big_button.tres" type="DynamicFont" id=8]
+[ext_resource path="res://assets/ui/panel/panel_blue.png" type="Texture" id=9]
+[ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=10]
+[ext_resource path="res://assets/ui/fonts/data/kenney_pixel.ttf" type="DynamicFontData" id=11]
+[ext_resource path="res://assets/ui/panel/panel_white_small.png" type="Texture" id=12]
+[ext_resource path="res://assets/ui/checkbox/checkbox_unchecked.png" type="Texture" id=13]
+[ext_resource path="res://assets/ui/checkbox/checkbox_checked.png" type="Texture" id=14]
+
+[sub_resource type="StyleBoxTexture" id=1]
+texture = ExtResource( 9 )
+region_rect = Rect2( 0, 0, 64, 64 )
+margin_left = 16.0
+margin_right = 16.0
+margin_top = 16.0
+margin_bottom = 24.0
+
+[sub_resource type="DynamicFont" id=2]
+size = 32
+font_data = ExtResource( 10 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 32
+font_data = ExtResource( 11 )
+
+[sub_resource type="DynamicFont" id=5]
+font_data = ExtResource( 11 )
+
+[sub_resource type="StyleBoxTexture" id=4]
+texture = ExtResource( 12 )
+region_rect = Rect2( 0, 0, 56, 56 )
+margin_left = 12.0
+margin_right = 12.0
+margin_top = 16.0
+margin_bottom = 12.0
 
 [node name="Editor" type="Node2D"]
 script = ExtResource( 1 )
@@ -37,48 +73,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BtnSave" type="Button" parent="CanvasLayer/UI"]
-margin_left = 910.0
-margin_top = 40.0
-margin_right = 951.0
-margin_bottom = 60.0
-disabled = true
-text = "Save"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="EditMapName" type="LineEdit" parent="CanvasLayer/UI/BtnSave"]
-margin_left = -52.0
-margin_top = -32.0
-margin_right = 107.0
-margin_bottom = -8.0
-placeholder_text = "Enter Map Name"
-
-[node name="BtnLoad" type="Button" parent="CanvasLayer/UI"]
-margin_left = 923.0
-margin_top = 187.0
-margin_right = 965.0
-margin_bottom = 207.0
-disabled = true
-text = "Load"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="SelectLoad" type="OptionButton" parent="CanvasLayer/UI/BtnLoad"]
-margin_left = -49.0
-margin_top = -31.0
-margin_right = 97.0
-margin_bottom = -11.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="FileDialog" type="FileDialog" parent="CanvasLayer/UI"]
-margin_right = 315.0
-margin_bottom = 130.0
-
 [node name="ContainerMapEdit" type="VBoxContainer" parent="CanvasLayer/UI"]
 margin_right = 338.0
 margin_bottom = 146.0
@@ -90,6 +84,7 @@ __meta__ = {
 margin_right = 338.0
 margin_bottom = 40.0
 theme = ExtResource( 6 )
+allow_reselect = true
 auto_height = true
 max_columns = 0
 icon_mode = 0
@@ -122,9 +117,112 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[connection signal="pressed" from="CanvasLayer/UI/BtnSave" to="." method="_on_BtnSave_pressed"]
-[connection signal="text_changed" from="CanvasLayer/UI/BtnSave/EditMapName" to="." method="_on_EditMapName_text_changed"]
-[connection signal="pressed" from="CanvasLayer/UI/BtnLoad" to="." method="_on_BtnLoad_pressed"]
-[connection signal="item_selected" from="CanvasLayer/UI/BtnLoad/SelectLoad" to="." method="_on_SelectLoad_item_selected"]
+[node name="BtnMenu" type="Button" parent="CanvasLayer/UI"]
+margin_left = 918.0
+margin_top = 10.0
+margin_right = 1016.0
+margin_bottom = 66.0
+theme = ExtResource( 5 )
+custom_fonts/font = ExtResource( 7 )
+text = "Menu"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SaveMenu" type="WindowDialog" parent="CanvasLayer/UI"]
+margin_left = 203.0
+margin_top = 105.0
+margin_right = 552.0
+margin_bottom = 393.0
+custom_fonts/title_font = ExtResource( 8 )
+custom_styles/panel = SubResource( 1 )
+popup_exclusive = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/UI/SaveMenu"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 16.0
+margin_top = 16.0
+margin_right = -16.0
+margin_bottom = -24.0
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblMenu" type="Label" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
+margin_right = 317.0
+margin_bottom = 66.0
+size_flags_vertical = 3
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "MENU"
+align = 1
+
+[node name="GridContainer" type="GridContainer" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
+margin_top = 70.0
+margin_right = 317.0
+margin_bottom = 178.0
+columns = 2
+
+[node name="LblName" type="Label" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
+margin_top = 8.0
+margin_right = 97.0
+margin_bottom = 32.0
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 3 )
+text = "Map Name"
+
+[node name="EditName" type="LineEdit" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
+margin_left = 101.0
+margin_right = 317.0
+margin_bottom = 40.0
+size_flags_horizontal = 3
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 5 )
+custom_styles/normal = SubResource( 4 )
+max_length = 16
+placeholder_text = "Enter a Name"
+
+[node name="LblPublic" type="Label" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
+margin_top = 64.0
+margin_right = 97.0
+margin_bottom = 88.0
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 3 )
+text = "Public"
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="CheckPublic" type="CheckBox" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
+margin_left = 101.0
+margin_top = 44.0
+margin_right = 165.0
+margin_bottom = 108.0
+size_flags_horizontal = 0
+size_flags_vertical = 4
+custom_icons/checked = ExtResource( 14 )
+custom_icons/unchecked = ExtResource( 13 )
+
+[node name="BtnSave" type="Button" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
+margin_left = 80.0
+margin_top = 192.0
+margin_right = 236.0
+margin_bottom = 248.0
+size_flags_horizontal = 4
+size_flags_vertical = 10
+theme = ExtResource( 5 )
+custom_fonts/font = ExtResource( 7 )
+text = "Save and Exit"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="item_selected" from="CanvasLayer/UI/ContainerMapEdit/SelectTool" to="." method="_on_SelectTool_item_selected"]
 [connection signal="item_selected" from="CanvasLayer/UI/ContainerMapEdit/SelectObject" to="." method="_on_SelectObject_item_selected"]
+[connection signal="pressed" from="CanvasLayer/UI/BtnMenu" to="." method="_on_BtnMenu_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/SaveMenu/VBoxContainer/BtnSave" to="." method="_on_BtnSave_pressed"]

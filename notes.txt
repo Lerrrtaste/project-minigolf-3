@@ -1,30 +1,30 @@
 #### TODOS
 
 
-- simple match end screen
-
-- store maps in nakama collection
-- map storage node to handle downloading / loading mapfile
-
 - wait for map to (down)load before starting match
 - player move impact should be normalized and controller by server (so mouse distance till max force can be client independent)
 - ball to ball collisison (turned off when reached finished and before first shot)
 - handle presence events (only leaves)
-- use alternative wall normal calculation (old implementaion wonky at some angles)
+
 - ingame info popup (for limit reached, ingame events, errors etc)
 - walls shouldnt hide water
 - enforce objects only non solid, non resetting tiles (and remove when tile removed)
 - Background 
 - fix practive mode
 - dont remove finished players from ingame panel (maybe icon prefix)
+- test if tiles as nodes work (for juicy effects and better collision and better tile property detection
+- use alternative wall normal calculation (old implementaion wonky at some angles)
 - Final MVP export :)
 
 
 #### DONE
+- store maps in nakama collection
+- map storage node to handle downloading / loading mapfile
+
+
 - Editor Tool Bar
 - ball name tag
 - simple match end screen
-
 - refactor map and editor to use only id as key
 - variable shot strenght
 - Button Sprite (Disabled, Normal, Hovered, Clicked)
@@ -43,13 +43,15 @@
 - sand tiles + speed slowdown
 
 #### Notes
-Atm solid only solid tiles have a collision shape on tilemap (solid TILE_DATA prop does nothing)
+Map name requirements: min 4 max 16 chars
 
+Atm solid only solid tiles have a collision shape on tilemap (solid TILE_DATA prop does nothing)
+Maybe save MapMetadata and full map tiles+objects in seperate collections (only if loading the whole map for only displaying name etc is too much)
 Wall sprite verdeckt wasser, etwas niedriger?
 
 UI Pixel Scale 400%
 
-#### IDEAS
+#### IDEAS (Alpha)
 - Ball to Wall collision normal with 4 spheres / ray casts? Only if current does not work
 - Match camera follows current player instead of local player
 - every player gets a color
@@ -57,7 +59,8 @@ UI Pixel Scale 400%
 - "in matchmaking" screen
 - "loading map" screen
 - emotes (zb kenney pack)
-
+- One Match Scene per GameMode (Practice Match, DefaultMatch) (Match Node should only handly gamemode specific things, everything else in other nodes, that should work standalone) 
+- paging for maps
 #### OP CODES
 101 MATCH_CONFIG (map_id:int)
 		sender: server

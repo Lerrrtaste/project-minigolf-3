@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://helpers/map_storage/map_storage.gd" type="Script" id=1]
+
+[node name="MapStorage" type="Node"]
+script = ExtResource( 1 )

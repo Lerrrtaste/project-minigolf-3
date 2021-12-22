@@ -108,7 +108,7 @@ func _on_Networker_authentication_successfull():
 
 func _on_BtnEditor_pressed():
 	if Networker.is_socket_connected():
-		get_tree().change_scene("res://scenes/editor/Editor.tscn")
+		get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
 
 
 func _on_BtnPractice_pressed():

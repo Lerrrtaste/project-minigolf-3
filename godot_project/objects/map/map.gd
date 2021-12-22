@@ -77,10 +77,7 @@ const OBJECT_DATA = {
 }
 
 var metadata = {
-	"name": null,
-	"id": null,
-	"creator_id": null,
-	"size": null,
+	"updated": false
 }
 
 var spawned_objects:Dictionary
@@ -172,18 +169,27 @@ func match_get_starting_position()->Vector2:
 
 #### Loading / Saving
 
+func update_metadata(map_id:String, map_name:String, creator_user_id:String):
+	metadata.clear()
+	metadata["name"] = map_name
+	metadata["id"] = map_id
+	metadata["creator_user_id"] = creator_user_id
+	metadata["size"] = tilemap.get_used_rect().size
+	metadata["updated"] = true
+
+
 func serialize()->String:
-	assert(metadata["id"] != null) # should be set by editor
-	
+	assert(metadata["updated"]) # call update_metadata(...) before
+
 	var mapdict := {
 		"game_version": "",
 		"cells": {}, # vector keys are saved with var2str
 		"objects": {}, # and need to be restored wit str2var
 		"metadata": {
-			"MapName": "",
-			"MapId": "",
-			"CreatorUserId": "",
-			"Size": Vector2(),
+			"name": "",
+			"id": "",
+			"creator_user_id": "",
+			"size": Vector2(),
 		}
 	}
 	
@@ -200,13 +206,14 @@ func serialize()->String:
 	
 	# metadata
 	mapdict["metadata"] = metadata
+	mapdict["metadata"].erase("updated")
 	mapdict["game_version"] = Global.GAME_VERSION
 	
 	return JSON.print(mapdict)
 
 
 func deserialize(jstring:String)->void:
-	if not metadata["id"] == null:
+	if metadata.has("id"):
 		printerr("A map is already loaded")
 		return
 	
@@ -247,7 +254,7 @@ func deserialize(jstring:String)->void:
 	
 	#metadata
 	metadata = parse.result["metadata"]
-	
+	metadata["updated"] = false
 	print("Map \"%s\" (ID %s) loaded succesfully"%[metadata["name"],metadata["id"]])
 
 

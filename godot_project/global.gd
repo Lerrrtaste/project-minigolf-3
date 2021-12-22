@@ -9,14 +9,10 @@ const DEBUGGING = true
 #### Maps ####
 # MAP SIZE
 const MAPFOLDER_PATH = "user://maps/"
-#const MAPFILES_PATH_USER = "user://maps/"
-#const MAPFILES_PATH_BUILTIN = "res://scenes/map/builtin_mapfiles/"
-#const BLOCK_SCENE_PATHS = [
-#	"res://scenes/building_blocks/error/BlockError.tscn",
-#	"res://scenes/building_blocks/wall/BlockWall.tscn",
-#	"res://scenes/building_blocks/grass/BlockGrass.tscn",
-#]
-
+const MAP_NAME_LENGTH_MIN = 4
+const MAP_NAME_LENGTH_MAX = 16
+const MAP_CACHE_PATH = "user://map_cache/"
+const MAP_COLLECTION = "maps"
 
 #### Nakama ####
 # https://github.com/heroiclabs/nakama-godot

@@ -2,21 +2,25 @@ extends Node2D
 
 onready var map = get_node("Map")
 
+onready var tilemap_cursor = get_node("Map/TileMapCursor")
+onready var camera_editor = get_node("CameraEditor")
+onready var line_border = get_node("Map/LineBorder")
+
+# ui
+onready var menu_edit_name = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer/EditName")
+onready var menu_check_public = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer/CheckPublic")
+onready var menu_btn_save = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/BtnSave")
+onready var menu_popup = get_node("CanvasLayer/UI/SaveMenu")
 onready var select_tile = get_node("CanvasLayer/UI/ContainerMapEdit/SelectTile")
 onready var select_tool = get_node("CanvasLayer/UI/ContainerMapEdit/SelectTool")
 onready var select_object = get_node("CanvasLayer/UI/ContainerMapEdit/SelectObject")
 
-onready var tilemap_cursor = get_node("Map/TileMapCursor")
-onready var camera_editor = get_node("CameraEditor")
-onready var line_border = get_node("Map/LineBorder")
-onready var edit_map_name_save = get_node("CanvasLayer/UI/BtnSave/EditMapName")
-onready var select_map_load = get_node("CanvasLayer/UI/BtnLoad/SelectLoad")
-onready var btn_save = get_node("CanvasLayer/UI/BtnSave")
-onready var btn_load = get_node("CanvasLayer/UI/BtnLoad")
+
 var show_cursor := true
 onready var spr_object_cursor = get_node("SprObjectCursor")
 var selected_cell := Vector2()
 var tool_dragged := false
+var previous_tool
 
 enum Tools {
 	tile_place,
@@ -91,36 +95,54 @@ func _ready():
 		select_tool.add_icon_item(load(TOOL_DATA[i]["icon_path"]))
 		select_tool.set_item_metadata(select_tool.get_item_count()-1,i)
 		select_tool.set_item_tooltip(select_tool.get_item_count()-1,TOOL_DATA[i]["name"])
-
 	
-	# populate load dropdown
-	var map_files = []
-	var dir = Directory.new()
-	dir.open(Global.MAPFOLDER_PATH)
-	dir.list_dir_begin()
-	while true:
-		var file = dir.get_next()
-		if file == "":
-			break
-		elif file.ends_with(".map"):
-			map_files.append(file)
-	dir.list_dir_end()
 	
-	for i in map_files:
-		var file = File.new()
-		file.open(Global.MAPFOLDER_PATH + i, File.READ)
-		var map_jstring = file.get_as_text()
-		file.close()
-
-		var parse = JSON.parse(map_jstring)
-		if parse.error != OK:
-			printerr("Could not parse map jstring to offer in load drop down")
-			continue
-		var map_name = parse.result["metadata"]["name"] 
-		var map_id = parse.result["metadata"]["id"] 
+	# LOAD OR CREATE MAP
+	var params = Global.get_scene_parameter()
+	if params.has("load_map_id"):
+		var map_jstring = yield(MapStorage.load_map_async(params["load_map_id"]),"completed")
+		map.deserialize(map_jstring)
+		menu_edit_name.text = map.metadata["name"]
 		
-		select_map_load.add_item(map_name,map_id)
+	elif params.has("created_new"):
+		pass
+		
+		#	map.deserialize(file.get_as_text())
+	#	file.close()
+	#	btn_load.disabled = true
+	#	select_map_load.disabled = true
+	#	edit_map_name_save.text = map.metadata["name"]
+	#
 	
+#
+#	# populate load dropdown
+#	var map_files = []
+#	var dir = Directory.new()
+#	dir.open(Global.MAPFOLDER_PATH)
+#	dir.list_dir_begin()
+#	while true:
+#		var file = dir.get_next()
+#		if file == "":
+#			break
+#		elif file.ends_with(".map"):
+#			map_files.append(file)
+#	dir.list_dir_end()
+#
+#	for i in map_files:
+#		var file = File.new()
+#		file.open(Global.MAPFOLDER_PATH + i, File.READ)
+#		var map_jstring = file.get_as_text()
+#		file.close()
+#
+#		var parse = JSON.parse(map_jstring)
+#		if parse.error != OK:
+#			printerr("Could not parse map jstring to offer in load drop down")
+#			continue
+#		var map_name = parse.result["metadata"]["name"] 
+#		var map_id = parse.result["metadata"]["id"] 
+#
+#		select_map_load.add_item(map_name,map_id)
+#
 	#enable load button
 #	if select_map_load.get_item_count() > 0:
 #		select_tool.select(0)
@@ -201,10 +223,24 @@ func tool_draw(coord:Vector2)->void:
 
 func _on_SelectTool_item_selected(index):
 	var _tool = select_tool.get_item_metadata(index)
+	
+	if _tool == previous_tool: 
+		select_tool.unselect_all()
+		
+		select_tile.visible = false
+		select_object.visible = false
+		spr_object_cursor.visible = false
+		tilemap_cursor.visible = false
+		
+		previous_tool = null
+		return
+	
 	select_tile.visible = TOOL_DATA[_tool]["show_tile_select"]
 	select_object.visible = TOOL_DATA[_tool]["show_object_select"]
 	spr_object_cursor.visible = TOOL_DATA[_tool]["show_object_cursor"]
 	tilemap_cursor.visible = TOOL_DATA[_tool]["show_tilemap_cursor"]
+	
+	previous_tool = _tool
 
 
 func _on_SelectObject_item_selected(index):
@@ -212,55 +248,96 @@ func _on_SelectObject_item_selected(index):
 	spr_object_cursor.texture = load(map.OBJECT_DATA[obj_id]["texture_path"])
 
 
+#### Menu
+
+func _on_BtnMenu_pressed():
+	menu_popup.popup_centered()
+	
+
 func _on_BtnSave_pressed():
+	if menu_edit_name.text.length() < Global.MAP_NAME_LENGTH_MIN:
+		print("Name too short")
+		return
+		
+	if menu_edit_name.text.length() > Global.MAP_NAME_LENGTH_MAX:
+		print("Name too long")
+		return
+	
+	menu_btn_save.disabled = true
+	menu_btn_save.text = "Saving..."
+	
 	# update metadata
-	map.metadata["name"] = edit_map_name_save.text
-	if map.metadata["id"] == null:
-		map.metadata["id"] = OS.get_unix_time()
-	if map.metadata["creator_id"] == null:
-		map.metadata["creator_id"] = Networker.session.user_id # TODO prevent crash if not logged in
+	var current_metadata = map.metadata
+	var map_id:String
+	var creator_id = Networker.session.user_id
+	var map_name = menu_edit_name.text
+	if current_metadata.has("id"):
+		map_id = current_metadata["id"]
+	else:
+		map_id = String(OS.get_unix_time()) # TODO replace with proper uid gen (maybe by server request)
+	map.update_metadata(map_id, map_name, creator_id)
 	
 	# export map
 	var map_jstring = map.serialize()
-	
-	# create mapfolder
-	var dir = Directory.new()
-	if not dir.dir_exists(Global.MAPFOLDER_PATH):
-		dir.make_dir_recursive(Global.MAPFOLDER_PATH)
-	
-	#save to file
-	var file = File.new()
-	var path = "%s%s.map"%[Global.MAPFOLDER_PATH,map.metadata["id"]]
-	var error = file.open(path, File.WRITE)
-	if error != OK:
-		printerr("Could not save to file!!!! %s"% error)
-		return
-	file.store_string(map_jstring)
-	file.close()
-	
-	print("Map \"%s\" (ID %s) succesfully saved to %s "%[map.metadata["name"],map.metadata["id"],path])
-	get_tree().change_scene("res://scenes/menu/Menu.tscn")
+	var public = menu_check_public.pressed
+	yield(MapStorage.save_map_async(map_id, map_jstring,public), "completed")
+	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
 
 
-func _on_EditMapName_text_changed(new_text):
-	btn_save.disabled = (new_text.length() < 4) # at least 4 char length 
 
 
-func _on_SelectLoad_item_selected(index):
-	btn_load.disabled = (index < 0)  # something is selected
+# to be outsourced
 
+#func _on_EditMapName_text_changed(new_text):
+#	btn_save.disabled = (new_text.length() < 4) # at least 4 char length 
+#
+#
+#func _on_SelectLoad_item_selected(index):
+#	btn_load.disabled = (index < 0)  # something is selected
 
-func _on_BtnLoad_pressed():
-	var map_id = select_map_load.get_selected_id()
-	
-	var file = File.new()
-	var error = file.open("%s%s.map"%[Global.MAPFOLDER_PATH,map_id],File.READ)
-	if error != OK:
-		printerr("Could not load file!!!")
-		return
-	
-	map.deserialize(file.get_as_text())
-	file.close()
-	btn_load.disabled = true
-	select_map_load.disabled = true
-	edit_map_name_save.text = map.metadata["name"]
+#
+#func _on_BtnLoad_pressed():
+#	var map_id = select_map_load.get_selected_id()
+#
+#	var file = File.new()
+#	var error = file.open("%s%s.map"%[Global.MAPFOLDER_PATH,map_id],File.READ)
+#	if error != OK:
+#		printerr("Could not load file!!!")
+#		return
+#
+#	map.deserialize(file.get_as_text())
+#	file.close()
+#	btn_load.disabled = true
+#	select_map_load.disabled = true
+#	edit_map_name_save.text = map.metadata["name"]
+#
+#func _on_BtnSave_pressed():
+#	# update metadata
+#	map.metadata["name"] = edit_map_name_save.text
+#	if map.metadata["id"] == null:
+#		map.metadata["id"] = OS.get_unix_time()
+#	if map.metadata["creator_id"] == null:
+#		map.metadata["creator_id"] = Networker.session.user_id # TODO prevent crash if not logged in
+#
+#	# export map
+#	var map_jstring = map.serialize()
+#
+#	# create mapfolder
+#	var dir = Directory.new()
+#	if not dir.dir_exists(Global.MAPFOLDER_PATH):
+#		dir.make_dir_recursive(Global.MAPFOLDER_PATH)
+#
+#	#save to file
+#	var file = File.new()
+#	var path = "%s%s.map"%[Global.MAPFOLDER_PATH,map.metadata["id"]]
+#	var error = file.open(path, File.WRITE)
+#	if error != OK:
+#		printerr("Could not save to file!!!! %s"% error)
+#		return
+#	file.store_string(map_jstring)
+#	file.close()
+#
+#	print("Map \"%s\" (ID %s) succesfully saved to %s "%[map.metadata["name"],map.metadata["id"],path])
+#	get_tree().change_scene("res://scenes/menu/Menu.tscn")
+#
+

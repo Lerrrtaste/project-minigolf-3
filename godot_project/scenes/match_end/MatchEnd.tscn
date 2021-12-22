@@ -5,7 +5,7 @@
 [ext_resource path="res://assets/ui/fonts/font_small_button.tres" type="DynamicFont" id=3]
 [ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=4]
 [ext_resource path="res://assets/ui/fonts/data/kenney_pixel.ttf" type="DynamicFontData" id=5]
-[ext_resource path="res://assets/ui/panel/panel.png" type="Texture" id=6]
+[ext_resource path="res://assets/ui/panel/panel_yellow.png" type="Texture" id=6]
 
 [sub_resource type="StyleBoxTexture" id=1]
 texture = ExtResource( 6 )
