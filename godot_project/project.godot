@@ -117,6 +117,10 @@ multirun/add_custom_args=true
 multirun/first_window_args="dev_user_1"
 multirun/other_window_args="dev_user_2"
 
+[display]
+
+mouse_cursor/custom_image="res://assets/ui/cursor.png"
+
 [editor_plugins]
 
 enabled=PoolStringArray( "res://addons/multirun/plugin.cfg" )

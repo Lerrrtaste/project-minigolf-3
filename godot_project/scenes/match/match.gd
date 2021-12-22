@@ -1,7 +1,7 @@
 extends Node2D
 
 """
-Represents a single Match / Game
+Represents a single Match (in the default gamemode)
 
 Start Data: players, map
 Connected to server
@@ -25,6 +25,7 @@ var turn_current_idx = 0 # current player id
 var turn_counter := {} # userid -> shots count
 
 var map_id 
+var map_owner_id
 
 enum States {
 	INVALID = -1,
@@ -48,7 +49,7 @@ func _ready():
 		map_id = params["practice"]
 		change_state(States.PRACTICE)
 	else:
-		Networker.match_join_async(Networker.matched_match) 
+		Networker.match_join_async(Networker.matched_match)
 	# now wait for MATCH_CONFIG data from server or practive_mode() call
 
 
@@ -60,11 +61,11 @@ func change_state(new_state:int):
 	assert(current_state != new_state)
 	match new_state:
 		States.LOADING:
-			load_map(map_id)
+			load_map(map_id, map_owner_id)
 		States.PLAYING:
 			_start_match()
 		States.PRACTICE:
-			load_map(map_id)
+			pass #load_map(map_id)
 			_start_practice()
 		States.FINISHED:
 			get_tree().change_scene("res://scenes/match_end/MatchEnd.tscn")
@@ -132,15 +133,9 @@ func player_remote_leave(user_id)->void:
 	remote_balls.erase(user_id)
 
 
-func load_map(map_id:int)->void: # todo use map storage helper some time in the futureeee
-	var file = File.new()
-	var error = file.open("%s%s.map"%[Global.MAPFOLDER_PATH,map_id],File.READ)
-	if error != OK:
-		printerr("Could not load file!!!")
-		assert(false)
-	
-	map.deserialize(file.get_as_text())
-	file.close()
+func load_map(map_id:String, map_owner_id:String="")->void: # todo use map storage helper some time in the futureeee
+	var map_jstring = yield(MapStorage.load_map_async(map_id, map_owner_id), "completed")
+	map.deserialize(map_jstring)
 
 
 func update_ui():
@@ -192,15 +187,14 @@ func _on_Networker_match_state(state):
 	match state.op_code:
 		Global.OpCodes.MATCH_CONFIG:
 			var data_dict = JSON.parse(state.data).result
-			map_id = int(data_dict["map_id"])
-			
+			map_id = data_dict["map_id"]
+			map_owner_id = data_dict["map_owner_id"]
 			change_state(States.LOADING)
 		
 		Global.OpCodes.MATCH_START:
 			var data_dict = JSON.parse(state.data).result
 			turn_order = data_dict["turn_order"]
 			joined_players = data_dict["joined_players"]
-
 			change_state(States.PLAYING)
 			
 			if(turn_order[turn_current_idx] == Networker.get_user_id()): #copied from below only used for first turn
@@ -214,7 +208,7 @@ func _on_Networker_match_state(state):
 		Global.OpCodes.NEXT_TURN:
 			var data_dict = JSON.parse(state.data).result
 			var previous_player = turn_order[turn_current_idx]
-			var next_turn_idx = (turn_current_idx+1)%turn_order.size()
+			var next_turn_idx = turn_order.find(data_dict["next_player"])#(turn_current_idx+1)%turn_order.size()
 			
 			if turn_order[next_turn_idx] != data_dict["next_player"]:
 				printerr("Next player is different from local turn_order")
@@ -233,8 +227,8 @@ func _on_Networker_match_state(state):
 		Global.OpCodes.REACHED_FINISH:
 			#var state_dict = JSON.parse(state).result
 			print("Player %s has reached the finish"%state.presence.username)
-			turn_order.erase(state.presence.user_id)
-			turn_current_idx = (turn_current_idx-1) % turn_order.size()
+			#turn_order.erase(state.presence.user_id)
+			#turn_current_idx = (turn_current_idx-1) % turn_order.size()
 		
 		Global.OpCodes.MATCH_END:
 			change_state(States.FINISHED)

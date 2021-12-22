@@ -106,46 +106,7 @@ func _ready():
 		
 	elif params.has("created_new"):
 		pass
-		
-		#	map.deserialize(file.get_as_text())
-	#	file.close()
-	#	btn_load.disabled = true
-	#	select_map_load.disabled = true
-	#	edit_map_name_save.text = map.metadata["name"]
-	#
-	
-#
-#	# populate load dropdown
-#	var map_files = []
-#	var dir = Directory.new()
-#	dir.open(Global.MAPFOLDER_PATH)
-#	dir.list_dir_begin()
-#	while true:
-#		var file = dir.get_next()
-#		if file == "":
-#			break
-#		elif file.ends_with(".map"):
-#			map_files.append(file)
-#	dir.list_dir_end()
-#
-#	for i in map_files:
-#		var file = File.new()
-#		file.open(Global.MAPFOLDER_PATH + i, File.READ)
-#		var map_jstring = file.get_as_text()
-#		file.close()
-#
-#		var parse = JSON.parse(map_jstring)
-#		if parse.error != OK:
-#			printerr("Could not parse map jstring to offer in load drop down")
-#			continue
-#		var map_name = parse.result["metadata"]["name"] 
-#		var map_id = parse.result["metadata"]["id"] 
-#
-#		select_map_load.add_item(map_name,map_id)
-#
-	#enable load button
-#	if select_map_load.get_item_count() > 0:
-#		select_tool.select(0)
+
 
 
 func _process(delta):
@@ -187,12 +148,14 @@ func tool_use()->void:
 		return
 	match select_tool.get_item_metadata(select_tool.get_selected_items()[0]):
 		Tools.tile_place:
-			map.editor_tile_change(get_global_mouse_position(),select_tile.get_item_metadata(select_tile.get_selected_items()[0]))
+			if select_tile.get_selected_items().size() > 0:
+				map.editor_tile_change(get_global_mouse_position(),select_tile.get_item_metadata(select_tile.get_selected_items()[0]))
 		Tools.tile_remove:
 			map.editor_tile_change(get_global_mouse_position(),-1)
 			tool_draw(selected_cell) # hide shadow of removed tile
 		Tools.object_place:
-			map.editor_object_place(get_global_mouse_position(),select_object.get_item_metadata(select_object.get_selected_items()[0]))
+			if select_object.get_selected_items().size() > 0:
+				map.editor_object_place(get_global_mouse_position(),select_object.get_item_metadata(select_object.get_selected_items()[0]))
 		Tools.object_remove:
 			map.editor_object_remove(get_global_mouse_position())
 
@@ -282,62 +245,3 @@ func _on_BtnSave_pressed():
 	var public = menu_check_public.pressed
 	yield(MapStorage.save_map_async(map_id, map_jstring,public), "completed")
 	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
-
-
-
-
-# to be outsourced
-
-#func _on_EditMapName_text_changed(new_text):
-#	btn_save.disabled = (new_text.length() < 4) # at least 4 char length 
-#
-#
-#func _on_SelectLoad_item_selected(index):
-#	btn_load.disabled = (index < 0)  # something is selected
-
-#
-#func _on_BtnLoad_pressed():
-#	var map_id = select_map_load.get_selected_id()
-#
-#	var file = File.new()
-#	var error = file.open("%s%s.map"%[Global.MAPFOLDER_PATH,map_id],File.READ)
-#	if error != OK:
-#		printerr("Could not load file!!!")
-#		return
-#
-#	map.deserialize(file.get_as_text())
-#	file.close()
-#	btn_load.disabled = true
-#	select_map_load.disabled = true
-#	edit_map_name_save.text = map.metadata["name"]
-#
-#func _on_BtnSave_pressed():
-#	# update metadata
-#	map.metadata["name"] = edit_map_name_save.text
-#	if map.metadata["id"] == null:
-#		map.metadata["id"] = OS.get_unix_time()
-#	if map.metadata["creator_id"] == null:
-#		map.metadata["creator_id"] = Networker.session.user_id # TODO prevent crash if not logged in
-#
-#	# export map
-#	var map_jstring = map.serialize()
-#
-#	# create mapfolder
-#	var dir = Directory.new()
-#	if not dir.dir_exists(Global.MAPFOLDER_PATH):
-#		dir.make_dir_recursive(Global.MAPFOLDER_PATH)
-#
-#	#save to file
-#	var file = File.new()
-#	var path = "%s%s.map"%[Global.MAPFOLDER_PATH,map.metadata["id"]]
-#	var error = file.open(path, File.WRITE)
-#	if error != OK:
-#		printerr("Could not save to file!!!! %s"% error)
-#		return
-#	file.store_string(map_jstring)
-#	file.close()
-#
-#	print("Map \"%s\" (ID %s) succesfully saved to %s "%[map.metadata["name"],map.metadata["id"],path])
-#	get_tree().change_scene("res://scenes/menu/Menu.tscn")
-#
-

@@ -9,10 +9,14 @@ onready var btn_login = get_node("LoginForm/BtnLogin")
 
 func _ready():
 	# resume previous states
-	lbl_loginStatus.text = "Logged in from before" if Networker.is_logged_in() else "NOT logged in!!!"
+	
 	if Networker.is_logged_in():
 		btn_login.disabled = true
 		Networker.socket_connect()
+		populate_map_dropdown()
+		lbl_loginStatus.text = "Logged in from before" 
+	else:
+		lbl_loginStatus.text = "NOT logged in!!!"
 	#btn_matchmaking.disabled = not Networker.is_socket_connected()
 	
 	Networker.connect("matchmaking_started", self,"_on_Networker_matchmaking_started")
@@ -23,43 +27,18 @@ func _ready():
 	Networker.connect("authentication_successfull", self, "_on_Networker_authentication_successfull")
 	Networker.connect("authentication_failed", self, "_on_Networker_authentication_failed")
 	
-	
-	
-	# ONLY TEMPORARY, later random map dictated by server
-	# populate load dropdown
-	var map_files = []
-	var dir = Directory.new()
-	dir.open(Global.MAPFOLDER_PATH)
-	dir.list_dir_begin()
-	while true:
-		var file = dir.get_next()
-		if file == "":
-			break
-		elif file.ends_with(".map"):
-			map_files.append(file)
-	dir.list_dir_end()
-	
-	for i in map_files:
-		var file = File.new()
-		file.open(Global.MAPFOLDER_PATH + i, File.READ)
-		var map_jstring = file.get_as_text()
-		file.close()
-
-		var parse = JSON.parse(map_jstring)
-		if parse.error != OK:
-			printerr("Could not parse map jstring to offer in load drop down")
-			continue
-		var map_name = parse.result["metadata"]["name"] 
-		var map_id = parse.result["metadata"]["id"] 
-		
-		select_map.add_item(map_name,map_id)
-		
-	
-	
 	if true: # autologin
 		if not OS.get_cmdline_args().empty():
 			line_customId.text = OS.get_cmdline_args()[0]
 			#_on_BtnLogin_pressed() #autologin for dbg
+
+
+func populate_map_dropdown():
+	var public_maps = yield(MapStorage.list_public_maps_async(), "completed")
+	for i in public_maps:
+		select_map.add_item(i.name)
+		select_map.set_item_metadata(select_map.get_item_count()-1, i)
+
 
 
 #### Event Callbacks
@@ -72,7 +51,9 @@ func _on_BtnMatchmaking_pressed():
 	if Networker.is_in_matchmaking():
 		Networker.matchmaking_cancel_async()
 	else:
-		Networker.matchmaking_start_async(select_map.get_selected_id())
+		var map_id = select_map.get_selected_metadata()["map_id"]
+		var owner_id = select_map.get_selected_metadata()["owner_id"]
+		Networker.matchmaking_start_async(map_id,owner_id)
 	
 	btn_matchmaking.disabled = true
 	btn_matchmaking.text = "..."
@@ -104,6 +85,7 @@ func _on_Networker_authentication_failed():
 func _on_Networker_authentication_successfull():
 	lbl_loginStatus.text =  "Freshly Logged in :)"
 	btn_login.disabled = true
+	populate_map_dropdown()
 
 
 func _on_BtnEditor_pressed():

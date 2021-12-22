@@ -14,11 +14,10 @@ func _ready():
 		dir.make_dir_recursive(Global.MAP_CACHE_PATH)
 
 
-func load_map_async(map_id:String): # -> map_jstring
+func load_map_async(map_id:String, owner_id:String=""): # -> map_jstring
 #	if _is_map_cached(map_id):
 #		return _load_from_cache(map_id)
-	
-	var map_jstring = yield(_load_from_server_async(map_id), "completed")
+	var map_jstring = yield(_load_from_server_async(map_id,owner_id), "completed")
 	return map_jstring
 
 
@@ -41,6 +40,20 @@ func list_owned_maps_async()->Dictionary: # -> {"map_id": "name", ...}
 	
 	return owned_maps
 
+
+func list_public_maps_async()->Array: # ->  [{"map_id":, "owner_id":, "name":},...]
+	var result = yield(Networker.collection_list_public_objects_async(Global.MAP_COLLECTION), "completed")
+	
+	var public_maps:Array
+	for i in result:
+		var entry = {
+			"map_id": i.key,
+			"owner_id": i.user_id,
+			"name": JSON.parse(i.value).result["metadata"]["name"],
+			}
+		public_maps.append(entry)
+	
+	return public_maps
 
 #ApiStorageObject Schema
 #	{
@@ -80,9 +93,14 @@ func _is_map_cached(map_id:String)->bool:
 
 #### Server
 
-func _load_from_server_async(map_id:String)->String: # -> map_jstring
+func _load_from_server_async(map_id:String, owner_id:String="")->String: # -> map_jstring
 	print("Loading from server")
-	var object = yield(Networker.collection_read_object_async(Global.MAP_COLLECTION,map_id),"completed")
+	var object
+	if owner_id == "":
+		object = yield(Networker.collection_read_object_async(Global.MAP_COLLECTION,map_id),"completed")
+	else:
+		object = yield(Networker.collection_read_object_async(Global.MAP_COLLECTION,map_id, owner_id),"completed")
+	 
 	assert(object is NakamaAPI.ApiStorageObject)
 	
 	return object.value

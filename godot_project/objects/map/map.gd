@@ -183,7 +183,7 @@ func serialize()->String:
 
 	var mapdict := {
 		"game_version": "",
-		"cells": {}, # vector keys are saved with var2str
+		"tiles": {}, # vector keys are saved with var2str
 		"objects": {}, # and need to be restored wit str2var
 		"metadata": {
 			"name": "",
@@ -198,7 +198,7 @@ func serialize()->String:
 	for i in cells:
 		for j in TILE_DATA:
 			if TILE_DATA[j]["tilemap_id"] == tilemap.get_cell(i.x,i.y):
-				mapdict["cells"][var2str(i)] = j
+				mapdict["tiles"][var2str(i)] = j
 	
 	# objects
 	for i in spawned_objects:
@@ -227,9 +227,9 @@ func deserialize(jstring:String)->void:
 		return
 	
 	# cells
-	for i in parse.result["cells"]:
+	for i in parse.result["tiles"]:
 		var coord:Vector2 = str2var(i)
-		var tile_id := int(parse.result["cells"][i])
+		var tile_id := int(parse.result["tiles"][i])
 
 		if not TILE_DATA.has(tile_id):
 			printerr("Mapfile contains unkown tile id: %s"%tile_id)

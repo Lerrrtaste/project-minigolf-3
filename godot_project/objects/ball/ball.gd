@@ -1,6 +1,7 @@
 extends KinematicBody2D
 
 onready var lbl_player_name = get_node("LblPlayerName")
+onready var spr_arrow = get_node("SprArrow")
 
 var connected_pc #has active player controller attached
 var map # set by match before entering tree
@@ -15,7 +16,6 @@ var friction_modifier: float = 1.0 # changed by tile
 var friction: float = 50
 
 # match
-var turn_ready: = false
 var finished := false
 
 signal finished_moving()
@@ -30,10 +30,12 @@ func _ready():
 		lbl_player_name.text = "YOU"
 	else:
 		lbl_player_name.text = Networker.get_username(connected_pc.user_id)
+	
 
 
 func _process(delta):
 	update()
+	spr_arrow.visible = connected_pc.active
 
 
 func _physics_process(delta):
@@ -53,6 +55,7 @@ func _draw():
 		draw_line(Vector2(),get_local_mouse_position().normalized() * dist, ColorN("black"))
 
 
+# valled before entering tree
 func setup_playercontroller(pc_scene:PackedScene,user_id)->void:
 	if is_instance_valid(connected_pc):
 		printerr("Ball is already controlled")

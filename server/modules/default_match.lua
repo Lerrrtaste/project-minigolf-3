@@ -13,8 +13,22 @@ OpCodes = {
 }
 
 function match_handler.match_init(context, setupstate)
+    -- load map object
+    --local user_id = "4ec4f126-3f9d-11e7-84ef-b7c182b36521" -- some user ID.
+    --local object_ids = {
+    --{collection = "maps", key = "1640202596", user_id = setupstate.map_owner_id} --a5e9f13a-3a2c-4dbf-a490-bc02412fb4f9"} --.map_id}
+    --}
+    --local objects = nk.storage_read(object_ids)
+    --nk.logger_info("Should read now: ")
+    --for _, r in ipairs(objects) do
+    --    local message = string.format("read: %q, write: %q, value: %q", r.permission_read, r.permission_write, r.value.metadata.name)
+    --    nk.logger_info(message)
+    --end
+
     local gamestate = {
         map_id = setupstate.map_id,
+        map_owner_id = setupstate.map_owner_id,
+
         expected_players = {}, -- numbered presences
         joined_players = {}, -- key=user_id val=presence
         turn_order = {}, -- numbered user_ids
@@ -50,9 +64,9 @@ function match_handler.match_join(context, dispatcher, tick, state, presences)
     end
 
     local op_code = OpCodes.MATCH_CONFIG
-    local data = nk.json_encode({map_id= state.map_id}) --, turn_order= state.expected_players})
+    local data = nk.json_encode({map_id= state.map_id, map_owner_id= state.map_owner_id}) --, turn_order= state.expected_players})
     local reciever = presences
-    nk.logger_info(string.format(" -> Sending MATCH_SETUP to %s", presences))
+    --nk.logger_info(string.format(" -> Sending MATCH_SETUP to %s", presences))
     dispatcher.broadcast_message(op_code, data, reciever)
     return state
 end
@@ -80,7 +94,7 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
     -- match loading
     if state.started ~= true then
         for _, user in pairs(state.expected_players) do
-            nk.logger_info(string.format("Joined: %s | checking for %s",nk.json_encode(state.joined_players),nk.json_encode(user)))
+            --nk.logger_info(string.format("Joined: %s | checking for %s",nk.json_encode(state.joined_players),nk.json_encode(user)))
             -- nk.logger_info(string.format("Joined: %s | Expected %s",nk.json_encode(state.joined_players),nk.json_encode(state.expected_players)))
             if state.joined_players[user.user_id] == nil then
                 --nk.logger_info(string.format("Missing user id: %s. joined_players[user_id] = %s",user.user_id, state.joined_players[user.user_id]))
@@ -115,7 +129,7 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
 
             elseif msg.op_code == OpCodes.FINISHED_TURN then
                 if msg.sender.user_id ~= state.turn_order[state.next_player_idx] then -- verify the sender is the next player in turn order
-                    nk.logger_error("Recieved FINISHED_TURN from wrong player (not his turn)")
+                    --nk.logger_error("Recieved FINISHED_TURN from wrong player (not his turn)")
                 else
                     if state.turn_count[msg.sender.user_id] == nil then -- initialize turn counter (if not already)
                         state.turn_count[msg.sender.user_id] = 0

@@ -77,7 +77,7 @@ func login_async(custom_id:String)->void:
 
 #### Matches
 
-func matchmaking_start_async(map_id:int)->void:
+func matchmaking_start_async(map_id:String, owner_id:String)->void:
 	if !is_socket_connected():
 		printerr("Not connected")
 		return
@@ -90,7 +90,8 @@ func matchmaking_start_async(map_id:int)->void:
 	var min_count = 2
 	var max_count = 2
 	var string_properties = {
-		"map_id": String(map_id)
+		"map_id": map_id,
+		"owner_id": owner_id,
 	}
 	var numeric_properties = { # broken atm
 		
@@ -171,9 +172,9 @@ func collection_write_object_async(collection:String, key:String, value:String, 
 	return acks.acks[0]
 
 
-func collection_read_object_async(collection:String,key:String): # -> ApiStorageObject
+func collection_read_object_async(collection:String, key:String, user_id:String = session.user_id): # -> ApiStorageObject
 	var result : NakamaAPI.ApiStorageObjects = yield(client.read_storage_objects_async(session, [
-	NakamaStorageObjectId.new(collection, key, session.user_id)
+	NakamaStorageObjectId.new(collection, key, user_id)
 	]), "completed")
 	
 	if result.is_exception():
@@ -209,6 +210,20 @@ func collection_list_owned_objects_async(collection:String)->Array: # -> Array :
 		return
 	return objects.objects
 
+
+func collection_list_public_objects_async(collection:String)->Array: # -> Array : ApiStorageObject
+	# "objects" has cursor (for paging later) 
+	var limit = 100 # default is 10.
+	var objects : NakamaAPI.ApiStorageObjectList = yield(client.list_storage_objects_async(session, collection, "", limit), "completed")
+	if objects.is_exception():
+		print("An error occured: %s" % objects)
+		return
+	# filter for public objects
+	var public_objects:Array
+	for i in objects.objects:
+		if i.permission_read == ReadPermissions.PUBLIC:
+			public_objects.append(i)
+	return public_objects
 
 #### Getset
 
