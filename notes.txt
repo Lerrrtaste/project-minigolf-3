@@ -1,23 +1,26 @@
 #### TODOS
 
-- wait for map to (down)load before starting match
-- player move impact should be normalized and controller by server (so mouse distance till max force can be client independent)
-- ball to ball collisison (turned off when reached finished and before first shot)
-- handle presence events (only leaves)
 
 - ingame info popup (for limit reached, ingame events, errors etc)
+
 - walls shouldnt hide water
 - enforce objects only non solid, non resetting tiles (and remove when tile removed)
 - Background 
-- fix practive mode
-- dont remove finished players from ingame panel (maybe icon prefix)
 - test if tiles as nodes work (for juicy effects and better collision and better tile property detection
-- use alternative wall normal calculation (old implementaion wonky at some angles)
+- (fix / ) rewrite turn order to be used equally by server and client
+- handle presence events (only leaves)
+- fix practive mode
+- end authorative matches properly (return nil in match_loop does not work)
 - Final MVP export :)
 
 
 #### DONE
+- player move impact should be normalized and controller by server (so mouse distance till max force can be client independent)
+- wait for map to (down)load before starting match
+- ball to ball collisison (turned off when reached finished and before first shot)
+- fixed wall collisions
 
+- dont remove finished players from ingame panel (maybe icon prefix)
 - store maps in nakama collection
 - map storage node to handle downloading / loading mapfile
 - Editor Tool Bar
@@ -66,36 +69,43 @@ UI Pixel Scale 400%
 - paging for maps
 - map rating (thumbs up/down) at the end
 - show map rating in editor
-
+- icon prefix for finished players in ingame panel
 
 
 
 #### OP CODES
 
-101 MATCH_CONFIG (map_id:string, owner_id:string)
+101 -> 110 MATCH_CONFIG (map_id:string, owner_id:string)
 		sender: server
 
-102 MATCH_START (joined_players:List presences, turn_order:List user_ids )
+111 MATCH_CLIENT_READY
+		sender: client
+		note: map loaded and client is ready
+
+102 -> 112 MATCH_START (joined_players:List presences, turn_order:List user_ids )
 		sender: server
 		note: implies next turn for first player in turn_order
 
-103 NEXT_TURN (next_player:Dictionary presence)
+106 -> 115 MATCH_END (scores:Dictionary key userid, value shots)
+
+
+103 -> 120 NEXT_TURN (next_player:Dictionary presence)
 		sender: server
 		after recieving a FINISHED_TURN the next player is announced
 
-104 FINISHED_TURN (reached_finish:bool)
+104 -> 125 FINISHED_TURN (reached_finish:bool)
 		sender: client
 		after ball stopped moving (because of friction or reaching the finish)
 
-105 REACHED_FINISH ()
+105 -> 130 REACHED_FINISH ()
 		sender: server
 		if reached_finish in the FINISHED_TURN msg was true
 
-106 MATCH_END (scores:Dictionary key userid, value shots)
+
 
 
 // Ball Movement
-201 BALL_IMPACT (target_pos:Vector2 relative click)
+201 BALL_IMPACT (impact_vec:Vector2 lengeth 0.0-1.0 realtive to balls max_speed (not networked nor changed yet)
 		sender: client (local playercontroller)
 		reciever: remote pc
 		note: impact meaining local player initiated move (not collision from another player)

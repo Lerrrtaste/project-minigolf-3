@@ -26,17 +26,18 @@ const NK_ADDON_VERSION = "2.1.0" # primarily note for me
 #### Match State Op codes ####
 # 100-199 forward to match
 enum OpCodes {
+	MATCH_CONFIG = 110,
+	MATCH_CLIENT_READY = 111,
+	MATCH_START = 112,
+	MATCH_END = 115,
+	
+	NEXT_TURN = 120,
+	TURN_FINISHED = 125,
+	
+	REACHED_FINISH = 130,
+	
 	BALL_IMPACT = 201,
 	BALL_SYNC = 202,
-	MATCH_CONFIG = 101,
-	MATCH_START = 102,
-	NEXT_TURN = 103,
-	TURN_FINISHED = 104,
-	REACHED_FINISH = 105,
-	MATCH_END = 106
-	# when match starts
-	# contains map_id, tuŕn_order
-	
 }
 
 

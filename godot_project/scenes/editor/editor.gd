@@ -102,7 +102,8 @@ func _ready():
 	if params.has("load_map_id"):
 		var map_jstring = yield(MapStorage.load_map_async(params["load_map_id"]),"completed")
 		map.deserialize(map_jstring)
-		menu_edit_name.text = map.metadata["name"]
+		if map.metadata.has("name"):
+			menu_edit_name.text = map.metadata["name"]
 		
 	elif params.has("created_new"):
 		pass

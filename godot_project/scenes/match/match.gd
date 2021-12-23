@@ -136,6 +136,7 @@ func player_remote_leave(user_id)->void:
 func load_map(map_id:String, map_owner_id:String="")->void: # todo use map storage helper some time in the futureeee
 	var map_jstring = yield(MapStorage.load_map_async(map_id, map_owner_id), "completed")
 	map.deserialize(map_jstring)
+	Networker.match_send_state_async(Global.OpCodes.MATCH_CLIENT_READY)
 
 
 func update_ui():
@@ -243,9 +244,10 @@ func _on_Networker_match_state(state):
 func _on_Ball_finished_moving():
 #	if not turn_order[turn_current_idx] == Networker.get_user_id():
 #		print("Warning sending FINISHED_MOVING even though not in turn_order (only valid when finished)")
-	var op_code = Global.OpCodes.TURN_FINISHED
-	var data = {"reached_finish": false}
-	Networker.match_send_state_async(op_code, data)
+	if local_ball.get_pc_user_id() == turn_order[turn_current_idx]:
+		var op_code = Global.OpCodes.TURN_FINISHED
+		var data = {"reached_finish": false}
+		Networker.match_send_state_async(op_code, data)
 
 
 func _on_Ball_reached_finish(final_pos):

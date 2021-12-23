@@ -1,7 +1,7 @@
 extends Node
 
 
-# signal completed
+signal completed
 
 var cached_maps:=[]
 
@@ -16,7 +16,9 @@ func _ready():
 
 func load_map_async(map_id:String, owner_id:String=""): # -> map_jstring
 #	if _is_map_cached(map_id):
+#		emit_signal("completed",_load_from_cache(map_id))
 #		return _load_from_cache(map_id)
+		#return _load_from_cache(map_id)
 	var map_jstring = yield(_load_from_server_async(map_id,owner_id), "completed")
 	return map_jstring
 
@@ -112,6 +114,7 @@ func _save_to_server_async(map_id:String, map_jstring:String, public:bool=false)
 
 func _delete_from_server(map_id:String):
 	Networker.collection_remove_object_asnyc(Global.MAP_COLLECTION,map_id)
+
 
 #### Cache
 

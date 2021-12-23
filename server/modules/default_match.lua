@@ -2,12 +2,16 @@ local nk = require("nakama")
 local match_handler = {}
 
 OpCodes = {
-   MATCH_CONFIG = 101,
-   MATCH_START = 102,
-   NEXT_TURN = 103,
-   FINISHED_TURN = 104,
-   REACHED_FINISH = 105,
-   MATCH_END = 106,
+   MATCH_CONFIG = 110,
+   MATCH_CLIENT_READY = 111,
+   MATCH_START = 112,
+   MATCH_END = 115,
+
+   NEXT_TURN = 120,
+   FINISHED_TURN = 125,
+
+   REACHED_FINISH = 130,
+
    BALL_IMPACT = 201,
    BALL_SYNC = 202,
 }
@@ -31,6 +35,7 @@ function match_handler.match_init(context, setupstate)
 
         expected_players = {}, -- numbered presences
         joined_players = {}, -- key=user_id val=presence
+        ready_players = {}, -- key=user_id val=bool (map loaded and ready to start)
         turn_order = {}, -- numbered user_ids
         turn_count = {},
         player_positions = {}, -- key=user_id val=var2str string
@@ -42,6 +47,7 @@ function match_handler.match_init(context, setupstate)
     for _, user in ipairs(setupstate.invited) do
         -- nk.logger_info(string.format("Trying to add %s to expected players.",nk.json_encode(user.presence)))
         gamestate.expected_players[user.presence.user_id] = user.presence
+        gamestate.ready_players[user.presence.user_id] = false
     end
 
     local tickrate = 5
@@ -93,10 +99,17 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
 
     -- match loading
     if state.started ~= true then
+        for _, msg in ipairs(messages) do
+            if msg.op_code == OpCodes.MATCH_CLIENT_READY then
+                state.ready_players[msg.sender.user_id] = true
+                nk.logger_info(string.format("%s is now ready",msg.sender.user_id))
+            end
+        end
+
         for _, user in pairs(state.expected_players) do
             --nk.logger_info(string.format("Joined: %s | checking for %s",nk.json_encode(state.joined_players),nk.json_encode(user)))
             -- nk.logger_info(string.format("Joined: %s | Expected %s",nk.json_encode(state.joined_players),nk.json_encode(state.expected_players)))
-            if state.joined_players[user.user_id] == nil then
+            if state.joined_players[user.user_id] == nil or state.ready_players[user.user_id] == false then
                 --nk.logger_info(string.format("Missing user id: %s. joined_players[user_id] = %s",user.user_id, state.joined_players[user.user_id]))
                 return state
             end
@@ -117,10 +130,10 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
     -- match is started from here
     if messages ~= nil then
         for _, msg in ipairs(messages) do
-
-            if msg.op_code == OpCodes.BALL_IMPACT then -- forward ball impacts to everyone
+            if  msg.op_code == OpCodes.BALL_IMPACT then -- forward ball impacts to everyone
                 if state.turn_order[state.next_player_idx] == msg.sender.user_id then -- only broadcast if player is at turn FIXME sync will still happen
                     dispatcher.broadcast_message(OpCodes.BALL_IMPACT, msg.data, nil, msg.sender)
+                    -- TODO verify max impact_vec length of 1 (not possible yet because BALL_SYNC cant be confirmed yet)
                 end
 
             elseif msg.op_code == OpCodes.BALL_SYNC then -- after local ball finished this is sent to sync

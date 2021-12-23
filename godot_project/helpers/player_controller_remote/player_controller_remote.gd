@@ -37,9 +37,9 @@ func _on_Networker_match_state(state:NakamaRTAPI.MatchData)->void:
 			printerr("Remote PC was not active but recieved a BALL_IMPACT msg")
 		
 		var data_dict = JSON.parse(state.data).result
-		var pos:Vector2 = str2var(data_dict["target_pos"])
+		var impact:Vector2 = str2var(data_dict["impact_vec"])
 		active = false
-		emit_signal("impact",pos)
+		emit_signal("impact",impact)
 	
 	
 	if state.op_code == Global.OpCodes.BALL_SYNC:

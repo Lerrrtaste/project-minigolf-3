@@ -140,7 +140,7 @@ func match_join_async(matchmaker_token)->void:
 	emit_signal("match_joined",joined_match)
 
 
-func match_send_state_async(op_code:int,new_state)->void:
+func match_send_state_async(op_code:int,new_state="")->void:
 	if not is_in_match():
 		printerr("Trying to send match state while not joined in any")
 		return

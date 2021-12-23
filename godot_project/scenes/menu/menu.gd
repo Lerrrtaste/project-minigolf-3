@@ -30,7 +30,7 @@ func _ready():
 	if true: # autologin
 		if not OS.get_cmdline_args().empty():
 			line_customId.text = OS.get_cmdline_args()[0]
-			#_on_BtnLogin_pressed() #autologin for dbg
+			_on_BtnLogin_pressed() #autologin for dbg
 
 
 func populate_map_dropdown():
