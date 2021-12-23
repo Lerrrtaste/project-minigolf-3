@@ -68,7 +68,6 @@ const TOOL_DATA = {
 func _ready():
 	# center camera
 	camera_editor.position = OS.window_size/2
-	
 	# populate tile dropdown
 	for i in map.TILE_DATA:
 		if i == map.Tiles.EMPTY:
@@ -220,11 +219,11 @@ func _on_BtnMenu_pressed():
 
 func _on_BtnSave_pressed():
 	if menu_edit_name.text.length() < Global.MAP_NAME_LENGTH_MIN:
-		print("Name too short")
+		Notifier.notify_editor("Name too short", "Min %s chars"%Global.MAP_NAME_LENGTH_MIN)
 		return
 		
 	if menu_edit_name.text.length() > Global.MAP_NAME_LENGTH_MAX:
-		print("Name too long")
+		Notifier.notify_editor("Name too long", "Max %s chars"%Global.MAP_NAME_LENGTH_MAX)
 		return
 	
 	menu_btn_save.disabled = true
@@ -245,4 +244,5 @@ func _on_BtnSave_pressed():
 	var map_jstring = map.serialize()
 	var public = menu_check_public.pressed
 	yield(MapStorage.save_map_async(map_id, map_jstring,public), "completed")
+	Notifier.notify_editor("Saved succesfully","TODO Its a lie, move this to somewhere it can be confirmed")
 	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")

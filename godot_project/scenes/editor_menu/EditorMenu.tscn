@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://scenes/editor_menu/editor_menu.gd" type="Script" id=1]
 [ext_resource path="res://assets/ui/panel/panel_blue.png" type="Texture" id=2]
 [ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=3]
 [ext_resource path="res://assets/ui/button_blue/button_blue.tres" type="Theme" id=4]
 [ext_resource path="res://assets/ui/fonts/font_small_button.tres" type="DynamicFont" id=5]
+[ext_resource path="res://assets/ui/fonts/data/kenney_pixel_square.ttf" type="DynamicFontData" id=6]
 
 [sub_resource type="StyleBoxTexture" id=1]
 texture = ExtResource( 2 )
@@ -13,6 +14,9 @@ margin_left = 16.0
 margin_right = 16.0
 margin_top = 16.0
 margin_bottom = 24.0
+
+[sub_resource type="DynamicFont" id=3]
+font_data = ExtResource( 6 )
 
 [sub_resource type="DynamicFont" id=2]
 size = 64
@@ -50,6 +54,17 @@ margin_bottom = 336.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="LblPlaceholder" type="Label" parent="Control/PanelContainer/ContainerMaps"]
+margin_top = 148.0
+margin_right = 736.0
+margin_bottom = 172.0
+size_flags_vertical = 6
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 3 )
+text = "LOADING MAPS..."
+align = 1
+valign = 1
 
 [node name="BtnCreate" type="Button" parent="Control"]
 anchor_top = 0.75

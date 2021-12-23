@@ -1,25 +1,34 @@
 #### TODOS
 
-
-- ingame info popup (for limit reached, ingame events, errors etc)
-
 - walls shouldnt hide water
-- enforce objects only non solid, non resetting tiles (and remove when tile removed)
 - Background 
+- Main Menu UI
+- editor popup close button sprite
+- show editor controls somewhere
+
+- enforce objects only non solid, non resetting tiles (and remove when tile removed)
 - test if tiles as nodes work (for juicy effects and better collision and better tile property detection
 - (fix / ) rewrite turn order to be used equally by server and client
-- handle presence events (only leaves)
 - fix practive mode
+- hide balls behind walls
+
+- handle presence events (only leaves)
 - end authorative matches properly (return nil in match_loop does not work)
+
+- finalize match end screen
+- main menu ui + map selection
+- login screen
+
 - Final MVP export :)
 
 
 #### DONE
+
+- ingame info popup (for limit reached, ingame events, errors etc)
 - player move impact should be normalized and controller by server (so mouse distance till max force can be client independent)
 - wait for map to (down)load before starting match
 - ball to ball collisison (turned off when reached finished and before first shot)
 - fixed wall collisions
-
 - dont remove finished players from ingame panel (maybe icon prefix)
 - store maps in nakama collection
 - map storage node to handle downloading / loading mapfile
@@ -70,34 +79,36 @@ UI Pixel Scale 400%
 - map rating (thumbs up/down) at the end
 - show map rating in editor
 - icon prefix for finished players in ingame panel
-
-
+- Trees
+- Balls have juicy eyes and smile when they hit each other (with sound) (emoji golf?) and the eyes roll with the ball (up+down / left+right)
+- Map deltetion only a flag, remove after x days (to be able to restore maps with console access)
+- itch io page (cover, banner, screenshots, html player....)
 
 #### OP CODES
 
-101 -> 110 MATCH_CONFIG (map_id:string, owner_id:string)
+110 MATCH_CONFIG (map_id:string, owner_id:string)
 		sender: server
 
 111 MATCH_CLIENT_READY
 		sender: client
 		note: map loaded and client is ready
 
-102 -> 112 MATCH_START (joined_players:List presences, turn_order:List user_ids )
+112 MATCH_START (joined_players:List presences, turn_order:List user_ids )
 		sender: server
 		note: implies next turn for first player in turn_order
 
-106 -> 115 MATCH_END (scores:Dictionary key userid, value shots)
+115 MATCH_END (scores:Dictionary key userid, value shots)
 
 
-103 -> 120 NEXT_TURN (next_player:Dictionary presence)
+120 NEXT_TURN (next_player:Dictionary presence)
 		sender: server
 		after recieving a FINISHED_TURN the next player is announced
 
-104 -> 125 FINISHED_TURN (reached_finish:bool)
+125 FINISHED_TURN (reached_finish:bool)
 		sender: client
 		after ball stopped moving (because of friction or reaching the finish)
 
-105 -> 130 REACHED_FINISH ()
+130 REACHED_FINISH ()
 		sender: server
 		if reached_finish in the FINISHED_TURN msg was true
 

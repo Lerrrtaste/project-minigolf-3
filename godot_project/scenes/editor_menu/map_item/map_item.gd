@@ -6,11 +6,12 @@ onready var btn_delete = get_node("HBoxContainer/BtnDelete")
 onready var btn_edit = get_node("HBoxContainer/BtnEditMap")
 onready var btn_practice = get_node("HBoxContainer/BtnPractice")
 
-signal open_editor(map_id)
+signal open_editor(map_id, map_name)
 signal delete(map_id)
 signal practice(map_id)
 
 var map_id:String
+var map_name:String
 var delete_confirm := false
 
 func _ready():
@@ -18,7 +19,8 @@ func _ready():
 
 func populate(_map_name:String,_map_id:String):
 	map_id = _map_id
-	lbl_name.text = _map_name
+	map_name = _map_name
+	lbl_name.text = map_name
 	lbl_id.text = "ID %s"%map_id
 	disable_buttons(false)
 	visible = true
@@ -30,7 +32,7 @@ func _on_BtnPractice_pressed():
 
 func _on_BtnEditMap_pressed():
 	disable_buttons(true)
-	emit_signal("open_editor", map_id)
+	emit_signal("open_editor", map_id, map_name)
 
 
 func _on_BtnDelete_pressed():

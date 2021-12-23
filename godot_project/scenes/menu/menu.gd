@@ -31,6 +31,8 @@ func _ready():
 		if not OS.get_cmdline_args().empty():
 			line_customId.text = OS.get_cmdline_args()[0]
 			_on_BtnLogin_pressed() #autologin for dbg
+			Notifier.notify_info("Autologged in because of multirun cmdline args")
+	Notifier.notify_game("Press BATTLE to start a game")
 
 
 func populate_map_dropdown():
@@ -62,11 +64,13 @@ func _on_BtnMatchmaking_pressed():
 func _on_Networker_matchmaking_started():
 	btn_matchmaking.text = "Cancel"
 	btn_matchmaking.disabled = false
+	Notifier.notify_info("Matchmaking started")
 
 
 func _on_Networker_matchmaking_ended():
 	btn_matchmaking.text = "BATTLE"
 	btn_matchmaking.disabled = false
+	Notifier.notify_info("Matchmaking cancled")
 
 
 func _on_Networker_socket_connected():
@@ -75,17 +79,21 @@ func _on_Networker_socket_connected():
 
 
 func _on_Networker_matchmaking_matched(matched):
+	Notifier.notify_game("Match found!")
 	get_tree().change_scene("res://scenes/match/Match.tscn")
+	
 
 
 func _on_Networker_authentication_failed():
 	lbl_loginStatus.text =  "Could NOT log in!!!"
+	Notifier.notify_error("Could not log in!")
 
 
 func _on_Networker_authentication_successfull():
 	lbl_loginStatus.text =  "Freshly Logged in :)"
 	btn_login.disabled = true
 	populate_map_dropdown()
+	Notifier.notify_info("Log in successful")
 
 
 func _on_BtnEditor_pressed():

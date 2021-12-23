@@ -219,11 +219,11 @@ func deserialize(jstring:String)->void:
 	
 	var parse := JSON.parse(jstring)
 	if parse.error != OK:
-		printerr("Could not parse mapfile")
+		Notifier.notify_error("Could not parse mapfile")
 		return
 	
 	if parse.result["game_version"] != Global.GAME_VERSION:
-		printerr("Could not load map created with different game version")
+		Notifier.notify_error("Could not load map created with different game version")
 		return
 	
 	# cells
@@ -245,6 +245,7 @@ func deserialize(jstring:String)->void:
 		
 		if not OBJECT_DATA.has(object_id):
 			printerr("Mapfile contains unkown object id: %s"%object_id)
+			assert(false)
 			continue
 		
 		inst = load(OBJECT_DATA[object_id]["scene_path"]).instance()
@@ -255,7 +256,7 @@ func deserialize(jstring:String)->void:
 	#metadata
 	metadata = parse.result["metadata"]
 	metadata["updated"] = false
-	print("Map \"%s\" (ID %s) loaded succesfully"%[metadata["name"],metadata["id"]])
+	Notifier.notify_game("Map \"%s\" loaded succesfully"%metadata["name"], "(ID %s)"%metadata["id"])
 
 
 #### Helper Functions
