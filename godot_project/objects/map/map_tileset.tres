@@ -11,7 +11,7 @@ points = PoolVector2Array( 16, 18, 32, 26, 16, 34, 0, 26, 0, 26 )
 [resource]
 0/name = "Grass"
 0/texture = ExtResource( 1 )
-0/tex_offset = Vector2( 0, -17 )
+0/tex_offset = Vector2( 0, -10 )
 0/modulate = Color( 1, 1, 1, 1 )
 0/region = Rect2( 0, 0, 32, 34 )
 0/tile_mode = 0
@@ -25,14 +25,14 @@ points = PoolVector2Array( 16, 18, 32, 26, 16, 34, 0, 26, 0, 26 )
 0/z_index = 0
 1/name = "Wall"
 1/texture = ExtResource( 2 )
-1/tex_offset = Vector2( 0, -17 )
+1/tex_offset = Vector2( 0, -10 )
 1/modulate = Color( 1, 1, 1, 1 )
 1/region = Rect2( 0, 0, 32, 34 )
 1/tile_mode = 0
 1/occluder_offset = Vector2( 0, 0 )
 1/navigation_offset = Vector2( 0, 0 )
-1/shape_offset = Vector2( 0, -26 )
-1/shape_transform = Transform2D( 1, 0, 0, 1, 0, -26 )
+1/shape_offset = Vector2( 0, -19 )
+1/shape_transform = Transform2D( 1, 0, 0, 1, 0, -19 )
 1/shape = SubResource( 1 )
 1/shape_one_way = false
 1/shape_one_way_margin = 1.0
@@ -41,12 +41,12 @@ points = PoolVector2Array( 16, 18, 32, 26, 16, 34, 0, 26, 0, 26 )
 "one_way": false,
 "one_way_margin": 1.0,
 "shape": SubResource( 1 ),
-"shape_transform": Transform2D( 1, 0, 0, 1, 0, -26 )
+"shape_transform": Transform2D( 1, 0, 0, 1, 0, -19 )
 } ]
 1/z_index = 0
 3/name = "Sand"
 3/texture = ExtResource( 3 )
-3/tex_offset = Vector2( 0, -17 )
+3/tex_offset = Vector2( 0, -10 )
 3/modulate = Color( 1, 1, 1, 1 )
 3/region = Rect2( 0, 0, 32, 34 )
 3/tile_mode = 0
@@ -60,7 +60,7 @@ points = PoolVector2Array( 16, 18, 32, 26, 16, 34, 0, 26, 0, 26 )
 3/z_index = 0
 4/name = "Water"
 4/texture = ExtResource( 4 )
-4/tex_offset = Vector2( 0, -17 )
+4/tex_offset = Vector2( 0, -10 )
 4/modulate = Color( 1, 1, 1, 1 )
 4/region = Rect2( 0, 0, 32, 34 )
 4/tile_mode = 0

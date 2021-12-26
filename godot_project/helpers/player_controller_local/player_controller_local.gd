@@ -4,7 +4,7 @@ signal impact(pos)
 signal sync_position(pos)
 const LOCAL = true
 
-var active := false
+var active := false # ball is listening for input
 var user_id:String
 
 const MAX_SPEED_DISTANCE = 100.0  # mouse distance till full force

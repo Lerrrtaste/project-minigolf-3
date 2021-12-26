@@ -122,7 +122,7 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 	
 	var obj = load(path).instance()
 	var snapped_pos = tilemap.map_to_world(cell)
-	snapped_pos.y -= TILE_Y/2 # center on cell
+	#snapped_pos.y -= TILE_Y/2 # center on cell
 	obj.position = snapped_pos
 	add_child(obj)
 	spawned_objects[snapped_pos] = obj
@@ -163,7 +163,7 @@ func match_get_starting_position()->Vector2:
 		if spawned_objects[i].OBJECT_ID == Objects.START:
 			return i
 	
-	printerr("No Startpoint found, defaulting to (0,0)")
+	Notifier.notify_error("No Spawn Object found, defaulting to (0,0)")
 	return Vector2()
 
 
@@ -264,7 +264,7 @@ func deserialize(jstring:String)->void:
 func get_center_cell_position(world_pos:Vector2)->Vector2:
 	var cell = tilemap.world_to_map(world_pos)
 	var snapped_pos = tilemap.map_to_world(cell)
-	snapped_pos.y -= TILE_Y/2 # center on cell
+	#snapped_pos.y -= TILE_Y/2 # center on cell
 	return snapped_pos
 
 

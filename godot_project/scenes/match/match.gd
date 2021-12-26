@@ -19,10 +19,10 @@ var MatchCamera = preload("res://helpers/cameras/match_camera/MatchCamera.tscn")
 var remote_balls:Dictionary
 var local_ball
 
-var joined_players := {} # presences (key is user_id)
-var turn_order := [] # list of user ids
-var turn_current_idx = 0 # current player id
-var turn_counter := {} # userid -> shots count
+var presences := {} # presences (key is user_id)
+var turn_order := [] # for ui only (turns are dispatched by server)
+var turn_count_local := {} # userid -> shots count
+var current_turn_user:String = "" # user_id
 
 var map_id 
 var map_owner_id
@@ -89,7 +89,7 @@ func spawn_ball(local:bool, user_id:String):
 	
 	if local:
 		new_ball.setup_playercontroller(PlayerControllerLocal,user_id)
-		new_ball.connect("finished_moving", self, "_on_Ball_finished_moving")
+		new_ball.connect("turn_completed", self, "_on_Ball_turn_completed")
 		local_ball = new_ball
 	else:
 		new_ball.setup_playercontroller(PlayerControllerRemote,user_id)
@@ -112,15 +112,15 @@ func _start_match():
 	spawn_ball(true,Networker.get_user_id())
 	
 	#spawn remote
-	for i in joined_players:
+	for i in presences:
 		spawn_ball(false,i)
-		turn_counter[i] = 0
+		turn_count_local[i] = 0
 
 
 func _start_practice():
 	# TODO need to simulate the server messages (next turn etc) 
 	spawn_ball(true,"me")
-	turn_counter["me"] = 0
+	turn_count_local["me"] = 0
 	turn_order[0] = "me"
 
 
@@ -147,40 +147,37 @@ func update_ui():
 			text += "[b]Waiting for Match to start...[/b]"
 		States.PLAYING:
 			var current_name
-			if turn_order[turn_current_idx] == Networker.get_user_id():
+			if local_ball.my_turn:
 				current_name = "YOUR"
 			else:
-				current_name = joined_players[turn_order[turn_current_idx]]["username"] + "´s"
+				current_name = presences[current_turn_user]["username"] + "´s"
 			text += "[b]%s turn[/b]\n\n"%current_name
 			text += "Shots:\n"
 			for i in turn_order:
-				if turn_order[turn_current_idx] == i:
+				if i == current_turn_user:
 					text += "->"
-				text += "\t%s:\t%s\n" % [joined_players[i]["username"],turn_counter[i]]
+				text += "\t%s:\t%s\n" % [presences[i]["username"],turn_count_local[i]]
 	
 	text_score.bbcode_text = text
 
 
+func next_turn(user_id:String):
+	if current_turn_user != "":
+		turn_count_local[current_turn_user] += 1
+	
+	
+	if(user_id == Networker.get_user_id()): #copied from below only used for first turn
+		local_ball.turn_ready()
+	elif remote_balls.has(user_id):
+		remote_balls[user_id].turn_ready()
+	else:
+		printerr("Could not find the server announced next user's ball")
+	
+	current_turn_user = user_id
+
 #### Callbacks
 
 func _on_Networker_match_joined(joined_match)->void:
-	pass
-
-
-# Currently not sent by server at all
-func _on_Networker_presences_updated(connected_presences)->void:
-#	var spawned_players = remote_balls.keys()
-#
-#	connected_presences.erase(Networker.session.user_id)
-#
-#	for _user_id in connected_presences:
-#		if spawned_players.has(_user_id): #player did nothing
-#			spawned_players.erase(_user_id)
-#		else: #player joined
-#			player_remote_spawn(_user_id)
-#
-#	for _user_id in spawned_players:
-#		player_remote_leave(_user_id)
 	pass
 
 
@@ -192,66 +189,44 @@ func _on_Networker_match_state(state):
 			map_owner_id = data_dict["map_owner_id"]
 			change_state(States.LOADING)
 		
+		
 		Global.OpCodes.MATCH_START:
 			var data_dict = JSON.parse(state.data).result
 			turn_order = data_dict["turn_order"]
-			joined_players = data_dict["joined_players"]
+			presences = data_dict["presences"]
 			change_state(States.PLAYING)
-			
-			if(turn_order[turn_current_idx] == Networker.get_user_id()): #copied from below only used for first turn
-				print("Local players turn (FIRST TURN)")
-				local_ball.connected_pc.activate()
-			else:
-				var starting_player = joined_players[turn_order[turn_current_idx]]
-				print("Other players turn: ", starting_player["username"])
-				remote_balls[starting_player["user_id"]].connected_pc.activate()
+			next_turn(turn_order[0])
 		
 		Global.OpCodes.NEXT_TURN:
 			var data_dict = JSON.parse(state.data).result
-			var previous_player = turn_order[turn_current_idx]
-			var next_turn_idx = turn_order.find(data_dict["next_player"])#(turn_current_idx+1)%turn_order.size()
+			next_turn(data_dict["next_player"])
 			
-			if turn_order[next_turn_idx] != data_dict["next_player"]:
-				printerr("Next player is different from local turn_order")
-			
-			turn_current_idx = next_turn_idx
-			
-			if(turn_order[turn_current_idx] == Networker.get_user_id()):
-				print("Local players turn")
-				local_ball.connected_pc.activate()
-			else:
-				print("Other players turn: ", joined_players[data_dict["next_player"]]["username"])
-				remote_balls[data_dict["next_player"]].connected_pc.activate()
-			
-			turn_counter[previous_player] += 1
-		
 		Global.OpCodes.REACHED_FINISH:
-			#var state_dict = JSON.parse(state).result
 			print("Player %s has reached the finish"%state.presence.username)
-			#turn_order.erase(state.presence.user_id)
-			#turn_current_idx = (turn_current_idx-1) % turn_order.size()
-		
+			if state.presence.user_id == Networker.get_user_id():
+				local_ball.reached_finish()
+			else:
+				remote_balls[state.presence.user_id].reached_finish()
+			
 		Global.OpCodes.MATCH_END:
 			change_state(States.FINISHED)
 			var params = {
-				"joined_players": joined_players,
-				"results": JSON.parse(state.data).result,
+				"presences": presences,
+				"turn_count": JSON.parse(state.data).result["turn_count"],
 				"map_metadata": map.metadata,
 			}
 			Global.set_scene_parameters(params)
 
 
-func _on_Ball_finished_moving():
-#	if not turn_order[turn_current_idx] == Networker.get_user_id():
-#		print("Warning sending FINISHED_MOVING even though not in turn_order (only valid when finished)")
-	if local_ball.get_pc_user_id() == turn_order[turn_current_idx]:
-		var op_code = Global.OpCodes.TURN_FINISHED
-		var data = {"reached_finish": false}
+func _on_Ball_turn_completed(local:bool):
+	if local:
+		var op_code = Global.OpCodes.TURN_COMPLETED
+		var data = {}
 		Networker.match_send_state_async(op_code, data)
 
 
 func _on_Ball_reached_finish(final_pos):
 	#turn_order.erase(user_id) # happens when msg comes back
-	var op_code = Global.OpCodes.TURN_FINISHED
-	var data = {"reached_finish": true}
+	var op_code = Global.OpCodes.REACHED_FINISH
+	var data = {}
 	Networker.match_send_state_async(op_code, data)

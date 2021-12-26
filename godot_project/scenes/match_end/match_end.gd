@@ -4,15 +4,15 @@ onready var text_result = get_node("VBoxContainer/PanelContainer/TextResult")
 
 func _ready():
 	var params = Global.get_scene_parameter()
-	
+
 	var text = ""
 	text += "[center][b]Match Results:[/b][/center]\n\n"
 	text += ""
 	var winner := []
 	var winner_shots := 99999
-	for i in params["joined_players"]:
-		var username = params["joined_players"][i]["username"]
-		var shots = params["results"]["scores"][i]
+	for i in params["presences"]:
+		var username = params["presences"][i]["username"]
+		var shots = params["turn_count"][i]
 		text += "%s: %s\n"%[username,shots]
 		
 		if shots < winner_shots:

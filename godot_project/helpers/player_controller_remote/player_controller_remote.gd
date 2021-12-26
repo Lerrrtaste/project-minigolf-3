@@ -5,9 +5,9 @@ signal sync_position(pos)
 const LOCAL = false
 
 var user_id:String
-var active := false
+var active := false # ball is waiting for remote player impact
 
-const MAX_SPEED_DISTANCE = 100 # for impact force calculation (will be changed to only send normalized vectors over the network in the future, until then quick fix)
+const MAX_SPEED_DISTANCE = 100 # distance for max impact force
 
 func _ready():
 	Networker.connect("match_state",self,"_on_Networker_match_state")

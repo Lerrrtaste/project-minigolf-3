@@ -2,9 +2,10 @@ extends KinematicBody2D
 
 onready var lbl_player_name = get_node("LblPlayerName")
 onready var spr_arrow = get_node("SprArrow")
+onready var shape_body = get_node("ShapeBody")
 
 var connected_pc #has active player controller attached
-var map # set by match before entering tree
+var map # set by match before entering tree (map ref)
 var current_cell:Vector2
 var collision_blacklist:Array # TODO maybe remove
 
@@ -20,8 +21,9 @@ var total_distance := 0.0 #only used for collision shabe activaten for now
 
 # match
 var finished := false
+var my_turn := false
 
-signal finished_moving()
+signal turn_completed(local)
 signal reached_finish(user_id)
 
 
@@ -39,12 +41,12 @@ func _ready():
 
 func _process(delta):
 	update()
-	spr_arrow.visible = connected_pc.active
+	spr_arrow.visible = my_turn
 
 
 func _physics_process(delta):
 	if total_distance >= 10:
-		$CollisionShape2D.set_deferred("disabled", false) # TODO cleanup
+		shape_body.set_deferred("disabled", finished) # TODO cleanup
 	
 	if speed > 0:
 		var _cell = map.get_cell_position(position)
@@ -80,10 +82,38 @@ func setup_playercontroller(pc_scene:PackedScene,user_id)->void:
 	new_pc.connect("sync_position", self, "_on_PlayerController_sync_position")
 
 
+# called by match when this balls turn
+func turn_ready():
+	if my_turn:
+		printerr("Ball was already at turn!!!!")
+		return
+	
+	if connected_pc.active:
+		printerr("The playercontroller was already active!!!!")
+	
+	while speed > 0:
+		yield(get_tree().create_timer(0.25),"timeout")
+	
+	connected_pc.activate()
+	my_turn = true
+
+
+# called by finished_moving callback if it was this balls turn
+func turn_complete():
+	assert(my_turn)
+	assert(not connected_pc.active) #he ball finished moving because of a previous collision, player took no turn yet
+	my_turn = false
+	emit_signal("turn_completed", connected_pc.LOCAL)
+
+
+# called by finish map object
 func reached_finish():
 	finished = true
+	shape_body.set_deferred("disabled", true)
+	
 	if connected_pc.LOCAL:
 		emit_signal("reached_finish",position)
+	
 	finish_moving()
 
 
@@ -113,10 +143,10 @@ func _handle_collision(collision:KinematicCollision2D):
 	if collision_blacklist.has(collision.collider):
 		return
 		 
-	if collision.collider is KinematicBody2D: # and not collision_blacklist.has(collision.collider): # atm only balls are kinematic bodies
+	if collision.collider is KinematicBody2D: # atm only balls are kinematic bodies
 		print("ball %s colliding with %s"%[self,collision.collider])
 		#You can get the collision components by creating a unit vector pointing in the direction
-#		#from one ball to the other, then taking the dot product with the velocity vectors of the balls. 
+		#from one ball to the other, then taking the dot product with the velocity vectors of the balls. 
 		var coll:Vector2 = position - collision.collider.position
 		var distance:float = coll.length()
 
@@ -163,6 +193,7 @@ func _handle_collision(collision:KinematicCollision2D):
 
 
 func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
+	# called by colliding ball
 	collision_blacklist.append(sender)
 	starting_position = position
 	#assert(_impact.length() <= 1.01) #length not longer than 1 (accounting for rounding error)
@@ -172,15 +203,23 @@ func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
 
 func finish_moving():
 	speed = 0
+	
 	if connected_pc.LOCAL:
 		connected_pc.send_sync_position(position)
-		emit_signal("finished_moving")
+		#emit_signal("finished_moving")
+	
+	if my_turn and not connected_pc.active:
+		turn_complete()
 
 
 func update_tile_properties():
+	if not is_instance_valid(map):
+		return
+		
 	if map.get_tile_resets_ball(position):
 		position = starting_position
 		finish_moving()
+		# TODO play respawn animation
 		#print("Sent because of tile property")
 	friction_modifier = map.get_tile_friction(position)
 
@@ -189,7 +228,7 @@ func update_tile_properties():
 
 func _on_PlayerController_impact(_impact):
 	starting_position = position
-	assert(_impact.length() <= 1.01) #length not longer than 1 (accounting for rounding error)
+	assert(_impact.length() <= 1.01) # length not longer than 1 (accounting for rounding error)
 	speed = min(_impact.length(),1.0) * max_speed
 	direction = _impact.normalized()
 
@@ -210,6 +249,7 @@ func get_pc_user_id()->String:
 		return""
 	
 	return connected_pc.user_id
+
 
 #### Helpers
 

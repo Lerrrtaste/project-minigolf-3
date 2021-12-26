@@ -42,7 +42,6 @@ func populate_map_dropdown():
 		select_map.set_item_metadata(select_map.get_item_count()-1, i)
 
 
-
 #### Event Callbacks
 
 func _on_BtnLogin_pressed():

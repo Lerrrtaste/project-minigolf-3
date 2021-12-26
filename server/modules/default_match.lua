@@ -8,15 +8,19 @@ OpCodes = {
    MATCH_END = 115,
 
    NEXT_TURN = 120,
-   FINISHED_TURN = 125,
+   TURN_COMPLETED = 125,
 
    REACHED_FINISH = 130,
+
+   PLAYER_LEFT = 150,
 
    BALL_IMPACT = 201,
    BALL_SYNC = 202,
 }
 
 function match_handler.match_init(context, setupstate)
+    -- setup inital state
+
     -- load map object
     --local user_id = "4ec4f126-3f9d-11e7-84ef-b7c182b36521" -- some user ID.
     --local object_ids = {
@@ -33,21 +37,23 @@ function match_handler.match_init(context, setupstate)
         map_id = setupstate.map_id,
         map_owner_id = setupstate.map_owner_id,
 
-        expected_players = {}, -- numbered presences
-        joined_players = {}, -- key=user_id val=presence
-        ready_players = {}, -- key=user_id val=bool (map loaded and ready to start)
-        turn_order = {}, -- numbered user_ids
-        turn_count = {},
-        player_positions = {}, -- key=user_id val=var2str string
+        players = {}, -- key=user_id val=presence
+        turn_order = {}, -- numbered user ids of not finished players (shrinks)
         next_player_idx = 1,
 
         started = false,
     }
 
-    for _, user in ipairs(setupstate.invited) do
-        -- nk.logger_info(string.format("Trying to add %s to expected players.",nk.json_encode(user.presence)))
-        gamestate.expected_players[user.presence.user_id] = user.presence
-        gamestate.ready_players[user.presence.user_id] = false
+    for _, user in ipairs(setupstate.matched_users) do
+        gamestate.players[user.presence.user_id] = {
+            presence = user.presence,
+            properties = user.properties,
+            joined = false,
+            ready = false,
+            finished = false,
+            ball_pos = nil,
+            turn_count = 0
+        }
     end
 
     local tickrate = 5
@@ -56,30 +62,47 @@ function match_handler.match_init(context, setupstate)
 end
 
 function match_handler.match_join_attempt(context, dispatcher, tick, state, presence, metadata)
+    -- accept all
+
     local acceptuser = true
     return state, acceptuser
 end
 
 function match_handler.match_join(context, dispatcher, tick, state, presences)
-    local _turn_order = {}
-    local key_idx = 0
+    -- Sets players.joined
+    -- Sends MATCH_CONFIG
 
     for _, user in ipairs(presences) do
-        state.joined_players[user.user_id] = user
-        --nk.logger_info(string.format("------ Joined: %s",user.user_id))
+        nk.logger_info(nk.json_encode(user))
+        nk.logger_info(nk.json_encode(state.players[user.user_id]))
+        state.players[user.user_id].joined = true
     end
 
     local op_code = OpCodes.MATCH_CONFIG
-    local data = nk.json_encode({map_id= state.map_id, map_owner_id= state.map_owner_id}) --, turn_order= state.expected_players})
+    local data = nk.json_encode({map_id= state.map_id, map_owner_id= state.map_owner_id})
     local reciever = presences
-    --nk.logger_info(string.format(" -> Sending MATCH_SETUP to %s", presences))
+
     dispatcher.broadcast_message(op_code, data, reciever)
     return state
 end
 
+
 function match_handler.match_leave(context, dispatcher, tick, state, presences)
+    -- set players joined to false
+    -- broadcasts PLAYER_LEFT to all
+
+    for _, user in ipairs(presences) do
+        state.players[user.user_id].joined = false
+    end
+
+    local op_code = OpCodes.PLAYER_LEFT
+    local data = nk.json_encode({
+        left_players = presences,
+    })
+    dispatcher.broadcast_message(op_code, data, nil)
     return state
 end
+
 
 function match_handler.match_loop(context, dispatcher, tick, state, messages)
         -- Messages format:
@@ -98,82 +121,117 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
     -- }
 
     -- match loading
-    if state.started ~= true then
+    if state.started == false then
         for _, msg in ipairs(messages) do
             if msg.op_code == OpCodes.MATCH_CLIENT_READY then
-                state.ready_players[msg.sender.user_id] = true
+                state.players[msg.sender.user_id].ready = true
                 nk.logger_info(string.format("%s is now ready",msg.sender.user_id))
             end
         end
 
-        for _, user in pairs(state.expected_players) do
-            --nk.logger_info(string.format("Joined: %s | checking for %s",nk.json_encode(state.joined_players),nk.json_encode(user)))
-            -- nk.logger_info(string.format("Joined: %s | Expected %s",nk.json_encode(state.joined_players),nk.json_encode(state.expected_players)))
-            if state.joined_players[user.user_id] == nil or state.ready_players[user.user_id] == false then
-                --nk.logger_info(string.format("Missing user id: %s. joined_players[user_id] = %s",user.user_id, state.joined_players[user.user_id]))
-                return state
+        -- wait for all players to join
+        for _, user in pairs(state.players) do
+            if user.joined == false then
+                return state --abort
             end
         end
 
+        -- start match
         -- generate turn order
-        for _, v in pairs(state.joined_players) do
+        local data = {presences = {}}
+
+        for _, player in pairs(state.players) do
+            data.presences[player.presence.user_id] = player.presence -- collect for MATCH_START msg
+
             local pos = math.random(1, #state.turn_order+1)
-            table.insert(state.turn_order, pos, v.user_id)
+            table.insert(state.turn_order, pos, player.presence.user_id)
         end
 
-        -- announce match start
+        data.turn_order = state.turn_order
+
+        -- broadcast match start and turn order
         state.started = true
-        local data = nk.json_encode({ joined_players = state.joined_players, turn_order = state.turn_order})
+        data = nk.json_encode(data)
         dispatcher.broadcast_message(OpCodes.MATCH_START, data, nil) -- send match start to all presences
     end
 
-    -- match is started from here
+    -- match running
     if messages ~= nil then
+
+        -- process messages
         for _, msg in ipairs(messages) do
-            if  msg.op_code == OpCodes.BALL_IMPACT then -- forward ball impacts to everyone
-                if state.turn_order[state.next_player_idx] == msg.sender.user_id then -- only broadcast if player is at turn FIXME sync will still happen
+
+            -- BALL_IMPACT
+            if  msg.op_code == OpCodes.BALL_IMPACT then
+                -- forward to all (if its players turn)
+                if state.turn_order[state.next_player_idx] == msg.sender.user_id then
                     dispatcher.broadcast_message(OpCodes.BALL_IMPACT, msg.data, nil, msg.sender)
                     -- TODO verify max impact_vec length of 1 (not possible yet because BALL_SYNC cant be confirmed yet)
                 end
 
-            elseif msg.op_code == OpCodes.BALL_SYNC then -- after local ball finished this is sent to sync
+
+                -- BALL_SYNC
+            elseif msg.op_code == OpCodes.BALL_SYNC then
+                -- broadcast to all
+                -- update players.ball_pos
                 dispatcher.broadcast_message(OpCodes.BALL_SYNC, msg.data, nil, msg.sender)
-                state.player_positions[msg.sender] = nk.json_decode(msg.data)["synced_pos"]
+                state.players[msg.sender.user_id].ball_pos = nk.json_decode(msg.data)["synced_pos"]
 
-            elseif msg.op_code == OpCodes.FINISHED_TURN then
-                if msg.sender.user_id ~= state.turn_order[state.next_player_idx] then -- verify the sender is the next player in turn order
-                    --nk.logger_error("Recieved FINISHED_TURN from wrong player (not his turn)")
-                else
-                    if state.turn_count[msg.sender.user_id] == nil then -- initialize turn counter (if not already)
-                        state.turn_count[msg.sender.user_id] = 0
+
+                -- TURN_COMPLETED
+            elseif msg.op_code == OpCodes.TURN_COMPLETED then
+                -- verify its the senders turn
+                if msg.sender.user_id == state.turn_order[state.next_player_idx] then
+                    -- increment turn_count
+                    state.players[msg.sender.user_id].turn_count = state.players[msg.sender.user_id].turn_count + 1
+
+                    -- increment next_player_idx
+                    for k, v in ipairs(state.turn_order)do
+                        state.next_player_idx = ((state.next_player_idx) % #state.turn_order) +1 -- increment next player idx (indices start at 1)
+                        if state.players[state.turn_order[state.next_player_idx]].finished == false then -- skip finished players TODO skip left players too
+                            break
+                        end
                     end
 
-                    state.turn_count[msg.sender.user_id] = state.turn_count[msg.sender.user_id] + 1 -- count turns
 
-                    if nk.json_decode(msg.data)["reached_finish"] then -- player is finished with map
-                        for k, user_id in ipairs(state.turn_order) do -- remove him from turn_order
-                            if user_id == msg.sender.user_id then
-                                table.remove(state.turn_order,k) -- TODO decrement next_player_idx to account for more than 2 players
-                                state.next_player_idx = state.next_player_idx -1 -- only possible this way because it gets incremented directly afterwards (below)
-                                break
-                            end
-                        end
-                        if #state.turn_order == 0 then -- end game if no players remain (maybe someday configurable remaining players till end match-parameter)
-                            local data = nk.json_encode({scores = state.turn_count})
-                            dispatcher.broadcast_message(OpCodes.MATCH_END, data)
-                            return nil
-                        end
-                        dispatcher.broadcast_message(OpCodes.REACHED_FINISH, nil, nil, msg.sender)-- broadcast FINISHED_TURN
-                    end
-
-                    state.next_player_idx = ((state.next_player_idx) % #state.turn_order) +1 -- increment next player idx (indices start at 1)
-
-                    -- broadcast next player
+                    -- broadcast NEXT_TURN
                     local data = nk.json_encode({next_player = state.turn_order[state.next_player_idx]})
                     dispatcher.broadcast_message(OpCodes.NEXT_TURN, data, nil)
+                else
+                    nk.logger_error("Recieved TURN_COMPLETED from wrong player, ignoring.")
                 end
+
+
+                -- REACHED_FINISH
             elseif msg.op_code == OpCodes.REACHED_FINISH then
-                nk.logger_error("Recieved REACHED_FINISH which must not be sent by clients (Announce in FINISHED_MOVING data)")
+                -- remove from turn_order
+                for k, user_id in ipairs(state.turn_order) do
+                    if user_id == msg.sender.user_id then
+                        -- table.remove(state.turn_order,k)
+                        -- state.next_player_idx = state.next_player_idx -1 -- hack because it gets incremented again below
+                        state.players[msg.sender.user_id].finished = true
+                        break
+                    end
+                end
+
+                -- end match if no players left
+                for k, player in pairs(state.players) do
+                    if player.finished == false then
+                        break -- not all finished
+                    end
+
+                    -- end match
+                    local _turn_count = {}
+                    for _, v in ipairs(state.turn_order) do
+                        _turn_count[v] = state.players[v].turn_count
+                    end
+                    local data = nk.json_encode({turn_count = _turn_count})
+                    dispatcher.broadcast_message(OpCodes.MATCH_END, data)
+                    return nil
+                end
+
+                -- forward TURN_COMPLETED
+                dispatcher.broadcast_message(OpCodes.TURN_COMPLETED, nil, nil, msg.sender)-- broadcast FINISHED_TURN
             end
         end
     end

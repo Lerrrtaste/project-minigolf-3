@@ -8,12 +8,11 @@
 
 - enforce objects only non solid, non resetting tiles (and remove when tile removed)
 - test if tiles as nodes work (for juicy effects and better collision and better tile property detection
-- (fix / ) rewrite turn order to be used equally by server and client
 - fix practive mode
 - hide balls behind walls
 
 - handle presence events (only leaves)
-- end authorative matches properly (return nil in match_loop does not work)
+
 
 - finalize match end screen
 - main menu ui + map selection
@@ -23,6 +22,8 @@
 
 
 #### DONE
+- (fix / ) rewrite turn order to be used equally by server and client
+- end authorative matches properly (return nil in match_loop does not work)
 
 - ingame info popup (for limit reached, ingame events, errors etc)
 - player move impact should be normalized and controller by server (so mouse distance till max force can be client independent)
@@ -83,6 +84,14 @@ UI Pixel Scale 400%
 - Balls have juicy eyes and smile when they hit each other (with sound) (emoji golf?) and the eyes roll with the ball (up+down / left+right)
 - Map deltetion only a flag, remove after x days (to be able to restore maps with console access)
 - itch io page (cover, banner, screenshots, html player....)
+- Vote for next map
+- Map playlists
+- fixed maps
+- "conveyor belt" tiles in all directions
+- "death" tiles that reset to spawn (lava?)
+- ice tiles with lower friction
+- sticky walls
+- bouncy walls
 
 #### OP CODES
 
@@ -93,7 +102,7 @@ UI Pixel Scale 400%
 		sender: client
 		note: map loaded and client is ready
 
-112 MATCH_START (joined_players:List presences, turn_order:List user_ids )
+112 MATCH_START (presences:List presences, turn_order:List user_ids )
 		sender: server
 		note: implies next turn for first player in turn_order
 
@@ -104,15 +113,18 @@ UI Pixel Scale 400%
 		sender: server
 		after recieving a FINISHED_TURN the next player is announced
 
-125 FINISHED_TURN (reached_finish:bool)
-		sender: client
+125 TURN_COMPLETED ()
+		sender: client (ball)
 		after ball stopped moving (because of friction or reaching the finish)
 
 130 REACHED_FINISH ()
 		sender: server
-		if reached_finish in the FINISHED_TURN msg was true
+		
 
-
+150 PLAYER_LEFT (left_players:Presences list)
+		sender: server
+		reciever: match
+		msg.sender is the leaving player
 
 
 // Ball Movement
@@ -124,3 +136,24 @@ UI Pixel Scale 400%
 202 BALL_SYNC (synced_pos:Vector2 absolute new pos)
 		sender client (local playercontroller)
 		reciever: remote pc
+
+
+
+
+#### Scrap
+
+<- config (map+owner)
+-> client ready
+<- match start (joined_players, turn order) (implies next_turn)
+
+-> finished turn (reached_finish)
+<- next turn (presence (should be id))
+
+	-> ball_impact (impact_vec)
+	-> ball_sync (synced_pos)
+
+-> finished turn (reached_finish true)
+<- reached_finish (sender -> finished player)
+
+<- match end (results)
+
