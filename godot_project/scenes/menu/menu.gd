@@ -1,11 +1,14 @@
 extends Control
 
+var MapCard = preload("res://objects/map_card/MapCard.tscn")
 
 onready var btn_matchmaking = get_node("BtnMatchmaking")
 onready var btn_editor = get_node("BtnEditor")
 onready var btn_practive = get_node("BtnPractice")
 
-onready var select_map = get_node("SelectMap")
+onready var box_map_cards = get_node("ContainerMaps/BoxMapCards")
+var map_cards:Array
+
 onready var lbl_display_name = get_node("PanelAccount/VBoxContainer/LblDisplayName")
 onready var lbl_guest = get_node("PanelAccount/VBoxContainer/LblGuest")
 onready var lbl_editor_guest_hint = get_node("BtnEditor/LblEditorGuestHint")
@@ -44,8 +47,16 @@ func load_ui():
 func refresh_map_selection():
 	var public_maps = yield(MapStorage.list_public_maps_async(), "completed")
 	for i in public_maps:
-		select_map.add_item(i.name)
-		select_map.set_item_metadata(select_map.get_item_count()-1, i)
+		var map_name = i.name
+		var creator_name = i.creator_name
+		var map_id = i.map_id
+		var creator_id = i.creator_id
+		
+		var inst = MapCard.instance()
+		box_map_cards.add_child(inst)
+		inst.populate(map_name, map_id, creator_id, creator_name)
+		
+		map_cards.append(inst)
 
 
 #### Event Callbacks
@@ -53,10 +64,25 @@ func refresh_map_selection():
 func _on_BtnMatchmaking_pressed():
 	if Networker.is_in_matchmaking():
 		Networker.matchmaking_cancel_async()
+		
 	else:
-		var map_id = select_map.get_selected_metadata()["map_id"]
-		var owner_id = select_map.get_selected_metadata()["owner_id"]
-		Networker.matchmaking_start_async(map_id,owner_id)
+		var map_pool:Array
+		for i in map_cards:
+			if i.is_included():
+				map_pool.append({
+					"map_id": i.map_id,
+					"creator_id": i.creator_id
+				})
+		
+		if map_pool.size() == 0:
+			Notifier.notify_error("Select at least one map", "or more")
+			return
+		
+		Networker.matchmaking_start_async(map_pool)
+		
+#		var map_id = select_map.get_selected_metadata()["map_id"]
+#		var owner_id = select_map.get_selected_metadata()["owner_id"]
+#		Networker.matchmaking_start_async(map_id,owner_id)
 	
 	btn_matchmaking.disabled = true
 	btn_matchmaking.text = "..."
@@ -66,9 +92,11 @@ func _on_BtnEditor_pressed():
 	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
 
 
+#FIXME FIXME FIXME FIXME
 func _on_BtnPractice_pressed():
-	Global.set_scene_parameters({ "practice": select_map.get_selected_id() })
-	get_tree().change_scene("res://scenes/match/Match.tscn")
+	pass
+	#Global.set_scene_parameters({ "practice": select_map.get_selected_id() })
+	#get_tree().change_scene("res://scenes/match/Match.tscn")
 
 
 func _on_Networker_matchmaking_started():

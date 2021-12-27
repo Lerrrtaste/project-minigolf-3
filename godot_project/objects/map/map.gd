@@ -185,11 +185,12 @@ func match_get_starting_position()->Vector2:
 
 #### Loading / Saving
 
-func update_metadata(map_id:String, map_name:String, creator_user_id:String):
+func update_metadata(map_id:String, map_name:String, creator_user_id:String, creator_display_name:String):
 	metadata.clear()
 	metadata["name"] = map_name
 	metadata["id"] = map_id
 	metadata["creator_user_id"] = creator_user_id
+	metadata["creator_display_name"] = creator_display_name
 	metadata["size"] = tilemap.get_used_rect().size
 	metadata["updated"] = true
 
@@ -205,6 +206,7 @@ func serialize()->String:
 			"name": "",
 			"id": "",
 			"creator_user_id": "",
+			"create_display_name": "",
 			"size": Vector2(),
 		}
 	}

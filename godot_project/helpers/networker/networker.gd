@@ -5,6 +5,8 @@ var session : NakamaSession
 var socket : NakamaSocket 
 var matchmaker_ticket : NakamaRTAPI.MatchmakerTicket
 
+var account : NakamaAPI.ApiAccount
+
 var connected_presences:Dictionary
 var joined_match:NakamaRTAPI.Match
 var matched_match:NakamaRTAPI.MatchmakerMatched
@@ -50,6 +52,8 @@ func socket_connect()->void:
 		return
 	print("Socket connected.")
 	emit_signal("socket_connected")
+	
+	account = yield(client.get_account_async(session),"completed")
 	
 	# register socket events
 	socket.connect("received_matchmaker_matched", self, "_on_matchmaker_matched")
@@ -162,7 +166,7 @@ func reset():
 
 #### Matches
 
-func matchmaking_start_async(map_id:String, owner_id:String)->void:
+func matchmaking_start_async(map_pool:Array)->void: # [{map_id:, creator_id:}, ...]
 	if !is_socket_connected():
 		printerr("Not connected")
 		return
@@ -170,17 +174,25 @@ func matchmaking_start_async(map_id:String, owner_id:String)->void:
 	if is_in_matchmaking():
 		printerr("Already in Matchmaking (has ticket)")
 		return
-		
-	var query = "+properties.map_id:%s"%String(map_id)
+	
+	var query = ""
 	var min_count = 2
 	var max_count = 2
-	var string_properties = {
-		"map_id": map_id,
-		"owner_id": owner_id,
-	}
+	var string_properties = {}
+	
+	for i in range(map_pool.size()):
+		#query += "properties./[0-9]{1,}_map_id/:%s "%str(map_pool[i].map_id)
+		query += "map_%s " % str(map_pool[i].map_id)
+		
+		#map 2d array to 1d 
+		string_properties["map_pool_%s"%(2 * i + 0)] = "map_%s"%map_pool[i].map_id
+		string_properties["map_pool_%s"%(2 * i + 1)] = "creator_%s"%map_pool[i].creator_id
+		
+	
 	var numeric_properties = { # broken atm
 		
 	} 
+	
 	matchmaker_ticket = yield(
 	  socket.add_matchmaker_async(query, min_count, max_count, string_properties, numeric_properties),
 	  "completed"
@@ -317,7 +329,9 @@ func get_user_id()->String:
 	return session.user_id
 
 
-func get_username()->String:
+func get_username(prefer_display_name:bool = false)->String:
+	if prefer_display_name and account.display_name != "":
+		return account.display_name
 	return session.username
 
 

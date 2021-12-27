@@ -42,9 +42,9 @@ __meta__ = {
 }
 
 [node name="PanelGuest" type="PanelContainer" parent="VBoxContainer"]
-margin_top = 13.0
+margin_top = 19.0
 margin_right = 414.0
-margin_bottom = 191.0
+margin_bottom = 193.0
 grow_horizontal = 2
 grow_vertical = 2
 custom_styles/panel = ExtResource( 9 )
@@ -56,7 +56,7 @@ __meta__ = {
 margin_left = 20.0
 margin_top = 20.0
 margin_right = 394.0
-margin_bottom = 158.0
+margin_bottom = 154.0
 size_flags_horizontal = 3
 alignment = 1
 __meta__ = {
@@ -72,34 +72,34 @@ text = "Play as guest"
 [node name="LineUsernameGuest" type="LineEdit" parent="VBoxContainer/PanelGuest/BoxGuest"]
 margin_top = 22.0
 margin_right = 374.0
-margin_bottom = 70.0
+margin_bottom = 66.0
 theme = ExtResource( 8 )
 placeholder_text = "Enter a Username"
 caret_blink = true
 
 [node name="BtnLoginGuest" type="Button" parent="VBoxContainer/PanelGuest/BoxGuest"]
 margin_left = 111.0
-margin_top = 74.0
+margin_top = 70.0
 margin_right = 262.0
-margin_bottom = 138.0
+margin_bottom = 134.0
 size_flags_horizontal = 4
 theme = ExtResource( 3 )
 custom_fonts/font = ExtResource( 2 )
 text = "guest login"
 
 [node name="LblOr" type="Label" parent="VBoxContainer"]
-margin_top = 195.0
+margin_top = 197.0
 margin_right = 414.0
-margin_bottom = 213.0
+margin_bottom = 215.0
 custom_fonts/font = SubResource( 3 )
 text = "OR"
 align = 1
 valign = 1
 
 [node name="PanelEmail" type="PanelContainer" parent="VBoxContainer"]
-margin_top = 217.0
+margin_top = 219.0
 margin_right = 414.0
-margin_bottom = 447.0
+margin_bottom = 441.0
 grow_horizontal = 2
 grow_vertical = 2
 custom_styles/panel = ExtResource( 10 )
@@ -111,7 +111,7 @@ __meta__ = {
 margin_left = 20.0
 margin_top = 20.0
 margin_right = 394.0
-margin_bottom = 210.0
+margin_bottom = 202.0
 size_flags_horizontal = 3
 alignment = 1
 __meta__ = {
@@ -129,7 +129,7 @@ text = "login"
 [node name="LineEmail" type="LineEdit" parent="VBoxContainer/PanelEmail/BoxEmail"]
 margin_top = 22.0
 margin_right = 374.0
-margin_bottom = 70.0
+margin_bottom = 66.0
 theme = ExtResource( 8 )
 custom_colors/font_color_selected = Color( 0, 0, 0, 1 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
@@ -139,9 +139,9 @@ placeholder_text = "Email"
 caret_blink = true
 
 [node name="LinePassword" type="LineEdit" parent="VBoxContainer/PanelEmail/BoxEmail"]
-margin_top = 74.0
+margin_top = 70.0
 margin_right = 374.0
-margin_bottom = 122.0
+margin_bottom = 114.0
 theme = ExtResource( 8 )
 custom_colors/font_color_selected = Color( 0, 0, 0, 1 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
@@ -177,9 +177,9 @@ placeholder_text = "Choose a Username"
 caret_blink = true
 
 [node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/PanelEmail/BoxEmail"]
-margin_top = 126.0
+margin_top = 118.0
 margin_right = 374.0
-margin_bottom = 190.0
+margin_bottom = 182.0
 
 [node name="BtnLoginEmail" type="Button" parent="VBoxContainer/PanelEmail/BoxEmail/HSplitContainer"]
 margin_right = 238.0

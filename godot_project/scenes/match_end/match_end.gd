@@ -1,4 +1,4 @@
-extends Node2D
+extends Control
 
 onready var text_result = get_node("VBoxContainer/PanelContainer/TextResult")
 

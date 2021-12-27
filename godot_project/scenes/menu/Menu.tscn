@@ -1,7 +1,7 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://scenes/menu/menu.gd" type="Script" id=1]
-[ext_resource path="res://assets/ui/button_yellow/button_yellow.tres" type="Theme" id=2]
+[ext_resource path="res://assets/ui/panels/metal_dark/panel_yellow_metal_dark.tres" type="StyleBox" id=2]
 [ext_resource path="res://assets/ui/general/general_ui.tres" type="Theme" id=3]
 [ext_resource path="res://assets/ui/fonts/font_small_button.tres" type="DynamicFont" id=4]
 [ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=5]
@@ -10,6 +10,7 @@
 [ext_resource path="res://assets/ui/buttons/big/yellow/button_yellow_big.tres" type="Theme" id=8]
 [ext_resource path="res://assets/ui/buttons/big/blue/button_blue_big.tres" type="Theme" id=9]
 [ext_resource path="res://assets/ui/buttons/small/red/button_red_small.tres" type="Theme" id=10]
+[ext_resource path="res://assets/ui/fonts/font_ui_title_small.tres" type="DynamicFont" id=11]
 
 [sub_resource type="DynamicFont" id=3]
 font_data = ExtResource( 5 )
@@ -19,6 +20,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 1 )
 __meta__ = {
+"_edit_horizontal_guides_": [ -68.0, -184.0 ],
 "_edit_use_anchors_": false
 }
 
@@ -35,31 +37,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BtnPractice" type="Button" parent="BtnMatchmaking"]
-anchor_left = 0.5
-anchor_top = 0.925
-anchor_right = 0.5
-anchor_bottom = 0.925
-margin_top = 50.0
-grow_horizontal = 2
-theme = ExtResource( 2 )
-custom_fonts/font = ExtResource( 4 )
-disabled = true
-text = "Practice"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="BtnEditor" type="Button" parent="."]
-anchor_left = 0.778
-anchor_top = 0.818
-anchor_right = 1.0
+anchor_top = 1.0
 anchor_bottom = 1.0
-margin_left = 13.3279
-margin_top = 0.199982
-margin_right = -29.0
-margin_bottom = -51.0
-grow_horizontal = 0
+margin_right = 25.0
+margin_bottom = -25.0
 grow_vertical = 0
 theme = ExtResource( 9 )
 custom_fonts/font = SubResource( 3 )
@@ -70,9 +52,8 @@ __meta__ = {
 }
 
 [node name="LblEditorGuestHint" type="Label" parent="BtnEditor"]
-anchor_top = 1.0
 anchor_right = 1.0
-anchor_bottom = 1.0
+grow_vertical = 0
 theme = ExtResource( 3 )
 custom_colors/font_color = Color( 0, 0, 0, 1 )
 custom_fonts/font = ExtResource( 7 )
@@ -84,18 +65,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="SelectMap" type="OptionButton" parent="."]
-margin_left = 65.0
-margin_top = 322.0
-margin_right = 202.0
-margin_bottom = 352.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="PanelAccount" type="PanelContainer" parent="."]
-margin_right = 225.0
-margin_bottom = 106.0
+margin_left = 5.0
+margin_top = 4.0
+margin_right = 173.0
+margin_bottom = 110.0
 custom_styles/panel = ExtResource( 6 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -104,12 +78,13 @@ __meta__ = {
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelAccount"]
 margin_left = 20.0
 margin_top = 20.0
-margin_right = 205.0
-margin_bottom = 116.0
+margin_right = 148.0
+margin_bottom = 86.0
 alignment = 1
 
 [node name="LblGuest" type="Label" parent="PanelAccount/VBoxContainer"]
-margin_right = 185.0
+visible = false
+margin_right = 197.0
 margin_bottom = 20.0
 theme = ExtResource( 3 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
@@ -118,35 +93,37 @@ text = "GUEST"
 align = 1
 
 [node name="LblDisplayName" type="Label" parent="PanelAccount/VBoxContainer"]
-margin_top = 24.0
-margin_right = 185.0
-margin_bottom = 48.0
+margin_right = 128.0
+margin_bottom = 18.0
 theme = ExtResource( 3 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = ExtResource( 11 )
 text = "LOADING..."
 align = 1
 
 [node name="LblPlayCount" type="Label" parent="PanelAccount/VBoxContainer"]
-margin_top = 52.0
-margin_right = 185.0
-margin_bottom = 72.0
+margin_top = 22.0
+margin_right = 128.0
+margin_bottom = 42.0
 theme = ExtResource( 3 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = ExtResource( 7 )
 text = "Played: 0"
 
 [node name="LblWinCount" type="Label" parent="PanelAccount/VBoxContainer"]
-margin_top = 76.0
-margin_right = 185.0
-margin_bottom = 96.0
+margin_top = 46.0
+margin_right = 128.0
+margin_bottom = 66.0
 theme = ExtResource( 3 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = ExtResource( 7 )
 text = "Won: 0"
 
 [node name="BtnLogout" type="Button" parent="."]
-anchor_left = 1.0
-anchor_right = 1.0
+margin_left = 12.0
+margin_top = 117.0
+margin_right = 106.0
+margin_bottom = 165.0
 grow_horizontal = 0
 theme = ExtResource( 10 )
 text = "logout"
@@ -154,7 +131,59 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ContainerMaps" type="ScrollContainer" parent="."]
+anchor_left = 0.7
+anchor_top = 0.05
+anchor_right = 0.993
+anchor_bottom = 0.95
+margin_left = 0.200012
+margin_right = 20.0
+custom_styles/bg = ExtResource( 2 )
+scroll_horizontal_enabled = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BoxMapCards" type="VBoxContainer" parent="ContainerMaps"]
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 299.832
+margin_bottom = 59.0
+rect_pivot_offset = Vector2( -997, 248 )
+size_flags_horizontal = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="ContainerMaps/BoxMapCards"]
+margin_right = 279.0
+margin_bottom = 39.0
+size_flags_vertical = 1
+theme = ExtResource( 3 )
+custom_fonts/font = ExtResource( 11 )
+text = "include maps to search for"
+align = 1
+autowrap = true
+
+[node name="BtnPractice" type="Button" parent="."]
+anchor_left = 0.5
+anchor_top = 0.925
+anchor_right = 0.5
+anchor_bottom = 0.925
+margin_left = -62.0
+margin_top = -186.0
+margin_right = 62.0
+margin_bottom = -122.0
+grow_horizontal = 2
+theme = ExtResource( 8 )
+custom_fonts/font = ExtResource( 4 )
+disabled = true
+text = "Practice"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="BtnMatchmaking" to="." method="_on_BtnMatchmaking_pressed"]
-[connection signal="pressed" from="BtnMatchmaking/BtnPractice" to="." method="_on_BtnPractice_pressed"]
 [connection signal="pressed" from="BtnEditor" to="." method="_on_BtnEditor_pressed"]
 [connection signal="pressed" from="BtnLogout" to="." method="_on_BtnLogout_pressed"]
+[connection signal="pressed" from="BtnPractice" to="." method="_on_BtnPractice_pressed"]

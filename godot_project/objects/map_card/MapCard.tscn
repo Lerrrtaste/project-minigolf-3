@@ -1,0 +1,141 @@
+[gd_scene load_steps=12 format=2]
+
+[ext_resource path="res://assets/ui/general/general_ui.tres" type="Theme" id=1]
+[ext_resource path="res://assets/ui/fonts/font_ui_small.tres" type="DynamicFont" id=2]
+[ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=3]
+[ext_resource path="res://icon.png" type="Texture" id=4]
+[ext_resource path="res://assets/ui/panels/metal/panel_yellow_metal.tres" type="StyleBox" id=5]
+[ext_resource path="res://objects/map_card/icon_players.png" type="Texture" id=6]
+[ext_resource path="res://objects/map_card/map_card.gd" type="Script" id=7]
+[ext_resource path="res://objects/map_card/icon_dot.png" type="Texture" id=8]
+[ext_resource path="res://assets/ui/checkbox/checkbox_small_unchecked.png" type="Texture" id=9]
+[ext_resource path="res://assets/ui/checkbox/checkbox_small_checked.png" type="Texture" id=10]
+
+[sub_resource type="DynamicFont" id=1]
+font_data = ExtResource( 3 )
+
+[node name="MapCard" type="PanelContainer"]
+margin_right = 240.0
+margin_bottom = 144.0
+theme = ExtResource( 1 )
+custom_styles/panel = ExtResource( 5 )
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="GridContainer" type="GridContainer" parent="."]
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 220.0
+margin_bottom = 124.0
+size_flags_vertical = 6
+columns = 2
+
+[node name="SprPreview" type="TextureRect" parent="GridContainer"]
+margin_right = 64.0
+margin_bottom = 64.0
+texture = ExtResource( 4 )
+
+[node name="BoxInfo" type="VBoxContainer" parent="GridContainer"]
+margin_left = 68.0
+margin_right = 200.0
+margin_bottom = 64.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LblName" type="Label" parent="GridContainer/BoxInfo"]
+margin_right = 132.0
+margin_bottom = 18.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+custom_fonts/font = SubResource( 1 )
+text = "MAP NAME"
+
+[node name="LblCreator" type="Label" parent="GridContainer/BoxInfo"]
+margin_top = 22.0
+margin_right = 132.0
+margin_bottom = 42.0
+custom_fonts/font = ExtResource( 2 )
+text = "by creator"
+
+[node name="LblRating" type="Label" parent="GridContainer/BoxInfo"]
+visible = false
+margin_top = 46.0
+margin_right = 123.0
+margin_bottom = 66.0
+custom_fonts/font = ExtResource( 2 )
+text = "rated 5.5 / 10"
+
+[node name="LblAverage" type="Label" parent="GridContainer/BoxInfo"]
+visible = false
+margin_top = 46.0
+margin_right = 146.0
+margin_bottom = 66.0
+custom_fonts/font = ExtResource( 2 )
+text = "Average: 51 Shots"
+
+[node name="BoxPlayers" type="HBoxContainer" parent="GridContainer"]
+margin_top = 68.0
+margin_right = 64.0
+margin_bottom = 104.0
+hint_tooltip = "Players on this map right now"
+
+[node name="TexPlayers" type="TextureRect" parent="GridContainer/BoxPlayers"]
+visible = false
+margin_right = 32.0
+margin_bottom = 36.0
+texture = ExtResource( 6 )
+
+[node name="TexDot" type="TextureRect" parent="GridContainer/BoxPlayers/TexPlayers"]
+anchor_left = 0.8
+anchor_top = 0.1
+anchor_right = 0.8
+anchor_bottom = 0.1
+margin_left = -6.0
+margin_top = -6.0
+margin_right = 6.0
+margin_bottom = 6.0
+grow_horizontal = 2
+grow_vertical = 2
+rect_pivot_offset = Vector2( 0.400002, 0 )
+texture = ExtResource( 8 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblPlayers" type="Label" parent="GridContainer/BoxPlayers/TexPlayers"]
+process_priority = 1
+margin_left = 36.0
+margin_top = 8.0
+margin_right = 46.0
+margin_bottom = 28.0
+custom_fonts/font = ExtResource( 2 )
+text = "16"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckInclude" type="CheckBox" parent="GridContainer"]
+margin_left = 68.0
+margin_top = 68.0
+margin_right = 200.0
+margin_bottom = 104.0
+hint_tooltip = "Choose if you want to play this map in online matchmaking"
+size_flags_horizontal = 6
+custom_colors/font_color_disabled = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_colors/font_color_focus = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_colors/font_color_hover_pressed = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_colors/font_color_hover = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_colors/font_color_pressed = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = ExtResource( 2 )
+custom_icons/checked = ExtResource( 10 )
+custom_icons/unchecked = ExtResource( 9 )
+text = "in map pool"
+align = 1
+expand_icon = true
+
+[node name="Tween" type="Tween" parent="."]
+repeat = true
+playback/repeat = true

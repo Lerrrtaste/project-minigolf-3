@@ -43,15 +43,17 @@ func list_owned_maps_async()->Dictionary: # -> {"map_id": "name", ...}
 	return owned_maps
 
 
-func list_public_maps_async()->Array: # ->  [{"map_id":, "owner_id":, "name":},...]
+func list_public_maps_async()->Array: # ->  [{"map_id":, "creator_id":, "name":, "owner_name":},...]
 	var result = yield(Networker.collection_list_public_objects_async(Global.MAP_COLLECTION), "completed")
 	
 	var public_maps:Array
 	for i in result:
+		var metadata_dict = JSON.parse(i.value).result["metadata"]
 		var entry = {
 			"map_id": i.key,
-			"owner_id": i.user_id,
-			"name": JSON.parse(i.value).result["metadata"]["name"],
+			"creator_id": i.user_id,
+			"creator_name": metadata_dict["creator_display_name"] if metadata_dict.has("creator_display_name") else "N/A",
+			"name": metadata_dict["name"], 
 			}
 		public_maps.append(entry)
 	

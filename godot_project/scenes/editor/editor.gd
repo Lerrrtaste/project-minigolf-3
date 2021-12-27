@@ -240,12 +240,13 @@ func _on_BtnSave_pressed():
 	var current_metadata = map.metadata
 	var map_id:String
 	var creator_id = Networker.session.user_id
+	var creator_display_name = Networker.get_username(true)
 	var map_name = menu_edit_name.text
 	if current_metadata.has("id"):
 		map_id = current_metadata["id"]
 	else:
 		map_id = String(OS.get_unix_time()) # TODO replace with proper uid gen (maybe by server request)
-	map.update_metadata(map_id, map_name, creator_id)
+	map.update_metadata(map_id, map_name, creator_id, creator_display_name)
 	
 	# export map
 	var map_jstring = map.serialize()

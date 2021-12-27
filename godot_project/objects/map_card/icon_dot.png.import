@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/button_yellow_sheet.png-0ae085daa1aaa8768353d5255a066c4b.stex"
+path="res://.import/icon_dot.png-b710b45e00c37df2b9d37ae5fc94f761.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/button_yellow/button_yellow_sheet.png"
-dest_files=[ "res://.import/button_yellow_sheet.png-0ae085daa1aaa8768353d5255a066c4b.stex" ]
+source_file="res://objects/map_card/icon_dot.png"
+dest_files=[ "res://.import/icon_dot.png-b710b45e00c37df2b9d37ae5fc94f761.stex" ]
 
 [params]
 
