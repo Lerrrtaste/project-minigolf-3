@@ -44,7 +44,12 @@ func _on_BtnDelete_pressed():
 		delete_confirm = true
 		btn_delete.text = "CONFIRM DELETION"
 
+func cancle_delete():
+	disable_buttons(false)
+	btn_delete.text = "Delete"
+
 func disable_buttons(disabled:bool):
 	btn_delete.disabled = disabled
 	btn_edit.disabled = disabled
 	btn_practice.disabled = disabled
+

@@ -1,8 +1,5 @@
 #### TODOS
 
-- show editor controls somewhere
-
-- enforce objects only non solid, non resetting tiles (and remove when tile removed)
 - test if tiles as nodes work (for juicy effects and better collision and better tile property detection
 - fix practive mode
 - hide balls behind walls
@@ -10,21 +7,23 @@
 - handle presence events (only leaves)
 - end authorative matches after x time when everyone left
 
-- finalize match end screen
 - main menu ui + map selection
-
 
 - Final MVP export :)
 
 
 #### DONE
+- confirmation dialog for delete and discarding changes
+- finalize match end screen
+- enforce objects only non solid, non resetting tiles (and remove when tile removed)
+- show editor controls somewhere
+
 - Background 
 - walls shouldnt hide water
 - Main Menu UI
 - editor popup close button sprite
 - login screen
 - set guest account metadata guest=true
-
 - (fix / ) rewrite turn order to be used equally by server and client
 - end authorative matches properly (return nil in match_loop does not work)
 - ingame info popup (for limit reached, ingame events, errors etc)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://scenes/editor/editor.gd" type="Script" id=1]
 [ext_resource path="res://objects/map_objects/finish/finish.png" type="Texture" id=2]
@@ -15,6 +15,9 @@
 [ext_resource path="res://assets/ui/checkbox/checkbox_unchecked.png" type="Texture" id=13]
 [ext_resource path="res://assets/ui/checkbox/checkbox_checked.png" type="Texture" id=14]
 [ext_resource path="res://assets/ui/general/form_theme.tres" type="Theme" id=15]
+[ext_resource path="res://assets/ui/general/general_ui.tres" type="Theme" id=16]
+[ext_resource path="res://assets/ui/panels/metal_dark/panel_red_metal_dark.tres" type="StyleBox" id=17]
+[ext_resource path="res://assets/ui/buttons/big/red/button_red_big.tres" type="Theme" id=18]
 
 [sub_resource type="DynamicFont" id=2]
 size = 32
@@ -48,8 +51,9 @@ texture = ExtResource( 2 )
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="UI" type="Control" parent="CanvasLayer"]
-margin_right = 40.0
-margin_bottom = 40.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -126,7 +130,6 @@ anchor_left = 0.1
 anchor_top = 0.1
 anchor_right = 0.9
 anchor_bottom = 0.9
-margin_bottom = 25.96
 theme = ExtResource( 15 )
 alignment = 1
 __meta__ = {
@@ -135,7 +138,7 @@ __meta__ = {
 
 [node name="LblMenu" type="Label" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
 margin_right = 324.0
-margin_bottom = 80.0
+margin_bottom = 71.0
 size_flags_vertical = 3
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = SubResource( 2 )
@@ -143,9 +146,9 @@ text = "MENU"
 align = 1
 
 [node name="GridContainer" type="GridContainer" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
-margin_top = 84.0
+margin_top = 75.0
 margin_right = 324.0
-margin_bottom = 200.0
+margin_bottom = 191.0
 columns = 2
 
 [node name="LblName" type="Label" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
@@ -164,6 +167,7 @@ size_flags_horizontal = 3
 theme = ExtResource( 15 )
 max_length = 16
 placeholder_text = "Enter a Name"
+caret_blink = true
 
 [node name="LblPublic" type="Label" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
 margin_top = 72.0
@@ -186,16 +190,34 @@ size_flags_vertical = 4
 custom_icons/checked = ExtResource( 14 )
 custom_icons/unchecked = ExtResource( 13 )
 
-[node name="BtnSave" type="Button" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
-margin_left = 77.0
-margin_top = 221.0
-margin_right = 247.0
-margin_bottom = 285.0
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
+margin_top = 195.0
+margin_right = 324.0
+margin_bottom = 259.0
+alignment = 1
+
+[node name="BtnSave" type="Button" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer"]
+margin_left = 19.0
+margin_right = 189.0
+margin_bottom = 64.0
 size_flags_horizontal = 4
 size_flags_vertical = 10
 theme = ExtResource( 8 )
 custom_fonts/font = ExtResource( 7 )
 text = "Save and Exit"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BtnDiscard" type="Button" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer"]
+margin_left = 193.0
+margin_right = 305.0
+margin_bottom = 64.0
+size_flags_horizontal = 4
+size_flags_vertical = 10
+theme = ExtResource( 18 )
+custom_fonts/font = ExtResource( 7 )
+text = "Discard"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -213,8 +235,76 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Label" type="Label" parent="CanvasLayer/UI"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 147.12
+grow_vertical = 0
+theme = ExtResource( 16 )
+text = "USE WASD to move"
+
+[node name="PopupDiscard" type="WindowDialog" parent="CanvasLayer/UI"]
+anchor_right = 0.323
+anchor_bottom = 0.257
+margin_right = 68.248
+margin_bottom = -0.199997
+custom_styles/panel = ExtResource( 17 )
+popup_exclusive = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/UI/PopupDiscard"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 25.0
+margin_top = 25.0
+margin_right = -25.0
+margin_bottom = -25.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblDiscard" type="Label" parent="CanvasLayer/UI/PopupDiscard/VBoxContainer"]
+margin_right = 349.0
+margin_bottom = 36.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource( 16 )
+custom_fonts/font = ExtResource( 11 )
+text = "DISCARD ALL CHANGES AND EXIT?"
+align = 1
+valign = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/UI/PopupDiscard/VBoxContainer"]
+margin_top = 40.0
+margin_right = 349.0
+margin_bottom = 104.0
+alignment = 1
+
+[node name="BtnDiscardConfirm" type="Button" parent="CanvasLayer/UI/PopupDiscard/VBoxContainer/HBoxContainer"]
+margin_left = 65.0
+margin_right = 177.0
+margin_bottom = 64.0
+theme = ExtResource( 18 )
+custom_fonts/font = ExtResource( 7 )
+disabled = true
+text = "discard"
+
+[node name="BtnDiscardCancel" type="Button" parent="CanvasLayer/UI/PopupDiscard/VBoxContainer/HBoxContainer"]
+margin_left = 181.0
+margin_right = 283.0
+margin_bottom = 64.0
+theme = ExtResource( 8 )
+custom_fonts/font = ExtResource( 7 )
+text = "Cancel"
+
 [connection signal="item_selected" from="CanvasLayer/UI/ContainerMapEdit/SelectTool" to="." method="_on_SelectTool_item_selected"]
 [connection signal="item_selected" from="CanvasLayer/UI/ContainerMapEdit/SelectObject" to="." method="_on_SelectObject_item_selected"]
 [connection signal="pressed" from="CanvasLayer/UI/BtnMenu" to="." method="_on_BtnMenu_pressed"]
-[connection signal="pressed" from="CanvasLayer/UI/SaveMenu/VBoxContainer/BtnSave" to="." method="_on_BtnSave_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnSave" to="." method="_on_BtnSave_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnDiscard" to="." method="_on_BtnDiscard_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/SaveMenu/BtnClose" to="." method="_on_BtnClose_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/PopupDiscard/VBoxContainer/HBoxContainer/BtnDiscardConfirm" to="." method="_on_BtnDiscardConfirm_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/PopupDiscard/VBoxContainer/HBoxContainer/BtnDiscardCancel" to="." method="_on_BtnDiscardCancel_pressed"]

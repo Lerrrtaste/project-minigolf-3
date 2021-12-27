@@ -65,12 +65,14 @@ const OBJECT_DATA = {
 		Objects.START: {
 				"name": "Spawn",
 				"limit": 1, #only one
+				"required": 1,
 				"scene_path":"res://objects/map_objects/start/Start.tscn",
 				"texture_path":"res://objects/map_objects/start/start.png"
 				},
 		Objects.FINISH: {
 				"name": "Finish",
-				"limit": 1,
+				"limit": 4,
+				"required": 1,
 				"scene_path":"res://objects/map_objects/finish/Finish.tscn",
 				"texture_path":"res://objects/map_objects/finish/finish.png"
 				},
@@ -99,11 +101,25 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 	
 	#dont spawn if cell already occupied
 	if spawned_objects.keys().has(cell):
+		Notifier.notify_editor("This Tile already has an object")
 		return
 	
 	# object is in OBJECT_DATA
 	if not OBJECT_DATA.keys().has(object_id):
 		printerr("Object with id %s does not exist!"%object_id)
+		return
+	
+	
+	# check if the tile beneath is valid
+	var tilemap_id = tilemap.get_cellv(cell)
+	var tdata
+	
+	for i in TILE_DATA:
+		if TILE_DATA[i]["tilemap_id"] == tilemap_id:
+			tdata = TILE_DATA[i]
+	
+	if tdata["solid"] or tdata["ball_reset"]:
+		Notifier.notify_editor("This object cant be placed on this tile")
 		return
 	
 	# find object data
@@ -117,7 +133,7 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 			if spawned_objects[i].OBJECT_ID == object_id:
 				remaining -= 1
 		if remaining <= 0:
-			print("Object limit reached")
+			Notifier.notify_editor("Object limit reached")
 			return
 	
 	var obj = load(path).instance()
@@ -289,6 +305,29 @@ func isometric_to_cartesion(iso:Vector2)->Vector2:
 	cart.x = (2 * iso.y + iso.x) / 2
 	cart.y = (2 * iso.y - iso.x) / 2
 	return cart
+
+
+func is_map_valid()->bool:
+	# objects
+	for id in OBJECT_DATA.keys():
+		var limit = OBJECT_DATA[id]["limit"]
+		var required = OBJECT_DATA[id]["required"]
+		
+		for j in spawned_objects:
+			if spawned_objects[j].OBJECT_ID == id:
+				limit -= 1
+				required -= 1
+		
+		if limit < 0:
+			Notifier.notify_editor("There are too many %s objects"%OBJECT_DATA[id]["name"], "Max %s of this object are allowed" %OBJECT_DATA[id]["limit"])
+			return false
+			
+		if required > 0:
+			Notifier.notify_editor("There are not enough %s objects"%OBJECT_DATA[id]["name"], "At least %s of this object are required" %OBJECT_DATA[id]["required"])
+			return false
+	
+	return true
+
 
 
 #### Setget

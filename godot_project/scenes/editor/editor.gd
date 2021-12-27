@@ -9,12 +9,15 @@ onready var line_border = get_node("Map/LineBorder")
 # ui
 onready var menu_edit_name = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer/EditName")
 onready var menu_check_public = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer/CheckPublic")
-onready var menu_btn_save = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/BtnSave")
+onready var menu_btn_save = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnSave")
+onready var menu_btn_discard = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnDiscard")
 onready var menu_popup = get_node("CanvasLayer/UI/SaveMenu")
 onready var select_tile = get_node("CanvasLayer/UI/ContainerMapEdit/SelectTile")
 onready var select_tool = get_node("CanvasLayer/UI/ContainerMapEdit/SelectTool")
 onready var select_object = get_node("CanvasLayer/UI/ContainerMapEdit/SelectObject")
 
+onready var popup_discard = get_node("CanvasLayer/UI/PopupDiscard")
+onready var btn_discard_confirm = get_node("CanvasLayer/UI/PopupDiscard/VBoxContainer/HBoxContainer/BtnDiscardConfirm")
 
 var show_cursor := true
 onready var spr_object_cursor = get_node("SprObjectCursor")
@@ -111,17 +114,18 @@ func _ready():
 
 func _process(delta):
 	
-	var cam_movement := Vector2()
-	var cam_speed = 5
-	if Input.is_key_pressed(KEY_W):
-		cam_movement.y -= cam_speed
-	if Input.is_key_pressed(KEY_S):
-		cam_movement.y += cam_speed 
-	if Input.is_key_pressed(KEY_A):
-		cam_movement.x -= cam_speed 
-	if Input.is_key_pressed(KEY_D):
-		cam_movement.x += cam_speed
-	camera_editor.position += cam_movement
+	if not menu_popup.visible:
+		var cam_movement := Vector2()
+		var cam_speed = 5
+		if Input.is_key_pressed(KEY_W):
+			cam_movement.y -= cam_speed
+		if Input.is_key_pressed(KEY_S):
+			cam_movement.y += cam_speed 
+		if Input.is_key_pressed(KEY_A):
+			cam_movement.x -= cam_speed 
+		if Input.is_key_pressed(KEY_D):
+			cam_movement.x += cam_speed
+		camera_editor.position += cam_movement
 	update()
 
 
@@ -218,6 +222,9 @@ func _on_BtnMenu_pressed():
 	
 
 func _on_BtnSave_pressed():
+	if not map.is_map_valid():
+		return
+		
 	if menu_edit_name.text.length() < Global.MAP_NAME_LENGTH_MIN:
 		Notifier.notify_editor("Name too short", "Min %s chars"%Global.MAP_NAME_LENGTH_MIN)
 		return
@@ -250,3 +257,19 @@ func _on_BtnSave_pressed():
 
 func _on_BtnClose_pressed():
 	menu_popup.visible=false
+
+
+func _on_BtnDiscard_pressed():
+	btn_discard_confirm.disabled = true
+	popup_discard.popup_centered()
+	yield(get_tree().create_timer(1), "timeout")
+	btn_discard_confirm.disabled = false
+
+
+func _on_BtnDiscardConfirm_pressed():
+	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
+
+
+func _on_BtnDiscardCancel_pressed():
+	pass # Replace with function body.
+	popup_discard.visible = false

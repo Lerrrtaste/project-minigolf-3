@@ -4,7 +4,10 @@ var MapItem = load("res://scenes/editor_menu/map_item/MapItem.tscn")
 
 onready var container_maps = get_node("Control/PanelContainer/ContainerMaps")
 onready var lbl_placeholder = get_node("Control/PanelContainer/ContainerMaps/LblPlaceholder")
+onready var popup_delete = get_node("Control/PopupDelete")
+onready var btn_delete_confirm = get_node("Control/PopupDelete/VBoxContainer/HBoxContainer/BtnDeleteConfirm")
 
+var deleting_map_id:String
 var items:Array
 
 func _ready():
@@ -12,6 +15,9 @@ func _ready():
 
 
 func populate_map_list():
+	lbl_placeholder.visible = true
+	lbl_placeholder.text = "Loading..."
+	
 	for i in items:
 		i.queue_free()
 		i.visible = false
@@ -42,10 +48,12 @@ func _on_MapItem_open_editor(map_id, map_name):
 
 
 func _on_MapItem_delete(map_id):
-	MapStorage.delete_map(map_id)
-	yield(get_tree().create_timer(0.5),"timeout")
-	Notifier.notify_editor("Map deleted")
-	populate_map_list()
+	deleting_map_id = map_id
+	btn_delete_confirm.disabled = true
+	popup_delete.popup_centered()
+	yield(get_tree().create_timer(1), "timeout")
+	btn_delete_confirm.disabled = false
+	
 
 
 func _on_MapItem_practice(map_id):
@@ -59,3 +67,27 @@ func _on_BtnCreate_pressed():
 	Notifier.notify_editor("Creating new map")
 	Global.set_scene_parameters(params)
 	get_tree().change_scene("res://scenes/editor/Editor.tscn")
+
+
+func _on_BtnBack_pressed():
+	get_tree().change_scene("res://scenes/menu/Menu.tscn")
+
+
+func _on_BtnDeleteConfirm_pressed():
+	MapStorage.delete_map(deleting_map_id)
+	yield(get_tree().create_timer(0.5),"timeout")
+	Notifier.notify_editor("Map deleted")
+	populate_map_list()
+
+	deleting_map_id = ""
+	popup_delete.visible = false
+
+
+func _on_BtnDeleteCancel_pressed():
+	for i in items:
+		if i.map_id == deleting_map_id:
+			i.cancle_delete()
+			break
+	deleting_map_id = ""
+	popup_delete.visible = false
+
