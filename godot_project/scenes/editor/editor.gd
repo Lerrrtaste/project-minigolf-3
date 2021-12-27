@@ -246,3 +246,7 @@ func _on_BtnSave_pressed():
 	yield(MapStorage.save_map_async(map_id, map_jstring,public), "completed")
 	Notifier.notify_editor("Saved succesfully","TODO Its a lie, move this to somewhere it can be confirmed")
 	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
+
+
+func _on_BtnClose_pressed():
+	menu_popup.visible=false

@@ -19,9 +19,11 @@ var MatchCamera = preload("res://helpers/cameras/match_camera/MatchCamera.tscn")
 var remote_balls:Dictionary
 var local_ball
 
-var presences := {} # presences (key is user_id)
-var turn_order := [] # for ui only (turns are dispatched by server)
-var turn_count_local := {} # userid -> shots count
+var expected_user_ids:Array
+var presences:Dictionary # presences (key is user_id)
+var accounts:Dictionary # full accounts (key userid)
+var turn_order:Array# for ui only (turns are dispatched by server)
+var turn_count_local:Dictionary # userid -> shots count
 var current_turn_user:String = "" # user_id
 
 var map_id 
@@ -61,8 +63,12 @@ func change_state(new_state:int):
 	assert(current_state != new_state)
 	match new_state:
 		States.LOADING:
+			Notifier.notify_game("Game is loading")
 			load_map(map_id, map_owner_id)
+			load_accounts(expected_user_ids)
+			Networker.match_send_state_async(Global.OpCodes.MATCH_CLIENT_READY)
 		States.PLAYING:
+			Notifier.notify_game("Match started")
 			_start_match()
 		States.PRACTICE:
 			pass #load_map(map_id)
@@ -76,24 +82,24 @@ func change_state(new_state:int):
 	current_state = new_state
 
 
-func spawn_ball(local:bool, user_id:String):
+func spawn_ball(local:bool, account):
 	if local and local_ball != null:
 		printerr("Trying to spawn a second local ball")
 		return
 	
-	if not local and user_id == Networker.get_user_id():
+	if not local and account.id == Networker.get_user_id():
 		printerr("Trying to spawn remote ball for local user_id")
 		return
 	
 	var new_ball = Ball.instance()
 	
 	if local:
-		new_ball.setup_playercontroller(PlayerControllerLocal,user_id)
+		new_ball.setup_playercontroller(PlayerControllerLocal,account)
 		new_ball.connect("turn_completed", self, "_on_Ball_turn_completed")
 		local_ball = new_ball
 	else:
-		new_ball.setup_playercontroller(PlayerControllerRemote,user_id)
-		remote_balls[user_id] = new_ball
+		new_ball.setup_playercontroller(PlayerControllerRemote,account)
+		remote_balls[account.id] = new_ball
 	
 	new_ball.set_map(map)
 	add_child(new_ball)
@@ -109,11 +115,11 @@ func spawn_ball(local:bool, user_id:String):
 
 func _start_match():
 	# spawn self
-	spawn_ball(true,Networker.get_user_id())
+	spawn_ball(true,accounts[Networker.get_user_id()])
 	
 	#spawn remote
 	for i in presences:
-		spawn_ball(false,i)
+		spawn_ball(false,accounts[i])
 		turn_count_local[i] = 0
 
 
@@ -136,8 +142,12 @@ func player_remote_leave(user_id)->void:
 func load_map(map_id:String, map_owner_id:String="")->void: # todo use map storage helper some time in the futureeee
 	var map_jstring = yield(MapStorage.load_map_async(map_id, map_owner_id), "completed")
 	map.deserialize(map_jstring)
-	Networker.match_send_state_async(Global.OpCodes.MATCH_CLIENT_READY)
 
+
+func load_accounts(expected_user_ids:Array):
+	var accs = yield(Networker.fetch_accounts_async(expected_user_ids), "completed")
+	for i in accs:
+		accounts[i.id] = i
 
 func update_ui():
 	var text := ""
@@ -149,14 +159,16 @@ func update_ui():
 			var current_name
 			if local_ball.my_turn:
 				current_name = "YOUR"
-			else:
-				current_name = presences[current_turn_user]["username"] + "´s"
+			elif remote_balls.has(current_turn_user):
+				current_name = remote_balls[current_turn_user].display_name + "´s"
+				
 			text += "[b]%s turn[/b]\n\n"%current_name
 			text += "Shots:\n"
 			for i in turn_order:
 				if i == current_turn_user:
 					text += "->"
-				text += "\t%s:\t%s\n" % [presences[i]["username"],turn_count_local[i]]
+				var display_name = get_ball(i).display_name
+				text += "\t%s:\t%s\n" % [display_name,turn_count_local[i]]
 	
 	text_score.bbcode_text = text
 
@@ -165,6 +177,7 @@ func next_turn(user_id:String):
 	if current_turn_user != "":
 		turn_count_local[current_turn_user] += 1
 	
+	Notifier.notify_game("It is %s's turn"%get_ball(user_id).display_name)
 	
 	if(user_id == Networker.get_user_id()): #copied from below only used for first turn
 		local_ball.turn_ready()
@@ -174,6 +187,14 @@ func next_turn(user_id:String):
 		printerr("Could not find the server announced next user's ball")
 	
 	current_turn_user = user_id
+
+func get_ball(user_id:String):
+	if remote_balls.has(user_id):
+		return remote_balls[user_id]
+	elif local_ball.get_pc_user_id() == user_id:
+		return local_ball
+	else:
+		assert(false) # looking for non existent ball
 
 #### Callbacks
 
@@ -187,6 +208,7 @@ func _on_Networker_match_state(state):
 			var data_dict = JSON.parse(state.data).result
 			map_id = data_dict["map_id"]
 			map_owner_id = data_dict["map_owner_id"]
+			expected_user_ids = data_dict["expected_user_ids"]
 			change_state(States.LOADING)
 		
 		
@@ -202,12 +224,15 @@ func _on_Networker_match_state(state):
 			next_turn(data_dict["next_player"])
 			
 		Global.OpCodes.REACHED_FINISH:
-			print("Player %s has reached the finish"%state.presence.username)
-			if state.presence.user_id == Networker.get_user_id():
-				local_ball.reached_finish()
-			else:
-				remote_balls[state.presence.user_id].reached_finish()
-			
+			assert(false) # this is only sent by the client
+#			print("Player %s has reached the finish"%state.presence.username)
+#			if state.presence.user_id == Networker.get_user_id():
+#				local_ball.reached_finish()
+#				Notifier.notify_game("You reached the finish :)")
+#			else:
+#				remote_balls[state.presence.user_id].reached_finish()
+#				Notifier.notify_game("%s reached the finish", remote_balls[state.presence.user_id].display_name)
+#
 		Global.OpCodes.MATCH_END:
 			change_state(States.FINISHED)
 			var params = {

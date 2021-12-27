@@ -1,41 +1,47 @@
-extends Node2D
+extends Control
 
 
-onready var line_customId = get_node("LoginForm/LineCustomId")
-onready var lbl_loginStatus = get_node("LoginForm/LblLoginStatus")
 onready var btn_matchmaking = get_node("BtnMatchmaking")
+onready var btn_editor = get_node("BtnEditor")
+onready var btn_practive = get_node("BtnPractice")
+
 onready var select_map = get_node("SelectMap")
-onready var btn_login = get_node("LoginForm/BtnLogin")
+onready var lbl_display_name = get_node("PanelAccount/VBoxContainer/LblDisplayName")
+onready var lbl_guest = get_node("PanelAccount/VBoxContainer/LblGuest")
+onready var lbl_editor_guest_hint = get_node("BtnEditor/LblEditorGuestHint")
 
 func _ready():
 	# resume previous states
 	
-	if Networker.is_logged_in():
-		btn_login.disabled = true
+	if not Networker.is_logged_in():
+		get_tree().change_scene("res://scenes/login/Login.tscn")
+	
+	if not Networker.is_socket_connected():
+		btn_matchmaking.disabled = true
+		Notifier.notify_error("Reconnecting...", "Server connection was interrupted")
 		Networker.socket_connect()
-		populate_map_dropdown()
-		lbl_loginStatus.text = "Logged in from before" 
 	else:
-		lbl_loginStatus.text = "NOT logged in!!!"
-	#btn_matchmaking.disabled = not Networker.is_socket_connected()
+		load_ui()
+		
+	
 	
 	Networker.connect("matchmaking_started", self,"_on_Networker_matchmaking_started")
 	Networker.connect("matchmaking_ended", self, "_on_Networker_matchmaking_ended")
-	Networker.connect("socket_connected", self, "_on_Networker_socket_connected")
 	Networker.connect("matchmaking_matched", self, "_on_Networker_matchmaking_matched")
 	
-	Networker.connect("authentication_successfull", self, "_on_Networker_authentication_successfull")
-	Networker.connect("authentication_failed", self, "_on_Networker_authentication_failed")
-	
-	if true: # autologin
-		if not OS.get_cmdline_args().empty():
-			line_customId.text = OS.get_cmdline_args()[0]
-			_on_BtnLogin_pressed() #autologin for dbg
-			Notifier.notify_info("Autologged in because of multirun cmdline args")
-	Notifier.notify_game("Press BATTLE to start a game")
+	Networker.connect("socket_connected", self, "_on_Networker_socket_connected")
 
 
-func populate_map_dropdown():
+func load_ui():
+	lbl_display_name.text = Networker.get_username()
+	if not Networker.is_guest():
+		btn_editor.disabled = false
+		lbl_guest.visible = false
+		lbl_editor_guest_hint.visible = false
+	refresh_map_selection()
+
+
+func refresh_map_selection():
 	var public_maps = yield(MapStorage.list_public_maps_async(), "completed")
 	for i in public_maps:
 		select_map.add_item(i.name)
@@ -43,10 +49,6 @@ func populate_map_dropdown():
 
 
 #### Event Callbacks
-
-func _on_BtnLogin_pressed():
-	Networker.login_async(line_customId.text)
-
 
 func _on_BtnMatchmaking_pressed():
 	if Networker.is_in_matchmaking():
@@ -60,46 +62,45 @@ func _on_BtnMatchmaking_pressed():
 	btn_matchmaking.text = "..."
 
 
+func _on_BtnEditor_pressed():
+	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
+
+
+func _on_BtnPractice_pressed():
+	Global.set_scene_parameters({ "practice": select_map.get_selected_id() })
+	get_tree().change_scene("res://scenes/match/Match.tscn")
+
+
 func _on_Networker_matchmaking_started():
 	btn_matchmaking.text = "Cancel"
 	btn_matchmaking.disabled = false
+	#btn_matchmaking.theme = load("res://assets/ui/button_red/button_red.tres")
 	Notifier.notify_info("Matchmaking started")
 
 
 func _on_Networker_matchmaking_ended():
 	btn_matchmaking.text = "BATTLE"
 	btn_matchmaking.disabled = false
+	#btn_matchmaking.theme = load("res://assets/ui/button_yellow/button_yellow.tres")
 	Notifier.notify_info("Matchmaking cancled")
 
 
-func _on_Networker_socket_connected():
-	btn_matchmaking.text = "BATTLE"
-	btn_matchmaking.disabled = false
-
-
 func _on_Networker_matchmaking_matched(matched):
-	Notifier.notify_game("Match found!")
+	Notifier.notify_info("Match found!")
 	get_tree().change_scene("res://scenes/match/Match.tscn")
 	
 
-
-func _on_Networker_authentication_failed():
-	lbl_loginStatus.text =  "Could NOT log in!!!"
-	Notifier.notify_error("Could not log in!")
-
-
-func _on_Networker_authentication_successfull():
-	lbl_loginStatus.text =  "Freshly Logged in :)"
-	btn_login.disabled = true
-	populate_map_dropdown()
-	Notifier.notify_info("Log in successful")
+func _on_Networker_socket_connected():
+	Notifier.notify_info("Connection established")
+	load_ui()
 
 
-func _on_BtnEditor_pressed():
-	if Networker.is_socket_connected():
-		get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
+func _on_Networker_socket_connection_failed():
+	Notifier.notify_error("Could not connect to server")
+	get_tree().change_scene("res://scenes/login/Login.tscn")
 
 
-func _on_BtnPractice_pressed():
-	Global.set_scene_parameters({ "practice": select_map.get_selected_id() })
-	get_tree().change_scene("res://scenes/match/Match.tscn")
+func _on_BtnLogout_pressed():
+	Networker.reset()
+	Notifier.notify_info("Logged out")
+	get_tree().change_scene("res://scenes/login/Login.tscn")

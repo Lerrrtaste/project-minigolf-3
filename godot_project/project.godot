@@ -99,7 +99,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Minigolf22"
-run/main_scene="res://scenes/menu/Menu.tscn"
+run/main_scene="res://scenes/login/Login.tscn"
 config/icon="res://icon.png"
 
 [autoload]

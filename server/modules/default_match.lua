@@ -79,7 +79,16 @@ function match_handler.match_join(context, dispatcher, tick, state, presences)
     end
 
     local op_code = OpCodes.MATCH_CONFIG
-    local data = nk.json_encode({map_id= state.map_id, map_owner_id= state.map_owner_id})
+    local user_ids = {}
+    for k, v in pairs(state.players) do
+        table.insert(user_ids, k)
+    end
+    local data = {
+        map_id = state.map_id,
+        map_owner_id = state.map_owner_id,
+        expected_user_ids = user_ids,
+    }
+    data = nk.json_encode(data)
     local reciever = presences
 
     dispatcher.broadcast_message(op_code, data, reciever)

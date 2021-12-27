@@ -16,8 +16,8 @@ signal matchmaking_started
 signal matchmaking_ended
 signal matchmaking_matched(matched)
 
-signal authentication_successfull
-signal authentication_failed
+signal authentication_successful
+signal authentication_failed(exception)
 
 signal match_join_failed
 signal match_joined(presences)
@@ -38,7 +38,7 @@ enum WritePermissions {
 }
 
 func _ready():
-	client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL)
+	reset()
 
 
 func socket_connect()->void:
@@ -57,23 +57,108 @@ func socket_connect()->void:
 	socket.connect("received_match_state", self, "_on_match_state")
 
 
-func login_async(custom_id:String)->void:
+func login_guest_asnyc(display_name:String)->void:
+	# create/login account with
+	# tries device uid, then random with unix time
+	# TODO metadata guest = true
+	# display name = entered name
+	# username = guest_display-name_random-number
+	
 	if is_logged_in():
+		printerr("Already logged in")
 		return
 	
-	session = yield(client.authenticate_custom_async(custom_id,custom_id), "completed")
+	var custom_id = OS.get_unique_id()
+	
+	# deviceID disabled for now
+	if true:# custom_id == "":
+		randomize()
+		custom_id = "guestid_os_%s" % ((OS.get_unix_time() * OS.get_system_time_msecs())%(randi()%823582305203))
+	else:
+		custom_id = "guestid_rand_%s" % custom_id
+	
+	var username = "guest_%s_%s"%[display_name,randi()%8999+1000]
+	
+	session = yield(client.authenticate_custom_async(custom_id, username, true, {"guest": true}), "completed")
+	
+	var update : NakamaAsyncResult = yield(client.update_account_async(session, null, display_name, null, null, null), "completed")
+	if update.is_exception():
+		print("An error occured: %s" % update)
+		return
+	print("Guest display name set")
 	
 	if !is_logged_in(): #failed
 		printerr("Could not log in with given custom ID!")
-		emit_signal("authentication_failed")
+		emit_signal("authentication_failed",session.get_exception())
 		return
 	
 	#worked
 	print("Logged in with customId %s successfully"%custom_id)
+	emit_signal("authentication_successful")
+	socket_connect()
+	return
+
+
+func login_email_async(email:String, password:String):
+	# login account with
+	# mail + pw
+	
+	if is_logged_in():
+		printerr("Already logged in")
+		return
+	
+	session = yield(client.authenticate_email_async(email,password, null, false), "completed")
+	
+	if !is_logged_in(): #failed
+		printerr("Could not log in with given email password!")
+		emit_signal("authentication_failed", session.get_exception())
+		return
+	
+	#worked
+	print("Logged in with email %s successfully"%email)
 	emit_signal("authentication_successfull")
 	socket_connect()
-	return true
+	return
 
+
+func register_email_async(email:String, password:String, username:String):
+	# login account with
+	# mail + pw
+	
+	if is_logged_in():
+		printerr("Already logged in")
+		return
+	
+	session = yield(client.authenticate_email_async(email, password, username, true), "completed")
+	
+	if !is_logged_in(): #failed
+		printerr("Could not register in with given email password!")
+		emit_signal("authentication_failed",session.get_exception())
+		return
+	
+	#worked
+	print("Registered and Logged in with mail %s successfully"%email)
+	emit_signal("authentication_successfull")
+	socket_connect()
+	return
+
+
+func fetch_accounts_async(user_ids:Array):
+	var ids = ["userid1", "userid2"]
+	var result : NakamaAPI.ApiUsers = yield(client.get_users_async(session, user_ids), "completed")
+	
+	if result.is_exception():
+		Notifier.notify_error("An error occured:",result.to_string())
+		return
+		
+	return result.users
+
+
+func reset():
+	client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL)
+	session = null
+	socket = null
+	matchmaker_ticket = null
 
 #### Matches
 
@@ -225,14 +310,22 @@ func collection_list_public_objects_async(collection:String)->Array: # -> Array 
 			public_objects.append(i)
 	return public_objects
 
+
 #### Getset
 
 func get_user_id()->String:
 	return session.user_id
 
 
-func get_username(user_id:String)->String:
-	return connected_presences[user_id]["username"]
+func get_username()->String:
+	return session.username
+
+
+func is_guest()->bool:
+	if not session.vars.has("guest"):
+		return false
+		
+	return session.vars["guest"]
 
 
 func is_socket_connected()->bool:

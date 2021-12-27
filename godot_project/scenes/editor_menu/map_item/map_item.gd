@@ -1,10 +1,10 @@
-extends HSplitContainer
+extends PanelContainer
 
-onready var lbl_name = get_node("VBoxContainer/LblName")
-onready var lbl_id = get_node("VBoxContainer/LblId")
-onready var btn_delete = get_node("HBoxContainer/BtnDelete")
-onready var btn_edit = get_node("HBoxContainer/BtnEditMap")
-onready var btn_practice = get_node("HBoxContainer/BtnPractice")
+onready var lbl_name = get_node("HSplitContainer/VBoxContainer/LblName")
+onready var lbl_id = get_node("HSplitContainer/VBoxContainer/LblId")
+onready var btn_delete = get_node("HSplitContainer/HBoxContainer/BtnDelete")
+onready var btn_edit = get_node("HSplitContainer/HBoxContainer/BtnEditMap")
+onready var btn_practice = get_node("HSplitContainer/HBoxContainer/BtnPractice")
 
 signal open_editor(map_id, map_name)
 signal delete(map_id)

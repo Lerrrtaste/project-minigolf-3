@@ -8,6 +8,7 @@ var connected_pc #has active player controller attached
 var map # set by match before entering tree (map ref)
 var current_cell:Vector2
 var collision_blacklist:Array # TODO maybe remove
+var display_name:String
 
 # movement
 var starting_position: Vector2
@@ -33,10 +34,11 @@ func _ready():
 		printerr("Ball without PC entered Tree")
 		return
 	
+	# name tag
 	if connected_pc.LOCAL:
 		lbl_player_name.text = "YOU"
 	else:
-		lbl_player_name.text = Networker.get_username(connected_pc.user_id)
+		lbl_player_name.text = display_name
 
 
 func _process(delta):
@@ -65,19 +67,26 @@ func _draw():
 
 
 # called before entering tree
-func setup_playercontroller(pc_scene:PackedScene,user_id)->void:
+func setup_playercontroller(pc_scene:PackedScene,account)->void:
 	if is_instance_valid(connected_pc):
 		printerr("Ball is already controlled")
 		return
 	
+	# Player Controller
 	var new_pc = pc_scene.instance()
 	connected_pc = new_pc
 	if new_pc.has_method("register_user_id"):
-		new_pc.register_user_id(user_id)
-		
+		new_pc.register_user_id(account.id)
 	add_child(new_pc)
 	
-	# connect pc signals
+	# for name tag
+	if account.display_name != "":
+		display_name = account.display_name
+	else:
+		display_name = account.username
+		
+	
+	#  pc signals
 	new_pc.connect("impact",self,"_on_PlayerController_impact")
 	new_pc.connect("sync_position", self, "_on_PlayerController_sync_position")
 
@@ -124,7 +133,9 @@ func move_step(movement,delta):
 	
 	#move_and_slide(movement)
 	var collision = move_and_collide(movement*delta)
+	#z_index = position.y
 	total_distance += movement.length() * delta
+	
 	if collision is KinematicCollision2D:
 		_handle_collision(collision)
 		total_distance -= collision.remainder.length()
@@ -157,7 +168,7 @@ func _handle_collision(collision:KinematicCollision2D):
 		var acf = bci
 		var bcf = aci
 
-		var new_local_vel = (acf - aci) * coll
+		var new_local_vel = (acf - aci) * coll 
 		print("NewLocalVel: %s"%new_local_vel)
 		var new_collider_vel = (bcf - bci) * coll
 		print("NewRemoteVel: %s"%new_collider_vel)
@@ -187,7 +198,7 @@ func _handle_collision(collision:KinematicCollision2D):
 			wall_normal = Vector2(1,-1).normalized()
 		else:
 			# left up
-			wall_normal = Vector2(1,1).normalized()
+			wall_normal =  Vector2(1,1).normalized()
 
 	direction = isometric_normalize(reflect_vector(direction,wall_normal))
 

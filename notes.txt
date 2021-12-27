@@ -1,9 +1,5 @@
 #### TODOS
 
-- walls shouldnt hide water
-- Background 
-- Main Menu UI
-- editor popup close button sprite
 - show editor controls somewhere
 
 - enforce objects only non solid, non resetting tiles (and remove when tile removed)
@@ -12,19 +8,25 @@
 - hide balls behind walls
 
 - handle presence events (only leaves)
-
+- end authorative matches after x time when everyone left
 
 - finalize match end screen
 - main menu ui + map selection
-- login screen
+
 
 - Final MVP export :)
 
 
 #### DONE
+- Background 
+- walls shouldnt hide water
+- Main Menu UI
+- editor popup close button sprite
+- login screen
+- set guest account metadata guest=true
+
 - (fix / ) rewrite turn order to be used equally by server and client
 - end authorative matches properly (return nil in match_loop does not work)
-
 - ingame info popup (for limit reached, ingame events, errors etc)
 - player move impact should be normalized and controller by server (so mouse distance till max force can be client independent)
 - wait for map to (down)load before starting match
@@ -52,7 +54,7 @@
 - fix bug if incorrect player sents finished turn 104 it should not be recognized by server
 - water tiles + ball reset
 - sand tiles + speed slowdown
-
+- delete guest accounts occasionally (sql query in run once?)
 
 
 #### Notes
@@ -92,10 +94,13 @@ UI Pixel Scale 400%
 - ice tiles with lower friction
 - sticky walls
 - bouncy walls
+- "claim" guest username when logged in as guest (register)
+- account / "profile" screen to change display name, mail, password etc 
+- statistics on profile page (as player and as map creator)
 
 #### OP CODES
 
-110 MATCH_CONFIG (map_id:string, owner_id:string)
+110 MATCH_CONFIG (map_id:string, owner_id:string, expected_user_ids:array)
 		sender: server
 
 111 MATCH_CLIENT_READY
@@ -157,3 +162,6 @@ UI Pixel Scale 400%
 
 <- match end (results)
 
+
+##### Copyright/Attributions
+Paulina Riva - bg placeholder pixel sky
