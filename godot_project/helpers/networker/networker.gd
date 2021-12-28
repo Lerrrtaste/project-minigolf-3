@@ -248,6 +248,14 @@ func match_send_state_async(op_code:int,new_state="")->void:
 	socket.send_match_state_async(joined_match.match_id, op_code, JSON.print(new_state))
 
 
+func match_leave():
+	if not is_in_match():
+		printerr("Trying to leave match but there is no joined_match")
+		return
+	
+	yield(socket.leave_match_async(joined_match.match_id), "completed")
+	print("Left the match")
+
 #### Collections
 
 func collection_write_object_async(collection:String, key:String, value:String, public_read:bool): # -> ApiStorageObjectAck/s

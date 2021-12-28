@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://assets/ui/fonts/data/kenney_pixel.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=2]
@@ -6,6 +6,8 @@
 [ext_resource path="res://assets/ui/general/general_ui.tres" type="Theme" id=4]
 [ext_resource path="res://assets/ui/panels/light/panel_yellow_light.tres" type="StyleBox" id=5]
 [ext_resource path="res://scenes/match_practice/match_practice.gd" type="Script" id=6]
+[ext_resource path="res://assets/ui/icons/icon_leave.png" type="Texture" id=7]
+[ext_resource path="res://assets/ui/buttons/small/red/button_red_small.tres" type="Theme" id=8]
 
 [sub_resource type="DynamicFont" id=2]
 font_data = ExtResource( 2 )
@@ -23,8 +25,8 @@ script = ExtResource( 6 )
 
 [node name="PanelScore" type="PanelContainer" parent="UI"]
 modulate = Color( 1, 1, 1, 0.705882 )
-margin_right = 396.0
-margin_bottom = 217.0
+margin_right = 340.0
+margin_bottom = 144.0
 custom_styles/panel = ExtResource( 5 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -33,8 +35,8 @@ __meta__ = {
 [node name="TextScore" type="RichTextLabel" parent="UI/PanelScore"]
 margin_left = 12.0
 margin_top = 12.0
-margin_right = 384.0
-margin_bottom = 197.0
+margin_right = 328.0
+margin_bottom = 124.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme = ExtResource( 4 )
@@ -42,3 +44,17 @@ custom_colors/default_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/bold_font = SubResource( 2 )
 custom_fonts/normal_font = SubResource( 3 )
 bbcode_enabled = true
+
+[node name="BtnLeave" type="Button" parent="UI"]
+modulate = Color( 1, 1, 1, 0.705882 )
+margin_left = 4.0
+margin_top = 539.0
+margin_right = 60.0
+margin_bottom = 595.0
+theme = ExtResource( 8 )
+icon = ExtResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="UI/BtnLeave" to="." method="_on_BtnLeave_pressed"]

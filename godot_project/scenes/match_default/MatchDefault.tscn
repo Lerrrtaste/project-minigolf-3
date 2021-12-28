@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://assets/ui/fonts/data/kenney_pixel.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=2]
@@ -6,6 +6,10 @@
 [ext_resource path="res://scenes/match_default/match_default.gd" type="Script" id=4]
 [ext_resource path="res://assets/ui/panels/light/panel_yellow_light.tres" type="StyleBox" id=5]
 [ext_resource path="res://objects/map/Map.tscn" type="PackedScene" id=6]
+[ext_resource path="res://assets/ui/buttons/small/yellow/button_yellow_small.tres" type="Theme" id=7]
+[ext_resource path="res://assets/ui/icons/icon_leave.png" type="Texture" id=8]
+[ext_resource path="res://assets/ui/buttons/small/red/button_red_small.tres" type="Theme" id=9]
+[ext_resource path="res://assets/ui/panels/metal/panel_red_metal.tres" type="StyleBox" id=10]
 
 [sub_resource type="DynamicFont" id=2]
 font_data = ExtResource( 2 )
@@ -42,3 +46,69 @@ custom_colors/default_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/bold_font = SubResource( 2 )
 custom_fonts/normal_font = SubResource( 3 )
 bbcode_enabled = true
+
+[node name="BtnLeave" type="Button" parent="UI"]
+modulate = Color( 1, 1, 1, 0.705882 )
+margin_left = 4.0
+margin_top = 539.0
+margin_right = 60.0
+margin_bottom = 595.0
+theme = ExtResource( 9 )
+icon = ExtResource( 8 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PopupLeave" type="WindowDialog" parent="UI"]
+visible = true
+margin_left = 281.0
+margin_top = 411.0
+margin_right = 568.0
+margin_bottom = 528.0
+theme = ExtResource( 3 )
+custom_styles/panel = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/PopupLeave"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblLeavePrompt" type="Label" parent="UI/PopupLeave/VBoxContainer"]
+margin_top = 20.0
+margin_right = 287.0
+margin_bottom = 44.0
+text = "Leave current match?"
+align = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/PopupLeave/VBoxContainer"]
+margin_top = 48.0
+margin_right = 287.0
+margin_bottom = 96.0
+alignment = 1
+
+[node name="BtnLeaveConfirm" type="Button" parent="UI/PopupLeave/VBoxContainer/HBoxContainer"]
+margin_left = 53.0
+margin_right = 135.0
+margin_bottom = 48.0
+theme = ExtResource( 9 )
+text = "Leave"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BtnLeaveCancel" type="Button" parent="UI/PopupLeave/VBoxContainer/HBoxContainer"]
+margin_left = 139.0
+margin_right = 233.0
+margin_bottom = 48.0
+theme = ExtResource( 7 )
+text = "cancel"
+
+[connection signal="pressed" from="UI/BtnLeave" to="." method="_on_BtnLeave_pressed"]
+[connection signal="pressed" from="UI/PopupLeave/VBoxContainer/HBoxContainer/BtnLeaveConfirm" to="." method="_on_BtnLeaveConfirm_pressed"]
+[connection signal="pressed" from="UI/PopupLeave/VBoxContainer/HBoxContainer/BtnLeaveCancel" to="." method="_on_BtnLeaveCancel_pressed"]

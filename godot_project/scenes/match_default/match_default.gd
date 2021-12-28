@@ -6,17 +6,20 @@ Represents a single Match (in the default gamemode)
 Start Parameters: none
 Uses Networker socket
 
-Exits to MatchEnd
-Parameters:
-	- gamemode = "default"
-	- presences: Dict
-	- turn_count: Dict
-	- map_metadata: Dict
+Exits to:
+	- MatchEnd
+		- gamemode = "default"
+		- presences: Dict
+		- turn_count: Dict
+		- map_metadata: Dict
+	- Menu (on leave)
 
 """
 
 onready var map = get_node("Map")
 onready var text_score = get_node("UI/PanelScore/TextScore")
+
+onready var popup_leave = get_node("UI/PopupLeave")
 
 var Ball = preload("res://objects/ball/Ball.tscn")
 var PlayerControllerLocal = preload("res://helpers/player_controller_local/PlayerControllerLocal.tscn")
@@ -246,3 +249,16 @@ func _on_Ball_reached_finish(final_pos):
 	var op_code = Global.OpCodes.REACHED_FINISH
 	var data = {}
 	Networker.match_send_state_async(op_code, data)
+
+
+func _on_BtnLeave_pressed():
+	popup_leave.popup_centered()
+
+
+func _on_BtnLeaveConfirm_pressed():
+	Networker.match_leave()
+	get_tree().change_scene("res://scenes/menu/Menu.tscn")
+
+
+func _on_BtnLeaveCancel_pressed():
+	popup_leave.visible = false

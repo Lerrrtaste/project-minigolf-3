@@ -3,14 +3,17 @@ extends Node2D
 """
 Represents a single Practice Match
 
-Paramaeters: map_id, creator_id, verifying
+Paramaeters: map_id, creator_id, verifying (optional)
 
-Exits to MatchEnd
-Parameters: 
-	- gamemode = "practice"
-	- verifying: bool
-	- turn_count: int
-	- map_metadata: dict
+Exits to:
+	- MatchEnd
+		- gamemode = "practice"
+		- verifying: bool
+		- turn_count: int
+		- map_metadata: dict
+	- EditorMenu (on cancel)
+	- Editor (on cancel with verifiying == true)
+		- load_map_id: String
 
 """
 
@@ -115,6 +118,8 @@ func update_ui():
 		States.PLAYING:
 			text += "[b]PRACTIC MODE[/b]\n\n"
 			text += "Shots: %s" % turn_count
+			if verifying:
+				text += "\nFinish the map to publish it"
 	
 	text_score.bbcode_text = text
 
@@ -130,3 +135,11 @@ func _on_Ball_reached_finish(final_pos):
 	turn_count += 1
 	change_state(States.FINISHED)
 	
+
+
+func _on_BtnLeave_pressed():
+	if verifying:
+		Global.set_scene_parameters({"load_map_id": map_id})
+		get_tree().change_scene("res://scenes/editor/Editor.tscn")
+	else:
+		get_tree().change_scene("res://scenes/menu/Menu.tscn")

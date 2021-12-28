@@ -1,9 +1,4 @@
 #### TODOS
-
-- fix practive mode
-- finish practice once before being able to publish map
-- exit match / practice match button
-
 - hide balls behind walls
 
 - handle presence events (only leaves)
@@ -13,6 +8,12 @@
 
 
 #### DONE
+- exit match / practice match button
+- map search bar
+- added practice mode button on map card 
+
+- fix practive mode
+- finish practice once before being able to publish map
 - Fix Matchmaking Query/Properties:
 single string_property ["map_pool"] = "1029501,102401"
 query , as delimiter needs a regex expr

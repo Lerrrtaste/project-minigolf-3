@@ -14,7 +14,7 @@ onready var line_password_confirm = get_node("VBoxContainer/PanelEmail/BoxEmail/
 onready var btn_login_email = get_node("VBoxContainer/PanelEmail/BoxEmail/HSplitContainer/BtnLoginEmail")
 onready var btn_register = get_node("VBoxContainer/PanelEmail/BoxEmail/HSplitContainer/BtnRegister")
 onready var lbl_login = get_node("VBoxContainer/PanelEmail/BoxEmail/LblLogin")
-
+onready var btn_cancel = get_node("VBoxContainer/PanelEmail/BoxEmail/BtnCancel")
 
 
 func _ready():
@@ -60,6 +60,15 @@ func disable_inputs(disabled:bool):
 func _on_Networker_socket_connected():
 	login_complete()
 
+func register_mode(enabled:bool):
+	panel_guest.visible = !enabled
+	line_password_confirm.visible = enabled
+	line_username_register.visible = enabled
+	lbl_login.text = "Register" if enabled else "Login"
+	btn_login_email.visible = !enabled
+	lbl_or.visible = !enabled
+	btn_cancel.visible = enabled 
+
 
 func _on_Networker_socket_connection_failed():
 	Notifier.notify_error("Connection failed", "This might be a temporary server problem\nPlease try again\n(Socket connection failed)")
@@ -96,12 +105,7 @@ func _on_BtnLoginEmail_pressed():
 
 func _on_BtnRegister_pressed():
 	if panel_guest.visible:
-		panel_guest.visible = false
-		line_password_confirm.visible = true
-		line_username_register.visible = true
-		lbl_login.text = "Register"
-		btn_login_email.visible = false
-		lbl_or.visible = false
+		register_mode(true)
 		Notifier.notify_info("Enter a Username and confirm password to proceed")
 		
 	else:
@@ -121,3 +125,7 @@ func _on_BtnRegister_pressed():
 		disable_inputs(true)
 		Networker.register_email_async(line_email.text, line_password.text, line_username_register.text)
 			
+
+
+func _on_BtnCancel_pressed():
+	register_mode(false)

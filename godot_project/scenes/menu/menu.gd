@@ -3,7 +3,7 @@ extends Control
 var MapCard = preload("res://objects/map_card/MapCard.tscn")
 
 onready var btn_matchmaking = get_node("BtnMatchmaking")
-onready var btn_editor = get_node("BtnEditor")
+onready var btn_editor = get_node("BtnMatchmaking/BtnEditor")
 onready var btn_practive = get_node("BtnPractice")
 
 onready var box_map_cards = get_node("ContainerMaps/BoxMapCards")
@@ -11,7 +11,7 @@ var map_cards:Array
 
 onready var lbl_display_name = get_node("PanelAccount/VBoxContainer/LblDisplayName")
 onready var lbl_guest = get_node("PanelAccount/VBoxContainer/LblGuest")
-onready var lbl_editor_guest_hint = get_node("BtnEditor/LblEditorGuestHint")
+onready var lbl_editor_guest_hint = get_node("BtnMatchmaking/BtnEditor/LblEditorGuestHint")
 
 func _ready():
 	# resume previous states
@@ -55,9 +55,19 @@ func refresh_map_selection():
 		var inst = MapCard.instance()
 		box_map_cards.add_child(inst)
 		inst.populate(map_name, map_id, creator_id, creator_name)
+		inst.connect("practice", self, "_on_MapCard_practice")
 		
 		map_cards.append(inst)
 
+func get_maps_included()->Array:
+	var map_pool:Array
+	for i in map_cards:
+		if i.is_included():
+			map_pool.append({
+				"map_id": i.map_id,
+				"creator_id": i.creator_id
+			})
+	return map_pool
 
 #### Event Callbacks
 
@@ -66,14 +76,7 @@ func _on_BtnMatchmaking_pressed():
 		Networker.matchmaking_cancel_async()
 		
 	else:
-		var map_pool:Array
-		for i in map_cards:
-			if i.is_included():
-				map_pool.append({
-					"map_id": i.map_id,
-					"creator_id": i.creator_id
-				})
-		
+		var map_pool = get_maps_included()
 		if map_pool.size() == 0:
 			Notifier.notify_error("Select at least one map", "or more")
 			return
@@ -90,13 +93,6 @@ func _on_BtnMatchmaking_pressed():
 
 func _on_BtnEditor_pressed():
 	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
-
-
-#FIXME FIXME FIXME FIXME
-func _on_BtnPractice_pressed():
-	pass
-	#Global.set_scene_parameters({ "practice": select_map.get_selected_id() })
-	#get_tree().change_scene("res://scenes/match/Match.tscn")
 
 
 func _on_Networker_matchmaking_started():
@@ -132,3 +128,20 @@ func _on_BtnLogout_pressed():
 	Networker.reset()
 	Notifier.notify_info("Logged out")
 	get_tree().change_scene("res://scenes/login/Login.tscn")
+
+func _on_MapCard_practice(map_id, creator_id):
+	var params = { "map_id": map_id, "creator_id": creator_id, "verifying": false}
+	Global.set_scene_parameters(params)
+	get_tree().change_scene("res://scenes/match_practice/MatchPractice.tscn")
+
+
+func _on_LineEdit_text_changed(search_text):
+	for i in map_cards:
+		if search_text == "":
+			i.visible = true
+		elif i.map_id.find(search_text)!=-1:
+			i.visible = true
+		elif i.map_name.to_lower().find(search_text.to_lower())!=-1:
+			i.visible = true
+		else:
+			i.visible = false
