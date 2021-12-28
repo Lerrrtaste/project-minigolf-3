@@ -1,14 +1,13 @@
 #### TODOS
 
-
-
 - fix practive mode
+- finish practice once before being able to publish map
+- exit match / practice match button
+
 - hide balls behind walls
 
 - handle presence events (only leaves)
 - end authorative matches after x time when everyone left
-
-- main menu ui + map selection
 
 - Final MVP export :)
 
@@ -18,7 +17,6 @@
 single string_property ["map_pool"] = "1029501,102401"
 query , as delimiter needs a regex expr
 - main menu ui + map selection
-
 - confirmation dialog for delete and discarding changes
 - finalize match end screen
 - enforce objects only non solid, non resetting tiles (and remove when tile removed)

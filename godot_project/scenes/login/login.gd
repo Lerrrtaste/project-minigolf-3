@@ -41,6 +41,7 @@ func _ready():
 
 # called when socket is connected
 func login_complete():
+	Notifier.notify_info("Logged in as %s"%Networker.get_username(true))
 	get_tree().change_scene("res://scenes/menu/Menu.tscn")
 
 
@@ -71,7 +72,6 @@ func _on_Networker_authentication_failed(exception):
 
 
 func _on_Networker_authentication_successful():
-	Notifier.notify_info("Logged in as %s")
 	disable_inputs(false)
 
 

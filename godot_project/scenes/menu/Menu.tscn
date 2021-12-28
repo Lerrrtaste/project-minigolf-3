@@ -79,12 +79,11 @@ __meta__ = {
 margin_left = 20.0
 margin_top = 20.0
 margin_right = 148.0
-margin_bottom = 86.0
+margin_bottom = 110.0
 alignment = 1
 
 [node name="LblGuest" type="Label" parent="PanelAccount/VBoxContainer"]
-visible = false
-margin_right = 197.0
+margin_right = 128.0
 margin_bottom = 20.0
 theme = ExtResource( 3 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
@@ -93,8 +92,9 @@ text = "GUEST"
 align = 1
 
 [node name="LblDisplayName" type="Label" parent="PanelAccount/VBoxContainer"]
+margin_top = 24.0
 margin_right = 128.0
-margin_bottom = 18.0
+margin_bottom = 42.0
 theme = ExtResource( 3 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = ExtResource( 11 )
@@ -102,18 +102,18 @@ text = "LOADING..."
 align = 1
 
 [node name="LblPlayCount" type="Label" parent="PanelAccount/VBoxContainer"]
-margin_top = 22.0
+margin_top = 46.0
 margin_right = 128.0
-margin_bottom = 42.0
+margin_bottom = 66.0
 theme = ExtResource( 3 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = ExtResource( 7 )
 text = "Played: 0"
 
 [node name="LblWinCount" type="Label" parent="PanelAccount/VBoxContainer"]
-margin_top = 46.0
+margin_top = 70.0
 margin_right = 128.0
-margin_bottom = 66.0
+margin_bottom = 90.0
 theme = ExtResource( 3 )
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = ExtResource( 7 )
@@ -121,9 +121,9 @@ text = "Won: 0"
 
 [node name="BtnLogout" type="Button" parent="."]
 margin_left = 12.0
-margin_top = 117.0
+margin_top = 142.0
 margin_right = 106.0
-margin_bottom = 165.0
+margin_bottom = 190.0
 grow_horizontal = 0
 theme = ExtResource( 10 )
 text = "logout"

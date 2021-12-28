@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://scenes/match_end/match_end.gd" type="Script" id=1]
 [ext_resource path="res://assets/ui/buttons/big/yellow/button_yellow_big.tres" type="Theme" id=2]
@@ -6,6 +6,8 @@
 [ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=4]
 [ext_resource path="res://assets/ui/fonts/data/kenney_pixel.ttf" type="DynamicFontData" id=5]
 [ext_resource path="res://assets/ui/panels/light/panel_yellow_light.tres" type="StyleBox" id=6]
+[ext_resource path="res://assets/ui/buttons/big/red/button_red_big.tres" type="Theme" id=7]
+[ext_resource path="res://assets/ui/buttons/big/blue/button_blue_big.tres" type="Theme" id=8]
 
 [sub_resource type="DynamicFont" id=2]
 font_data = ExtResource( 4 )
@@ -71,4 +73,37 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="BoxPublish" type="HBoxContainer" parent="VBoxContainer"]
+visible = false
+margin_top = 182.0
+margin_right = 512.0
+margin_bottom = 246.0
+alignment = 1
+
+[node name="BtnPublish" type="Button" parent="VBoxContainer/BoxPublish"]
+margin_left = 51.0
+margin_right = 251.0
+margin_bottom = 64.0
+size_flags_horizontal = 4
+theme = ExtResource( 8 )
+custom_fonts/font = ExtResource( 3 )
+text = "Publish and exit"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BtnEditor" type="Button" parent="VBoxContainer/BoxPublish"]
+margin_left = 255.0
+margin_right = 461.0
+margin_bottom = 64.0
+size_flags_horizontal = 4
+theme = ExtResource( 7 )
+custom_fonts/font = ExtResource( 3 )
+text = "RETURN TO EDITOR"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="VBoxContainer/BtnMenu" to="." method="_on_BtnMenu_pressed"]
+[connection signal="pressed" from="VBoxContainer/BoxPublish/BtnPublish" to="." method="_on_BtnPublish_pressed"]
+[connection signal="pressed" from="VBoxContainer/BoxPublish/BtnEditor" to="." method="_on_BtnEditor_pressed"]

@@ -57,7 +57,13 @@ func _on_MapItem_delete(map_id):
 
 
 func _on_MapItem_practice(map_id):
-	pass
+	var params = {
+		"map_id": map_id,
+		"creator_id": Networker.get_user_id(),
+		"verifying": false,
+	}
+	Global.set_scene_parameters(params)
+	get_tree().change_scene("res://scenes/match_practice/MatchPractice.tscn")
 
 
 func _on_BtnCreate_pressed():

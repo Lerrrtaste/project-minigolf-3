@@ -3,8 +3,15 @@ extends Node2D
 """
 Represents a single Match (in the default gamemode)
 
-Start Data: players, map
-Connected to server
+Start Parameters: none
+Uses Networker socket
+
+Exits to MatchEnd
+Parameters:
+	- gamemode = "default"
+	- presences: Dict
+	- turn_count: Dict
+	- map_metadata: Dict
 
 """
 
@@ -34,8 +41,6 @@ enum States {
 	LOADING, # waiting for players to join
 	PLAYING, # playing a match
 	FINISHED, # match finished
-	
-	PRACTICE, # playing solo
 }
 var current_state = States.INVALID
 
@@ -45,14 +50,7 @@ func _ready():
 	Networker.connect("match_presences_updated", self, "_on_Networker_presences_updated")
 	Networker.connect("match_state", self, "_on_Networker_match_state")
 	
-	
-	var params = Global.get_scene_parameter()
-	if params.has("practice"):
-		map_id = params["practice"]
-		change_state(States.PRACTICE)
-	else:
-		Networker.match_join_async(Networker.matched_match)
-	# now wait for MATCH_CONFIG data from server or practive_mode() call
+	Networker.match_join_async(Networker.matched_match)
 
 
 func _process(delta):
@@ -65,14 +63,13 @@ func change_state(new_state:int):
 		States.LOADING:
 			Notifier.notify_game("Game is loading")
 			load_map(map_id, map_owner_id)
-			load_accounts(expected_user_ids)
+			var accs = yield(get_accounts_async(expected_user_ids), "completed")
+			for i in accs:
+				accounts[i.id] = i
 			Networker.match_send_state_async(Global.OpCodes.MATCH_CLIENT_READY)
 		States.PLAYING:
 			Notifier.notify_game("Match started")
 			_start_match()
-		States.PRACTICE:
-			pass #load_map(map_id)
-			_start_practice()
 		States.FINISHED:
 			get_tree().change_scene("res://scenes/match_end/MatchEnd.tscn")
 		_:
@@ -94,11 +91,11 @@ func spawn_ball(local:bool, account):
 	var new_ball = Ball.instance()
 	
 	if local:
-		new_ball.setup_playercontroller(PlayerControllerLocal,account)
+		new_ball.setup_playercontroller(PlayerControllerLocal, account)
 		new_ball.connect("turn_completed", self, "_on_Ball_turn_completed")
 		local_ball = new_ball
 	else:
-		new_ball.setup_playercontroller(PlayerControllerRemote,account)
+		new_ball.setup_playercontroller(PlayerControllerRemote, account)
 		remote_balls[account.id] = new_ball
 	
 	new_ball.set_map(map)
@@ -123,14 +120,7 @@ func _start_match():
 		turn_count_local[i] = 0
 
 
-func _start_practice():
-	# TODO need to simulate the server messages (next turn etc) 
-	spawn_ball(true,"me")
-	turn_count_local["me"] = 0
-	turn_order[0] = "me"
-
-
-func player_remote_leave(user_id)->void:
+func player_remote_leave(user_id)->void: # not called yet
 	if user_id == Networker.session.user_id:
 		printerr("trying to remove local ball")
 		return
@@ -144,11 +134,10 @@ func load_map(map_id:String, map_owner_id:String="")->void: # todo use map stora
 	map.deserialize(map_jstring)
 
 
-func load_accounts(expected_user_ids:Array):
-	var accs = yield(Networker.fetch_accounts_async(expected_user_ids), "completed")
-	for i in accs:
-		accounts[i.id] = i
-
+func get_accounts_async(expected_user_ids:Array):
+	return yield(Networker.fetch_accounts_async(expected_user_ids), "completed")
+	
+		
 func update_ui():
 	var text := ""
 	
@@ -174,7 +163,7 @@ func update_ui():
 
 
 func next_turn(user_id:String):
-	if current_turn_user != "":
+	if current_turn_user != "": # no prev player in the first round
 		turn_count_local[current_turn_user] += 1
 	
 	Notifier.notify_game("It is %s's turn"%get_ball(user_id).display_name)
@@ -187,6 +176,7 @@ func next_turn(user_id:String):
 		printerr("Could not find the server announced next user's ball")
 	
 	current_turn_user = user_id
+
 
 func get_ball(user_id:String):
 	if remote_balls.has(user_id):
@@ -239,6 +229,7 @@ func _on_Networker_match_state(state):
 				"presences": presences,
 				"turn_count": JSON.parse(state.data).result["turn_count"],
 				"map_metadata": map.metadata,
+				"gamemode": "default"
 			}
 			Global.set_scene_parameters(params)
 

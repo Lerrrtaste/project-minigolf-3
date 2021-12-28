@@ -23,9 +23,14 @@ func load_map_async(map_id:String, owner_id:String=""): # -> map_jstring
 	return map_jstring
 
 
-func save_map_async(map_id:String, map_jstring:String,public:bool)->void:
-	yield(_save_to_server_async(map_id, map_jstring, public), "completed")
-	_save_to_cache(map_id, map_jstring)
+func save_map_async(map_id:String, map_jstring:String,public:bool): # -> ApiStorageObjectAck/s
+	assert(not public) # use publish_map instead
+	var ack = yield(_save_to_server_async(map_id, map_jstring, public), "completed")
+	return ack
+	#_save_to_cache(map_id, map_jstring)
+
+func publish_map_async(map_id:String):
+	return yield(Networker.rpc_call("publish_map", JSON.print({"map_id": map_id})), "completed")
 
 
 func delete_map(map_id:String)->void:
@@ -110,8 +115,8 @@ func _load_from_server_async(map_id:String, owner_id:String="")->String: # -> ma
 	return object.value
 
 
-func _save_to_server_async(map_id:String, map_jstring:String, public:bool=false): 
-	yield(Networker.collection_write_object_async(Global.MAP_COLLECTION, map_id, map_jstring, public), "completed")
+func _save_to_server_async(map_id:String, map_jstring:String, public:bool=false): # -> ApiStorageObjectAck/s
+	return yield(Networker.collection_write_object_async(Global.MAP_COLLECTION, map_id, map_jstring, public), "completed")
 
 
 func _delete_from_server(map_id:String):

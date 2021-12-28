@@ -42,7 +42,7 @@ func _ready():
 
 
 func _process(delta):
-	update()
+	#update()
 	spr_arrow.visible = my_turn
 
 
@@ -60,14 +60,9 @@ func _physics_process(delta):
 		move_step(direction * speed, delta)
 
 
-func _draw():
-	if connected_pc.active and connected_pc.LOCAL:
-		var dist = min(get_local_mouse_position().length(), connected_pc.MAX_SPEED_DISTANCE)
-		draw_line(Vector2(),get_local_mouse_position().normalized() * dist, ColorN("black"))
-
 
 # called before entering tree
-func setup_playercontroller(pc_scene:PackedScene,account)->void:
+func setup_playercontroller(pc_scene:PackedScene,account=null)->void:
 	if is_instance_valid(connected_pc):
 		printerr("Ball is already controlled")
 		return
@@ -75,16 +70,17 @@ func setup_playercontroller(pc_scene:PackedScene,account)->void:
 	# Player Controller
 	var new_pc = pc_scene.instance()
 	connected_pc = new_pc
-	if new_pc.has_method("register_user_id"):
+	if new_pc.has_method("register_user_id") and account != null:
 		new_pc.register_user_id(account.id)
 	add_child(new_pc)
 	
 	# for name tag
-	if account.display_name != "":
+	if account == null:
+		lbl_player_name.visible = false
+	elif account.display_name != "":
 		display_name = account.display_name
 	else:
 		display_name = account.username
-		
 	
 	#  pc signals
 	new_pc.connect("impact",self,"_on_PlayerController_impact")
@@ -215,7 +211,7 @@ func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
 func finish_moving():
 	speed = 0
 	
-	if connected_pc.LOCAL:
+	if connected_pc.LOCAL and connected_pc.has_method("send_sync_position"):
 		connected_pc.send_sync_position(position)
 		#emit_signal("finished_moving")
 	
@@ -257,7 +253,11 @@ func set_map(_map):
 func get_pc_user_id()->String:
 	if connected_pc == null:
 		printerr("No pc connected")
-		return""
+		return ""
+	
+	if not "user_id" in connected_pc:
+		printerr("Conncted pc does not have a user id")
+		return ""
 	
 	return connected_pc.user_id
 

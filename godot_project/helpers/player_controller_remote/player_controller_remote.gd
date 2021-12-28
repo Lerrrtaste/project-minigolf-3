@@ -1,11 +1,12 @@
 extends Node2D
 
-signal impact(pos)
-signal sync_position(pos)
-const LOCAL = false
+# expected interface by ball
+signal impact(pos) # required
+signal sync_position(pos) # required
+const LOCAL = false # required
+var active := false # required (ball is awaiting impact)
 
 var user_id:String
-var active := false # ball is waiting for remote player impact
 
 const MAX_SPEED_DISTANCE = 100 # distance for max impact force
 
@@ -17,7 +18,7 @@ func register_user_id(_user_id):
 	user_id = _user_id
 
 
-func activate():
+func activate(): # required
 	if active:
 		printerr("Remote PC is already active")
 	active = true

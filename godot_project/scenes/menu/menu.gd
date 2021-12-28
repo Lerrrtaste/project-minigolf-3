@@ -36,7 +36,7 @@ func _ready():
 
 
 func load_ui():
-	lbl_display_name.text = Networker.get_username()
+	lbl_display_name.text = Networker.get_username(true)
 	if not Networker.is_guest():
 		btn_editor.disabled = false
 		lbl_guest.visible = false
@@ -115,7 +115,7 @@ func _on_Networker_matchmaking_ended():
 
 func _on_Networker_matchmaking_matched(matched):
 	Notifier.notify_info("Match found!")
-	get_tree().change_scene("res://scenes/match/Match.tscn")
+	get_tree().change_scene("res://scenes/match_default/MatchDefault.tscn")
 	
 
 func _on_Networker_socket_connected():

@@ -1,5 +1,20 @@
 extends Node2D
 
+"""
+The actual map editor
+
+Parameters:
+	- load_map_id:string or created_new = true
+	- verified:bool, optional
+
+Uses socket
+
+Exits to
+- MatchPractice with verifying = true
+- EditorMenu
+
+"""
+
 onready var map = get_node("Map")
 
 onready var tilemap_cursor = get_node("Map/TileMapCursor")
@@ -10,6 +25,7 @@ onready var line_border = get_node("Map/LineBorder")
 onready var menu_edit_name = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer/EditName")
 onready var menu_check_public = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer/CheckPublic")
 onready var menu_btn_save = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnSave")
+onready var menu_btn_publish = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnPublish")
 onready var menu_btn_discard = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnDiscard")
 onready var menu_popup = get_node("CanvasLayer/UI/SaveMenu")
 onready var select_tile = get_node("CanvasLayer/UI/ContainerMapEdit/SelectTile")
@@ -106,10 +122,10 @@ func _ready():
 		map.deserialize(map_jstring)
 		if map.metadata.has("name"):
 			menu_edit_name.text = map.metadata["name"]
+	
 		
 	elif params.has("created_new"):
 		pass
-
 
 
 func _process(delta):
@@ -186,6 +202,43 @@ func tool_draw(coord:Vector2)->void:
 			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id_at(get_global_mouse_position()))
 
 
+func save_map_async():
+	if not map.is_map_valid():
+		return
+		
+	if menu_edit_name.text.length() < Global.MAP_NAME_LENGTH_MIN:
+		Notifier.notify_editor("Name too short", "Min %s chars"%Global.MAP_NAME_LENGTH_MIN)
+		return
+		
+	if menu_edit_name.text.length() > Global.MAP_NAME_LENGTH_MAX:
+		Notifier.notify_editor("Name too long", "Max %s chars"%Global.MAP_NAME_LENGTH_MAX)
+		return
+	
+	menu_btn_save.disabled = true
+	menu_btn_save.text = "Saving..."
+	
+	# update metadata
+	var current_metadata = map.metadata
+	var map_id:String
+	var creator_id = Networker.session.user_id
+	var creator_display_name = Networker.get_username(true)
+	var map_name = menu_edit_name.text
+	if current_metadata.has("id"):
+		map_id = current_metadata["id"]
+	else:
+		map_id = String(OS.get_unix_time()) # TODO replace with proper uid gen (maybe by server request)
+	map.update_metadata(map_id, map_name, creator_id, creator_display_name)
+	
+	# export map
+	var map_jstring = map.serialize()
+	var public = false # menu_check_public.pressed
+	var ack = yield(MapStorage.save_map_async(map_id, map_jstring,public), "completed")
+	if ack.is_exception():
+		Notifier.notify_error("ERROR: Map saving failed", str(ack))
+	else:
+		Notifier.notify_editor("Saved succesfully")
+	return ack
+
 # Signal Callbacks
 
 func _on_SelectTool_item_selected(index):
@@ -222,38 +275,9 @@ func _on_BtnMenu_pressed():
 	
 
 func _on_BtnSave_pressed():
-	if not map.is_map_valid():
-		return
-		
-	if menu_edit_name.text.length() < Global.MAP_NAME_LENGTH_MIN:
-		Notifier.notify_editor("Name too short", "Min %s chars"%Global.MAP_NAME_LENGTH_MIN)
-		return
-		
-	if menu_edit_name.text.length() > Global.MAP_NAME_LENGTH_MAX:
-		Notifier.notify_editor("Name too long", "Max %s chars"%Global.MAP_NAME_LENGTH_MAX)
-		return
-	
-	menu_btn_save.disabled = true
-	menu_btn_save.text = "Saving..."
-	
-	# update metadata
-	var current_metadata = map.metadata
-	var map_id:String
-	var creator_id = Networker.session.user_id
-	var creator_display_name = Networker.get_username(true)
-	var map_name = menu_edit_name.text
-	if current_metadata.has("id"):
-		map_id = current_metadata["id"]
-	else:
-		map_id = String(OS.get_unix_time()) # TODO replace with proper uid gen (maybe by server request)
-	map.update_metadata(map_id, map_name, creator_id, creator_display_name)
-	
-	# export map
-	var map_jstring = map.serialize()
-	var public = menu_check_public.pressed
-	yield(MapStorage.save_map_async(map_id, map_jstring,public), "completed")
-	Notifier.notify_editor("Saved succesfully","TODO Its a lie, move this to somewhere it can be confirmed")
-	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
+	var ack = yield(save_map_async(), "completed")
+	if not ack.is_exception():
+		get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
 
 
 func _on_BtnClose_pressed():
@@ -274,3 +298,19 @@ func _on_BtnDiscardConfirm_pressed():
 func _on_BtnDiscardCancel_pressed():
 	pass # Replace with function body.
 	popup_discard.visible = false
+
+
+func _on_CheckPublic_toggled(button_pressed):
+	menu_btn_publish.visible = button_pressed
+	menu_btn_save.visible = not button_pressed
+	
+
+func _on_BtnPublish_pressed():
+	yield(save_map_async(), "completed")
+	var params = {
+		"map_id": map.metadata["id"],
+		"creator_id": map.metadata["creator_user_id"],
+		"verifying": true,
+	}
+	Global.set_scene_parameters(params)
+	get_tree().change_scene("res://scenes/match_practice/MatchPractice.tscn")

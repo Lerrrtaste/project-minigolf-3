@@ -25,6 +25,8 @@ const NK_ADDON_VERSION = "2.1.0" # primarily note for me
 const USERNAME_LENGTH_MIN = 4
 const USERNAME_LENGTH_MAX = 12
 
+
+
 #### Match State Op codes ####
 # 100-199 forward to match
 enum OpCodes {

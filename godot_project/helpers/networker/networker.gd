@@ -51,7 +51,6 @@ func socket_connect()->void:
 		emit_signal("socket_connection_failed")
 		return
 	print("Socket connected.")
-	emit_signal("socket_connected")
 	
 	account = yield(client.get_account_async(session),"completed")
 	
@@ -59,7 +58,9 @@ func socket_connect()->void:
 	socket.connect("received_matchmaker_matched", self, "_on_matchmaker_matched")
 	socket.connect("received_match_presence", self, "_on_match_presence")
 	socket.connect("received_match_state", self, "_on_match_state")
-
+	
+	emit_signal("socket_connected")
+	
 
 func login_guest_asnyc(display_name:String)->void:
 	# create/login account with
@@ -77,7 +78,7 @@ func login_guest_asnyc(display_name:String)->void:
 	# deviceID disabled for now
 	if true:# custom_id == "":
 		randomize()
-		custom_id = "guestid_os_%s" % ((OS.get_unix_time() * OS.get_system_time_msecs())%(randi()%823582305203))
+		custom_id = "guestid_os_%s" % ((OS.get_unix_time() * OS.get_system_time_msecs())%(randi()%19521982))
 	else:
 		custom_id = "guestid_rand_%s" % custom_id
 	
@@ -97,7 +98,6 @@ func login_guest_asnyc(display_name:String)->void:
 		return
 	
 	#worked
-	print("Logged in with customId %s successfully"%custom_id)
 	emit_signal("authentication_successful")
 	socket_connect()
 	return
@@ -148,7 +148,6 @@ func register_email_async(email:String, password:String, username:String):
 
 
 func fetch_accounts_async(user_ids:Array):
-	var ids = ["userid1", "userid2"]
 	var result : NakamaAPI.ApiUsers = yield(client.get_users_async(session, user_ids), "completed")
 	
 	if result.is_exception():
@@ -163,6 +162,10 @@ func reset():
 	session = null
 	socket = null
 	matchmaker_ticket = null
+
+
+func rpc_call(rpc_id:String, payload = null):
+	return yield(client.rpc_async(session, rpc_id, payload), "completed")
 
 #### Matches
 
@@ -247,7 +250,7 @@ func match_send_state_async(op_code:int,new_state="")->void:
 
 #### Collections
 
-func collection_write_object_async(collection:String, key:String, value:String, public_read:bool): # -> ApiStorageObjectAck
+func collection_write_object_async(collection:String, key:String, value:String, public_read:bool): # -> ApiStorageObjectAck/s
 	if not is_logged_in():
 		printerr("Cant save to collection, NOT LOGGED IN")
 		return
@@ -260,7 +263,7 @@ func collection_write_object_async(collection:String, key:String, value:String, 
 	
 	if acks.is_exception():
 		printerr("An error occured while writing to collection: %s" % acks)
-		return
+		return acks
 		
 	print("Successfully stored objects:")
 	for a in acks.acks:
@@ -330,8 +333,8 @@ func get_user_id()->String:
 
 
 func get_username(prefer_display_name:bool = false)->String:
-	if prefer_display_name and account.display_name != "":
-		return account.display_name
+	if prefer_display_name and account.user.display_name != "":
+		return account.user.display_name
 	return session.username
 
 

@@ -49,6 +49,7 @@ function match_handler.match_init(context, setupstate)
             presence = user.presence,
             properties = user.properties,
             joined = false,
+            left = false, -- TODO use to end match if all left
             ready = false,
             finished = false,
             ball_pos = nil,
@@ -73,16 +74,17 @@ function match_handler.match_join(context, dispatcher, tick, state, presences)
     -- Sends MATCH_CONFIG
 
     for _, user in ipairs(presences) do
-        nk.logger_info(nk.json_encode(user))
-        nk.logger_info(nk.json_encode(state.players[user.user_id]))
+        --nk.logger_info(nk.json_encode(user))
+        --nk.logger_info(nk.json_encode(state.players[user.user_id]))
         state.players[user.user_id].joined = true
     end
 
     local op_code = OpCodes.MATCH_CONFIG
     local user_ids = {}
     for k, v in pairs(state.players) do
-        table.insert(user_ids, k)
+        table.insert(user_ids, v.presence.user_id)
     end
+    nk.logger_info(nk.json_encode(user_ids))
     local data = {
         map_id = state.map_id,
         map_owner_id = state.map_owner_id,
@@ -99,9 +101,11 @@ end
 function match_handler.match_leave(context, dispatcher, tick, state, presences)
     -- set players joined to false
     -- broadcasts PLAYER_LEFT to all
+    -- end match if no one left
 
     for _, user in ipairs(presences) do
         state.players[user.user_id].joined = false
+        state.players[user.user_id].left = true
     end
 
     local op_code = OpCodes.PLAYER_LEFT
@@ -109,6 +113,8 @@ function match_handler.match_leave(context, dispatcher, tick, state, presences)
         left_players = presences,
     })
     dispatcher.broadcast_message(op_code, data, nil)
+
+
     return state
 end
 
@@ -128,6 +134,7 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
     --   },
     --   ...
     -- }
+
 
     -- match loading
     if state.started == false then
@@ -224,12 +231,17 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
                 end
 
                 -- end match if no players left
+                local all_finished = true
                 for k, player in pairs(state.players) do
                     if player.finished == false then
+                        all_finished = false
                         break -- not all finished
                     end
+                end
 
-                    -- end match
+                -- end match
+                if all_finished then
+                    state.players[msg.sender.user_id].turn_count = 1 + state.players[msg.sender.user_id].turn_count -- because last players TURN_COMPLETED wont be recognized
                     local _turn_count = {}
                     for _, v in ipairs(state.turn_order) do
                         _turn_count[v] = state.players[v].turn_count

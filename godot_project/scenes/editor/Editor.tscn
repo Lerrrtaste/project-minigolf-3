@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=2]
+[gd_scene load_steps=23 format=2]
 
 [ext_resource path="res://scenes/editor/editor.gd" type="Script" id=1]
 [ext_resource path="res://objects/map_objects/finish/finish.png" type="Texture" id=2]
@@ -18,6 +18,8 @@
 [ext_resource path="res://assets/ui/general/general_ui.tres" type="Theme" id=16]
 [ext_resource path="res://assets/ui/panels/metal_dark/panel_red_metal_dark.tres" type="StyleBox" id=17]
 [ext_resource path="res://assets/ui/buttons/big/red/button_red_big.tres" type="Theme" id=18]
+[ext_resource path="res://assets/ui/fonts/font_ui_small.tres" type="DynamicFont" id=19]
+[ext_resource path="res://assets/ui/buttons/big/yellow/button_yellow_big.tres" type="Theme" id=20]
 
 [sub_resource type="DynamicFont" id=2]
 size = 32
@@ -117,8 +119,8 @@ __meta__ = {
 visible = true
 margin_left = 203.0
 margin_top = 105.0
-margin_right = 609.0
-margin_bottom = 429.0
+margin_right = 619.0
+margin_bottom = 394.0
 custom_styles/panel = ExtResource( 9 )
 popup_exclusive = true
 __meta__ = {
@@ -130,6 +132,9 @@ anchor_left = 0.1
 anchor_top = 0.1
 anchor_right = 0.9
 anchor_bottom = 0.9
+margin_left = 0.200001
+margin_top = 0.5
+margin_bottom = 0.5
 theme = ExtResource( 15 )
 alignment = 1
 __meta__ = {
@@ -137,8 +142,8 @@ __meta__ = {
 }
 
 [node name="LblMenu" type="Label" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
-margin_right = 324.0
-margin_bottom = 71.0
+margin_right = 332.0
+margin_bottom = 47.0
 size_flags_vertical = 3
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = SubResource( 2 )
@@ -146,23 +151,23 @@ text = "MENU"
 align = 1
 
 [node name="GridContainer" type="GridContainer" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
-margin_top = 75.0
-margin_right = 324.0
-margin_bottom = 191.0
+margin_top = 51.0
+margin_right = 332.0
+margin_bottom = 163.0
 columns = 2
 
 [node name="LblName" type="Label" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
-margin_top = 12.0
+margin_top = 10.0
 margin_right = 97.0
-margin_bottom = 36.0
+margin_bottom = 34.0
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = ExtResource( 11 )
 text = "Map Name"
 
 [node name="EditName" type="LineEdit" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
 margin_left = 101.0
-margin_right = 324.0
-margin_bottom = 48.0
+margin_right = 332.0
+margin_bottom = 44.0
 size_flags_horizontal = 3
 theme = ExtResource( 15 )
 max_length = 16
@@ -170,9 +175,9 @@ placeholder_text = "Enter a Name"
 caret_blink = true
 
 [node name="LblPublic" type="Label" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
-margin_top = 72.0
+margin_top = 68.0
 margin_right = 97.0
-margin_bottom = 96.0
+margin_bottom = 92.0
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = ExtResource( 11 )
 text = "Public"
@@ -182,23 +187,33 @@ __meta__ = {
 
 [node name="CheckPublic" type="CheckBox" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer"]
 margin_left = 101.0
-margin_top = 52.0
+margin_top = 48.0
 margin_right = 165.0
-margin_bottom = 116.0
+margin_bottom = 112.0
 size_flags_horizontal = 0
 size_flags_vertical = 4
+theme = ExtResource( 16 )
+custom_fonts/font = ExtResource( 19 )
 custom_icons/checked = ExtResource( 14 )
 custom_icons/unchecked = ExtResource( 13 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/UI/SaveMenu/VBoxContainer"]
-margin_top = 195.0
-margin_right = 324.0
-margin_bottom = 259.0
+margin_top = 167.0
+margin_right = 332.0
+margin_bottom = 231.0
 alignment = 1
 
+[node name="BtnPublish" type="Button" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer"]
+visible = false
+margin_right = 224.0
+margin_bottom = 64.0
+theme = ExtResource( 20 )
+custom_fonts/font = ExtResource( 11 )
+text = "Verify and publish"
+
 [node name="BtnSave" type="Button" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer"]
-margin_left = 19.0
-margin_right = 189.0
+margin_left = 23.0
+margin_right = 193.0
 margin_bottom = 64.0
 size_flags_horizontal = 4
 size_flags_vertical = 10
@@ -210,8 +225,8 @@ __meta__ = {
 }
 
 [node name="BtnDiscard" type="Button" parent="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer"]
-margin_left = 193.0
-margin_right = 305.0
+margin_left = 197.0
+margin_right = 309.0
 margin_bottom = 64.0
 size_flags_horizontal = 4
 size_flags_vertical = 10
@@ -303,6 +318,8 @@ text = "Cancel"
 [connection signal="item_selected" from="CanvasLayer/UI/ContainerMapEdit/SelectTool" to="." method="_on_SelectTool_item_selected"]
 [connection signal="item_selected" from="CanvasLayer/UI/ContainerMapEdit/SelectObject" to="." method="_on_SelectObject_item_selected"]
 [connection signal="pressed" from="CanvasLayer/UI/BtnMenu" to="." method="_on_BtnMenu_pressed"]
+[connection signal="toggled" from="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer/CheckPublic" to="." method="_on_CheckPublic_toggled"]
+[connection signal="pressed" from="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnPublish" to="." method="_on_BtnPublish_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnSave" to="." method="_on_BtnSave_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnDiscard" to="." method="_on_BtnDiscard_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/SaveMenu/BtnClose" to="." method="_on_BtnClose_pressed"]
