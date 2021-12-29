@@ -17,9 +17,8 @@ Exits to
 
 onready var map = get_node("Map")
 
-onready var tilemap_cursor = get_node("Map/TileMapCursor")
+onready var tilemap_cursor = get_node("TileMapCursor")
 onready var camera_editor = get_node("CameraEditor")
-onready var line_border = get_node("Map/LineBorder")
 
 # ui
 onready var menu_edit_name = get_node("CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer/EditName")
@@ -187,7 +186,7 @@ func tool_draw(coord:Vector2)->void:
 		Tools.object_place:
 			if select_object.get_selected_items().size() == 0:
 				return
-			spr_object_cursor.position = map.get_center_cell_position(get_global_mouse_position())
+			spr_object_cursor.position = map.get_cell_center(get_global_mouse_position())
 			var obj_id = select_object.get_item_metadata(select_object.get_selected_items()[0])
 			var path = map.OBJECT_DATA[obj_id]["texture_path"]
 			var icon = load(path)
@@ -199,7 +198,7 @@ func tool_draw(coord:Vector2)->void:
 			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id(select_tile.get_item_metadata(select_tile.get_selected_items()[0])))
 		Tools.tile_remove:
 			tilemap_cursor.set_cell(selected_cell.x,selected_cell.y,-1)
-			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id_at(get_global_mouse_position()))
+			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id(map.get_tile_id_at(get_global_mouse_position())))
 
 
 func save_map_async():
@@ -306,6 +305,17 @@ func _on_CheckPublic_toggled(button_pressed):
 	
 
 func _on_BtnPublish_pressed():
+	if not map.is_map_valid():
+		return
+		
+	if menu_edit_name.text.length() < Global.MAP_NAME_LENGTH_MIN:
+		Notifier.notify_editor("Name too short", "Min %s chars"%Global.MAP_NAME_LENGTH_MIN)
+		return
+		
+	if menu_edit_name.text.length() > Global.MAP_NAME_LENGTH_MAX:
+		Notifier.notify_editor("Name too long", "Max %s chars"%Global.MAP_NAME_LENGTH_MAX)
+		return
+	
 	yield(save_map_async(), "completed")
 	var params = {
 		"map_id": map.metadata["id"],

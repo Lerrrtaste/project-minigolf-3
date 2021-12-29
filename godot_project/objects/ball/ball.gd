@@ -3,6 +3,7 @@ extends KinematicBody2D
 onready var lbl_player_name = get_node("LblPlayerName")
 onready var spr_arrow = get_node("SprArrow")
 onready var shape_body = get_node("ShapeBody")
+onready var center_pos = get_node("CenterPos")
 
 var connected_pc #has active player controller attached
 var map # set by match before entering tree (map ref)
@@ -51,7 +52,7 @@ func _physics_process(delta):
 		shape_body.set_deferred("disabled", finished) # TODO cleanup
 	
 	if speed > 0:
-		var _cell = map.get_cell_position(position)
+		var _cell = map.get_cell_center(_get("position"))
 		if _cell != current_cell: # moved to new cell
 			current_cell = _cell
 			update_tile_properties()
@@ -73,6 +74,7 @@ func setup_playercontroller(pc_scene:PackedScene,account=null)->void:
 	if new_pc.has_method("register_user_id") and account != null:
 		new_pc.register_user_id(account.id)
 	add_child(new_pc)
+	new_pc.position = center_pos.position
 	
 	# for name tag
 	if account == null:
@@ -117,7 +119,7 @@ func reached_finish():
 	shape_body.set_deferred("disabled", true)
 	
 	if connected_pc.LOCAL:
-		emit_signal("reached_finish",position)
+		emit_signal("reached_finish",_get("position"))
 	
 	finish_moving()
 
@@ -154,7 +156,7 @@ func _handle_collision(collision:KinematicCollision2D):
 		print("ball %s colliding with %s"%[self,collision.collider])
 		#You can get the collision components by creating a unit vector pointing in the direction
 		#from one ball to the other, then taking the dot product with the velocity vectors of the balls. 
-		var coll:Vector2 = position - collision.collider.position
+		var coll:Vector2 = _get("position") - collision.collider.position
 		var distance:float = coll.length()
 
 		coll = coll / distance
@@ -177,7 +179,7 @@ func _handle_collision(collision:KinematicCollision2D):
 		return
 	
 	#wall collision
-	var coll_pos_delta = collision.position - position
+	var coll_pos_delta = collision.position - _get("position")
 	var collision_normal = coll_pos_delta.normalized()
 
 	var wall_normal := Vector2()
@@ -202,7 +204,7 @@ func _handle_collision(collision:KinematicCollision2D):
 func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
 	# called by colliding ball
 	collision_blacklist.append(sender)
-	starting_position = position
+	starting_position = _get("position")
 	#assert(_impact.length() <= 1.01) #length not longer than 1 (accounting for rounding error)
 	speed = new_velocity.length()
 	direction = new_velocity.normalized()
@@ -212,7 +214,7 @@ func finish_moving():
 	speed = 0
 	
 	if connected_pc.LOCAL and connected_pc.has_method("send_sync_position"):
-		connected_pc.send_sync_position(position)
+		connected_pc.send_sync_position(_get("position"))
 		#emit_signal("finished_moving")
 	
 	if my_turn and not connected_pc.active:
@@ -222,26 +224,27 @@ func finish_moving():
 func update_tile_properties():
 	if not is_instance_valid(map):
 		return
-		
-	if map.get_tile_resets_ball(position):
-		position = starting_position
+	
+	if map.get_tile_property(_get("position"), "resets_ball"):
+		_set("position",starting_position)
 		finish_moving()
 		# TODO play respawn animation
 		#print("Sent because of tile property")
-	friction_modifier = map.get_tile_friction(position)
+	friction_modifier = map.get_tile_property(_get("position"),"friction")
 
 
 #### Callbacks
 
 func _on_PlayerController_impact(_impact):
-	starting_position = position
+	#Notifier.notify_debug(get_position(),str(position))
+	starting_position = _get("position")
 	assert(_impact.length() <= 1.01) # length not longer than 1 (accounting for rounding error)
 	speed = min(_impact.length(),1.0) * max_speed
 	direction = _impact.normalized()
 
 
 func _on_PlayerController_sync_position(pos):
-	position = pos
+	_set("position",pos)
 	finish_moving()
 
 
@@ -249,6 +252,7 @@ func _on_PlayerController_sync_position(pos):
 
 func set_map(_map):
 	map = _map
+
 
 func get_pc_user_id()->String:
 	if connected_pc == null:
@@ -262,15 +266,22 @@ func get_pc_user_id()->String:
 	return connected_pc.user_id
 
 
+#### TEMP
+func _get(property):
+	print("Getting ", property)
+	match property:
+		"position":
+			return position + center_pos.position
+
+func _set(property, value):
+	print(property, " used _set to value ", value)
+	match property:
+		"position":
+			position = value - center_pos.position
+
+
+
 #### Helpers
-
-func cartesian_to_isometric(cart:Vector2)->Vector2:
-	# Cartesian to isometric:
-	var iso = Vector2()
-	iso.x = cart.x - cart.y
-	iso.y = (cart.x + cart.y) / 2
-	return iso
-
 
 func reflect_vector(vector:Vector2, normal:Vector2)->Vector2:
 	return vector - 2 * vector.dot(normal) * normal

@@ -12,6 +12,7 @@ var map_cards:Array
 onready var lbl_display_name = get_node("PanelAccount/VBoxContainer/LblDisplayName")
 onready var lbl_guest = get_node("PanelAccount/VBoxContainer/LblGuest")
 onready var lbl_editor_guest_hint = get_node("BtnMatchmaking/BtnEditor/LblEditorGuestHint")
+onready var lbl_version = get_node("LblVersion")
 
 func _ready():
 	# resume previous states
@@ -42,6 +43,7 @@ func load_ui():
 		lbl_guest.visible = false
 		lbl_editor_guest_hint.visible = false
 	refresh_map_selection()
+	lbl_version.text = "Game Version %s"%Global.GAME_VERSION
 
 
 func refresh_map_selection():

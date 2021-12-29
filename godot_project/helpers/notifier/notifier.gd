@@ -6,6 +6,7 @@ var TexturePanelRed = preload("res://helpers/notifier/popup/notification_panel1.
 var TexturePanelYellow = preload("res://helpers/notifier/popup/notification_panel2.png")
 var TexturePanelBlue = preload("res://helpers/notifier/popup/notification_panel3.png")
 var TexturePanelGreen = preload("res://helpers/notifier/popup/notification_panel4.png")
+var TexturePanelWhite = preload("res://assets/ui/panels/panel_white_small.tres")
 
 var Notification = preload("res://helpers/notifier/popup/Notification.tscn")
 
@@ -14,6 +15,7 @@ onready var tween = get_node("Tween")
 func _ready():
 	tween.connect("tween_completed", self, "_on_tween_completed")
 
+# TODO allow non strings and do str() everywhere
 
 func notify_info(title:String, message:String = ""):
 	_spawn_notification(TexturePanelGreen, title, message, 3.0)
@@ -29,6 +31,9 @@ func notify_error(title:String, message:String = ""):
 
 func notify_editor(title:String, message:String = ""):
 	_spawn_notification(TexturePanelBlue, title, message, 3.0)
+
+func notify_debug(title, message:String = ""):
+	_spawn_notification(TexturePanelWhite, "Dbg: "+str(title), message, 3.0)
 
 
 func notify(color:String, message:String, title:String, duration:float):

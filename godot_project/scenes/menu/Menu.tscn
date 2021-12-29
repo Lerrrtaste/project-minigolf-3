@@ -149,7 +149,7 @@ __meta__ = {
 margin_left = 20.0
 margin_top = 20.0
 margin_right = 296.0
-margin_bottom = 107.0
+margin_bottom = 86.0
 rect_pivot_offset = Vector2( -997, 248 )
 size_flags_horizontal = 3
 __meta__ = {
@@ -158,21 +158,34 @@ __meta__ = {
 
 [node name="Label" type="Label" parent="ContainerMaps/BoxMapCards"]
 margin_right = 276.0
-margin_bottom = 39.0
+margin_bottom = 18.0
 size_flags_vertical = 1
 theme = ExtResource( 3 )
 custom_fonts/font = ExtResource( 11 )
-text = "include in map rotation"
+text = "MAPS"
 align = 1
 autowrap = true
 
 [node name="LineEdit" type="LineEdit" parent="ContainerMaps/BoxMapCards"]
-margin_top = 43.0
+margin_top = 22.0
 margin_right = 276.0
-margin_bottom = 87.0
+margin_bottom = 66.0
 theme = ExtResource( 12 )
 clear_button_enabled = true
 placeholder_text = "Search for Map ID or Name"
+
+[node name="LblVersion" type="Label" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "X.X.X"
+valign = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [connection signal="pressed" from="BtnMatchmaking" to="." method="_on_BtnMatchmaking_pressed"]
 [connection signal="pressed" from="BtnMatchmaking/BtnEditor" to="." method="_on_BtnEditor_pressed"]

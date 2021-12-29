@@ -103,7 +103,6 @@ func _is_map_cached(map_id:String)->bool:
 #### Server
 
 func _load_from_server_async(map_id:String, owner_id:String="")->String: # -> map_jstring
-	print("Loading from server")
 	var object
 	if owner_id == "":
 		object = yield(Networker.collection_read_object_async(Global.MAP_COLLECTION,map_id),"completed")

@@ -1,6 +1,10 @@
 extends Node2D
 
 """
+Represents a playable and editable map
+
+Contains TILE_DATA and OBJECT_DATA
+
 Tile Texture Size
 32*44
 """
@@ -15,45 +19,50 @@ enum Tiles { # these are saved in files
 	SAND = 2,
 	WATER = 3,
 }
-var TILE_DATA = { # TODO refactor to use tile enum as key
+var TILE_DATA = {
 		Tiles.EMPTY: {
 				"name": "Empty",
 				"tilemap_id": null, # tileset index of
 				"solid": true, # not used yet (planning to use this instead of tilemap collision shape)
-				"ball_reset": true, # maybe it doesnt work (sold and reset) 
-				"texture_path":null # for editor icon
+				"resets_ball": true, # maybe it doesnt work (sold and reset) 
+				"texture_path":null, # for editor icon
+				"layer": "all",
 		},
 		Tiles.GRASS: {
 				"name": "Grass",
 				"tilemap_id": null,
 				"solid": false,
-				"ball_reset": false,
+				"resets_ball": false,
 				"friction": 1.0, 
-				"texture_path":"res://objects/map/grass.png"
+				"texture_path":"res://objects/map/grass.png",
+				"layer": "ground",
 				},
 		Tiles.WALL: {
 				"name": "Wall",
 				"tilemap_id": null,
 				"solid": true,
-				"ball_reset": false,
+				"resets_ball": false,
 				"friction": 1.0, 
-				"texture_path":"res://objects/map/wall.png"
+				"texture_path":"res://objects/map/wall.png",
+				"layer": "walls",
 		},
 		Tiles.SAND: {
 				"name": "Sand",
 				"tilemap_id": null,
 				"solid": false,
-				"ball_reset": false,
+				"resets_ball": false,
 				"friction": 4.0, 
-				"texture_path":"res://objects/map/sand.png"
+				"texture_path":"res://objects/map/sand.png",
+				"layer": "ground",
 		},
 		Tiles.WATER: {
 				"name": "Water",
 				"tilemap_id": null,
 				"solid": false,
-				"ball_reset": true,
+				"resets_ball": true,
 				"friction": 1.0, 
-				"texture_path":"res://objects/map/water.png"
+				"texture_path":"res://objects/map/water.png",
+				"layer": "ground",
 		},
 }
 
@@ -66,14 +75,14 @@ const OBJECT_DATA = {
 				"name": "Spawn",
 				"limit": 1, #only one
 				"required": 1,
-				"scene_path":"res://objects/map_objects/start/Start.tscn",
+				"node_path":"res://objects/map_objects/start/Start.tscn",
 				"texture_path":"res://objects/map_objects/start/start.png"
 				},
 		Objects.FINISH: {
 				"name": "Finish",
 				"limit": 4,
 				"required": 1,
-				"scene_path":"res://objects/map_objects/finish/Finish.tscn",
+				"node_path":"res://objects/map_objects/finish/Finish.tscn",
 				"texture_path":"res://objects/map_objects/finish/finish.png"
 				},
 }
@@ -82,22 +91,26 @@ var metadata = {
 	"updated": false
 }
 
+onready var _tilemap_ground = get_node("TileMapGround")
+onready var _tilemap_walls = get_node("TileMapWalls")
+var MapTileset = preload("res://objects/map/map_tileset.tres")
+
 var spawned_objects:Dictionary
-onready var tilemap = get_node("TileMap")
+
 
 
 func _ready():
-	# update tileset tile ids
+	# Set tilemap_id's
 	for i in TILE_DATA:
-		var real_id = tilemap.tile_set.find_tile_by_name(TILE_DATA[i]["name"])
+		var real_id = MapTileset.find_tile_by_name(TILE_DATA[i]["name"])
 		TILE_DATA[i]["tilemap_id"] = real_id
+
 
 #### Editor Actions
 
 func editor_object_place(world_pos:Vector2,object_id:int):
-	var cell = tilemap.world_to_map(world_pos)
+	var cell = _world_to_map(world_pos)
 	
-	# TODO check if outside of map border
 	
 	#dont spawn if cell already occupied
 	if spawned_objects.keys().has(cell):
@@ -111,22 +124,14 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 	
 	
 	# check if the tile beneath is valid
-	var tilemap_id = tilemap.get_cellv(cell)
-	var tdata
+	var tdata = TILE_DATA[_get_tile(cell)]
 	
-	for i in TILE_DATA:
-		if TILE_DATA[i]["tilemap_id"] == tilemap_id:
-			tdata = TILE_DATA[i]
-	
-	if tdata["solid"] or tdata["ball_reset"]:
+	if tdata["solid"] or tdata["resets_ball"]:
 		Notifier.notify_editor("This object cant be placed on this tile")
 		return
 	
-	# find object data
-	var obj_data = OBJECT_DATA[object_id]
-	var path = obj_data["scene_path"]
-	
 	#check limit
+	var obj_data = OBJECT_DATA[object_id]
 	if obj_data.has("limit"):
 		var remaining = obj_data["limit"]
 		for i in spawned_objects:
@@ -136,40 +141,32 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 			Notifier.notify_editor("Object limit reached")
 			return
 	
-	var obj = load(path).instance()
-	var snapped_pos = tilemap.map_to_world(cell)
-	#snapped_pos.y -= TILE_Y/2 # center on cell
-	obj.position = snapped_pos
-	add_child(obj)
-	spawned_objects[snapped_pos] = obj
+	_spawn_object(cell, object_id)
 
 
 func editor_object_remove(world_pos:Vector2):
-	var cell = tilemap.world_to_map(world_pos)
-	var snapped_pos = tilemap.map_to_world(cell)
-	#snapped_pos.y -= TILE_Y/2 # center on cell
+	var cell = _world_to_map(world_pos)
 
-	if not spawned_objects.keys().has(snapped_pos):
-		print("Note: %s has no object"%snapped_pos)
+	if not spawned_objects.keys().has(cell):
+		print("Note: cell %s has no object"%cell)
 		return
-		
-	var obj = spawned_objects[snapped_pos]
-	obj.visible = false
-	obj.set_process(false)
-	obj.queue_free()
-	spawned_objects.erase(snapped_pos)
+	
+	_remove_object(cell)
 
 
 func editor_tile_change(world_pos:Vector2, id:int):
-	var cell = tilemap.world_to_map(world_pos)
+	var cell = _world_to_map(world_pos)
 	
 	if not TILE_DATA.keys().has(id):
 		printerr("Tile with id %s does not exist!"%id)
-		
-	var tilemap_id = TILE_DATA[id]["tilemap_id"]
-	tilemap.set_cell(cell.x,cell.y,tilemap_id)
-
-	#TODO remove potential object on this tile
+	
+	_set_tile(cell, id)
+	
+	if spawned_objects.keys().has(cell):
+		var object_id = _get_object(cell).OBJECT_ID
+		_remove_object(cell)
+		editor_object_place(world_pos, object_id)
+	
 
 
 #### Match
@@ -177,7 +174,8 @@ func editor_tile_change(world_pos:Vector2, id:int):
 func match_get_starting_position()->Vector2:
 	for i in spawned_objects:
 		if spawned_objects[i].OBJECT_ID == Objects.START:
-			return Vector2(i.x,i.y+TILE_Y/2)
+			_get_object(i)
+			return Vector2(_map_to_world(i).x,_map_to_world(i).y+TILE_Y/2)
 	
 	Notifier.notify_error("No Spawn Object found, defaulting to (0,0)")
 	return Vector2()
@@ -191,7 +189,11 @@ func update_metadata(map_id:String, map_name:String, creator_user_id:String, cre
 	metadata["id"] = map_id
 	metadata["creator_user_id"] = creator_user_id
 	metadata["creator_display_name"] = creator_display_name
-	metadata["size"] = tilemap.get_used_rect().size
+	var size = Vector2()
+	size.x = _get_used_cells().max().x - _get_used_cells().min().x + 1
+	size.y = _get_used_cells().max().y - _get_used_cells().min().y
+	metadata["size"] = size
+	Notifier.notify_debug("Calculated size is %s"%size, "Is this correct?")
 	metadata["updated"] = true
 
 
@@ -211,12 +213,9 @@ func serialize()->String:
 		}
 	}
 	
-	# tile
-	var cells = tilemap.get_used_cells()
+	var cells = _get_used_cells()
 	for i in cells:
-		for j in TILE_DATA:
-			if TILE_DATA[j]["tilemap_id"] == tilemap.get_cell(i.x,i.y):
-				mapdict["tiles"][var2str(i)] = j
+		mapdict["tiles"][var2str(i)] = _get_tile(i)
 	
 	# objects
 	for i in spawned_objects:
@@ -254,22 +253,19 @@ func deserialize(jstring:String)->void:
 			assert(false)
 			continue
 		
-		tilemap.set_cell(coord.x,coord.y,TILE_DATA[tile_id]["tilemap_id"])
-	
+		_set_tile(coord, tile_id)
+		
+
 	# objects
 	for i in parse.result["objects"]:
 		var object_id := int(parse.result["objects"][i])
-		var inst
 		
 		if not OBJECT_DATA.has(object_id):
 			printerr("Mapfile contains unkown object id: %s"%object_id)
 			assert(false)
 			continue
 		
-		inst = load(OBJECT_DATA[object_id]["scene_path"]).instance()
-		inst.position = str2var(i)
-		add_child(inst)
-		spawned_objects[str2var(i)] = inst
+		_spawn_object(str2var(i), object_id)
 	
 	#metadata
 	metadata = parse.result["metadata"]
@@ -277,36 +273,84 @@ func deserialize(jstring:String)->void:
 	Notifier.notify_game("Map \"%s\" loaded succesfully"%metadata["name"], "(ID %s)"%metadata["id"])
 
 
+#### Internal Tile and Object interaction
+
+func _set_tile(cell:Vector2, tile_id:int):
+	if _get_tile(cell) != -1 and TILE_DATA[tile_id]["layer"] != "all": # clear other layers to only have one tile per coordinate across all tilemaps
+		_set_tile(cell, Tiles.EMPTY)
+		
+	match TILE_DATA[tile_id]["layer"]:
+			"ground":
+				_tilemap_ground.set_cell(cell.x,cell.y,TILE_DATA[tile_id]["tilemap_id"])
+			"walls":
+				_tilemap_walls.set_cell(cell.x,cell.y,TILE_DATA[tile_id]["tilemap_id"])
+			"all":
+				_tilemap_walls.set_cell(cell.x,cell.y,TILE_DATA[tile_id]["tilemap_id"])
+				_tilemap_ground.set_cell(cell.x,cell.y,TILE_DATA[tile_id]["tilemap_id"])
+			_:
+				printerr("TILE_DATA has unkown layer ", TILE_DATA[tile_id]["layer"])
+
+
+func _get_tile(cell:Vector2)->int: # -> tile_id
+	var tilemap_id := -1
+	
+	if _tilemap_ground.get_cellv(cell) != -1:
+		tilemap_id = _tilemap_ground.get_cellv(cell)
+	elif _tilemap_walls.get_cellv(cell) != -1:
+		tilemap_id = _tilemap_walls.get_cellv(cell)
+		
+	for i in TILE_DATA:
+		if TILE_DATA[i]["tilemap_id"] == tilemap_id:
+			return i
+	
+	printerr("Tile at ", cell, "could not be determined (error! investiage _get_tile)")
+	return -1
+
+
+func _get_used_cells(): # -> vector array
+	var used_cells = []
+	used_cells.append_array(_tilemap_ground.get_used_cells())
+	used_cells.append_array(_tilemap_walls.get_used_cells())
+	return used_cells
+
+
+
+func _spawn_object(cell:Vector2, id:int):
+	var path = OBJECT_DATA[id]["node_path"]
+	var obj = load(path).instance()
+	var world_pos = _map_to_world(cell)
+	obj.position = world_pos
+	add_child(obj)
+	spawned_objects[cell] = obj
+
+
+func _get_object(cell:Vector2): # -> object ref
+	return spawned_objects[cell]
+
+
+func _remove_object(cell:Vector2):
+	var obj = _get_object(cell)
+	obj.visible = false
+	obj.queue_free()
+	spawned_objects.erase(cell)
+
+
+
+func _world_to_map(world_pos:Vector2)->Vector2:
+	return _tilemap_ground.world_to_map(world_pos)
+
+
+func _map_to_world(cell:Vector2)->Vector2:
+	return _tilemap_ground.map_to_world(cell)
+
+
 #### Helper Functions
 
-func get_center_cell_position(world_pos:Vector2)->Vector2:
-	var cell = tilemap.world_to_map(world_pos)
-	var snapped_pos = tilemap.map_to_world(cell)
+func get_cell_center(world_pos:Vector2)->Vector2:
+	var cell = _world_to_map(world_pos)
+	var snapped_pos = _map_to_world(cell)
 	#snapped_pos.y -= TILE_Y/2 # center on cell
 	return snapped_pos
-
-
-func snap_world_to_grid(pos:Vector2)->Vector2:
-	var grid = Vector2()
-	grid.x = floor(pos.x/TILE_X) * TILE_X
-	grid.y = floor(pos.y/TILE_Y) * TILE_Y
-	return grid
-
-
-func cartesian_to_isometric(cart:Vector2)->Vector2:
-	# Cartesian to isometric:
-	var iso = Vector2()
-	iso.x = cart.x - cart.y
-	iso.y = (cart.x + cart.y) / 2
-	return iso
-
-
-func isometric_to_cartesion(iso:Vector2)->Vector2:
-	# Isometric to Cartesian:
-	var cart = Vector2()
-	cart.x = (2 * iso.y + iso.x) / 2
-	cart.y = (2 * iso.y - iso.x) / 2
-	return cart
 
 
 func is_map_valid()->bool:
@@ -331,55 +375,21 @@ func is_map_valid()->bool:
 	return true
 
 
-
 #### Setget
 
-func get_cell_position(world_pos:Vector2)->Vector2:
-	return tilemap.world_to_map(world_pos)
+
+func get_tile_property(world_pos:Vector2, property:String):
+	var tile_id = _get_tile(_world_to_map(world_pos))
+	
+	if not TILE_DATA[tile_id].has(property):
+		printerr("Cell %s has no \"%s\" property"%[tile_id,property])
+		return
+	
+	return TILE_DATA[tile_id][property]
 
 
-func get_tile_friction(world_pos:Vector2)->float:
-	var tilemap_id = tilemap.get_cellv(tilemap.world_to_map(world_pos))
-	for i in TILE_DATA:
-		if TILE_DATA[i]["tilemap_id"] == tilemap_id:
-			if not TILE_DATA[i].has("friction"):
-				printerr("Cell %s has no friction property"%i)
-				return 0.0
-			return TILE_DATA[i]["friction"]
-	printerr("Cell %s not found in TILE_DATA"%tilemap_id)
-	return 0.0
-
-
-func get_tile_resets_ball(world_pos:Vector2)->bool:
-	var tilemap_id = tilemap.get_cellv(tilemap.world_to_map(world_pos))
-	for i in TILE_DATA:
-		if TILE_DATA[i]["tilemap_id"] == tilemap_id:
-			if not TILE_DATA[i].has("ball_reset"):
-				printerr("Cell %s has no ball_reset property"%i)
-				return false
-			return TILE_DATA[i]["ball_reset"]
-	printerr("Cell %s not found in TILE_DATA"%tilemap_id)
-	return false
-
-
-func get_tile_solid(world_pos:Vector2)->bool:
-	var tilemap_id = tilemap.get_cellv(tilemap.world_to_map(world_pos))
-	for i in TILE_DATA:
-		if TILE_DATA[i]["tilemap_id"] == tilemap_id:
-			if not TILE_DATA[i].has("solid"):
-				printerr("Cell %s has no solid property"%i)
-				return false
-			return TILE_DATA[i]["solid"]
-	printerr("Cell %s not found in TILE_DATA"%tilemap_id)
-	return false
-
-
-func get_cell_from_world(world_pos:Vector2)->Vector2:
-	return tilemap.world_to_map(world_pos)
-
-
-func get_tilemap_id_at(world_pos:Vector2)->int:
-	return tilemap.get_cellv(tilemap.world_to_map(world_pos))
+func get_tile_id_at(world_pos:Vector2)->int:
+	return _get_tile(_world_to_map(world_pos))
 
 
 func get_tilemap_id(tile_id:int)->int:

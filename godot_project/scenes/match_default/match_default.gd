@@ -92,6 +92,7 @@ func spawn_ball(local:bool, account):
 		return
 	
 	var new_ball = Ball.instance()
+	map.add_child(new_ball)
 	
 	if local:
 		new_ball.setup_playercontroller(PlayerControllerLocal, account)
@@ -102,11 +103,10 @@ func spawn_ball(local:bool, account):
 		remote_balls[account.id] = new_ball
 	
 	new_ball.set_map(map)
-	add_child(new_ball)
 	new_ball.position = map.match_get_starting_position()
 	new_ball.connect("reached_finish", self, "_on_Ball_reached_finish")
 	
-	if local: # TODO add as own child and always follow current player
+	if local: # TODO add as own child and always follow current player (implement in match camera scipt
 		# attach camera
 		var cam = MatchCamera.instance()
 		local_ball.add_child(cam)
@@ -132,7 +132,7 @@ func player_remote_leave(user_id)->void: # not called yet
 	remote_balls.erase(user_id)
 
 
-func load_map(map_id:String, map_owner_id:String="")->void: # todo use map storage helper some time in the futureeee
+func load_map(map_id:String, map_owner_id:String="")->void:
 	var map_jstring = yield(MapStorage.load_map_async(map_id, map_owner_id), "completed")
 	map.deserialize(map_jstring)
 

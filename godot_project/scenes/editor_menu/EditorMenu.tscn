@@ -31,30 +31,31 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PanelContainer" type="PanelContainer" parent="Control"]
+[node name="PanelContainer" type="ScrollContainer" parent="Control"]
 anchor_left = 0.2
 anchor_top = 0.2
 anchor_right = 0.8
 anchor_bottom = 0.8
-custom_styles/panel = ExtResource( 9 )
+custom_styles/bg = ExtResource( 9 )
+scroll_vertical_enabled = false
 __meta__ = {
 "_edit_group_": true,
-"_edit_use_anchors_": true
+"_edit_use_anchors_": false
 }
 
 [node name="ContainerMaps" type="VBoxContainer" parent="Control/PanelContainer"]
 margin_left = 12.0
 margin_top = 12.0
 margin_right = 602.4
-margin_bottom = 340.0
+margin_bottom = 36.0
+size_flags_horizontal = 3
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="LblPlaceholder" type="Label" parent="Control/PanelContainer/ContainerMaps"]
-margin_top = 152.0
 margin_right = 590.0
-margin_bottom = 176.0
+margin_bottom = 24.0
 size_flags_vertical = 6
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = SubResource( 3 )

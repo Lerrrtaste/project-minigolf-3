@@ -65,7 +65,7 @@ func _ready():
 				text += "\n[b]%s won[/b]"%i
 			
 			text += "\n\n\n"
-			text += "The Map was [i]%s[/i] by %s"%[params["map_metadata"]["name"],params["map_metadata"]["creator_user_id"]] # TODO get real username (not custom_id)
+			text += "The Map was \"%s[/i]\" by %s"%[params["map_metadata"]["name"],params["map_metadata"]["create_display_name"]]
 			text += "\n(MapID %s)"%params["map_metadata"]["id"]
 	
 	text_result.bbcode_text = text

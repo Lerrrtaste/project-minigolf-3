@@ -65,7 +65,7 @@ func socket_connect()->void:
 func login_guest_asnyc(display_name:String)->void:
 	# create/login account with
 	# tries device uid, then random with unix time
-	# TODO metadata guest = true
+	# metadata guest = true
 	# display name = entered name
 	# username = guest_display-name_random-number
 	
@@ -158,7 +158,7 @@ func fetch_accounts_async(user_ids:Array):
 
 
 func reset():
-	client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL)
+	client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL, Global.NK_TIMEOUT, Global.NK_LOG_LEVEL)
 	session = null
 	socket = null
 	matchmaker_ticket = null
@@ -222,7 +222,7 @@ func matchmaking_cancel_async()->void:
 
 
 func match_join_async(matchmaker_token)->void:
-	# TODO make matchmaker parameter optional to use this for normal matches too
+	# only matchmaker matches rn (maybe accept any match id in futuree) 
 	joined_match = yield(socket.join_matched_async(matchmaker_token), "completed")
 	if joined_match.is_exception():
 		printerr("An error occured: %s" % joined_match)
@@ -273,10 +273,10 @@ func collection_write_object_async(collection:String, key:String, value:String, 
 		printerr("An error occured while writing to collection: %s" % acks)
 		return acks
 		
-	print("Successfully stored objects:")
-	for a in acks.acks:
-		print("%s" % a)
-	
+#	print("Successfully stored objects:")
+#	for a in acks.acks:
+#		print("%s" % a)
+#
 	return acks.acks[0]
 
 
@@ -289,9 +289,9 @@ func collection_read_object_async(collection:String, key:String, user_id:String 
 		printerr("An error occured: %s" % result)
 		return
 		
-	print("Read objects:")
-	for o in result.objects:
-		print("%s" % o)
+#	print("Read objects:")
+#	for o in result.objects:
+#		print("%s" % o)
 	
 	return result.objects[0]
 

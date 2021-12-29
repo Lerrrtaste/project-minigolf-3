@@ -89,7 +89,7 @@ func change_state(new_state:int):
 
 func spawn_ball():
 	local_ball = Ball.instance()
-	add_child(local_ball)
+	map.add_child(local_ball)
 	local_ball.position = map.match_get_starting_position()
 	
 	local_ball.setup_playercontroller(PlayerControllerPractice)

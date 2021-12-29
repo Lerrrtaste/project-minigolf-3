@@ -1,14 +1,23 @@
 #### TODOS
-- hide balls behind walls
+
+- scroll for editor map cards
 
 - handle presence events (only leaves)
 - end authorative matches after x time when everyone left
-- scroll for editor map cards
 
 - Final MVP export :)
 
 
 #### DONE
+- THEY DONT - test if tiles as nodes work (for juicy effects and better collision and better tile property detection
+- finally got tilemap / ball y sort to work,
+- balls position is now faked with _get / _set
+- hide balls behind walls
+- Split tilemaps in ground / walls
+- move pc to ball get_pos (center)
+- replace map_dict object keys world pos -> cell coord
+- editor respawn objects on tile change to make sure they are allowed
+
 
 - exit match / practice match button
 - map search bar
@@ -101,11 +110,11 @@ UI Pixel Scale 400%
 - account / "profile" screen to change display name, mail, password etc 
 - statistics on profile page (as player and as map creator)
 - leaderboards per map
-- test if tiles as nodes work (for juicy effects and better collision and better tile property detection
 - menu end screen with vote up / down / report, and optional vote next, save map, map card, leaderboard, statistics
 - public map "overview" window/screen with all the stats, big preview, options etc
 - seperate map metadata collection <-> map tiles/objects so clients dont have to download the whole object to display map lists for example
 - sound
+- Map Selection: Playlists (Trending, and curated ones like Simple, Hard, Big, Small, ...) or single maps
 
 
 #### OP CODES
@@ -153,6 +162,10 @@ UI Pixel Scale 400%
 		reciever: remote pc
 
 
+#### Z Layers
+Tilemaps = 0
+Ball = 0
+PC = 10 (for line above tilemap)
 
 
 #### Scrap
