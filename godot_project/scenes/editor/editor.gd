@@ -203,17 +203,6 @@ func tool_draw(coord:Vector2)->void:
 
 
 func save_map_async():
-	if not map.is_map_valid():
-		return
-		
-	if menu_edit_name.text.length() < Global.MAP_NAME_LENGTH_MIN:
-		Notifier.notify_editor("Name too short", "Min %s chars"%Global.MAP_NAME_LENGTH_MIN)
-		return
-		
-	if menu_edit_name.text.length() > Global.MAP_NAME_LENGTH_MAX:
-		Notifier.notify_editor("Name too long", "Max %s chars"%Global.MAP_NAME_LENGTH_MAX)
-		return
-	
 	menu_btn_save.disabled = true
 	menu_btn_save.text = "Saving..."
 	
@@ -272,9 +261,20 @@ func _on_SelectObject_item_selected(index):
 
 func _on_BtnMenu_pressed():
 	menu_popup.popup_centered()
-	
+
 
 func _on_BtnSave_pressed():
+	if not map.is_map_valid():
+		return
+		
+	if menu_edit_name.text.length() < Global.MAP_NAME_LENGTH_MIN:
+		Notifier.notify_editor("Name too short", "Min %s chars"%Global.MAP_NAME_LENGTH_MIN)
+		return
+		
+	if menu_edit_name.text.length() > Global.MAP_NAME_LENGTH_MAX:
+		Notifier.notify_editor("Name too long", "Max %s chars"%Global.MAP_NAME_LENGTH_MAX)
+		return
+		
 	var ack = yield(save_map_async(), "completed")
 	if not ack.is_exception():
 		get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")

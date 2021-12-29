@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://assets/ui/buttons/small/red/button_red_small.tres" type="Theme" id=1]
 [ext_resource path="res://assets/ui/buttons/big/blue/button_blue_big.tres" type="Theme" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://scenes/editor_menu/map_item/map_item.gd" type="Script" id=6]
 [ext_resource path="res://assets/ui/fonts/data/kenney_pixel_square.ttf" type="DynamicFontData" id=7]
 [ext_resource path="res://assets/ui/panels/panel_white_small.tres" type="StyleBox" id=8]
+[ext_resource path="res://assets/ui/icons/icon_play.png" type="Texture" id=9]
 
 [sub_resource type="DynamicFont" id=1]
 font_data = ExtResource( 5 )
@@ -33,19 +34,19 @@ __meta__ = {
 
 [node name="HSplitContainer" type="HSplitContainer" parent="."]
 margin_left = 12.0
-margin_top = 16.0
+margin_top = 12.0
 margin_right = 629.0
-margin_bottom = 80.0
+margin_bottom = 76.0
 split_offset = 2968
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer"]
 margin_top = 9.0
-margin_right = 295.0
+margin_right = 387.0
 margin_bottom = 55.0
 size_flags_vertical = 4
 
 [node name="LblName" type="Label" parent="HSplitContainer/VBoxContainer"]
-margin_right = 295.0
+margin_right = 387.0
 margin_bottom = 18.0
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = SubResource( 1 )
@@ -54,7 +55,7 @@ valign = 1
 
 [node name="LblId" type="Label" parent="HSplitContainer/VBoxContainer"]
 margin_top = 22.0
-margin_right = 295.0
+margin_right = 387.0
 margin_bottom = 46.0
 custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
 custom_fonts/font = SubResource( 2 )
@@ -62,7 +63,7 @@ text = "ID 20318"
 valign = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer"]
-margin_left = 307.0
+margin_left = 399.0
 margin_right = 617.0
 margin_bottom = 64.0
 size_flags_vertical = 0
@@ -71,26 +72,26 @@ __meta__ = {
 }
 
 [node name="BtnPractice" type="Button" parent="HSplitContainer/HBoxContainer"]
-margin_right = 124.0
+margin_right = 56.0
 margin_bottom = 64.0
 theme = ExtResource( 4 )
 custom_fonts/font = ExtResource( 3 )
 disabled = true
-text = "Practice"
+icon = ExtResource( 9 )
 
 [node name="BtnEditMap" type="Button" parent="HSplitContainer/HBoxContainer"]
-margin_left = 128.0
-margin_right = 228.0
+margin_left = 60.0
+margin_right = 136.0
 margin_bottom = 64.0
 theme = ExtResource( 2 )
 custom_fonts/font = ExtResource( 3 )
 disabled = true
-text = "Editor"
+text = "Edit"
 
 [node name="BtnDelete" type="Button" parent="HSplitContainer/HBoxContainer"]
-margin_left = 232.0
+margin_left = 140.0
 margin_top = 11.0
-margin_right = 310.0
+margin_right = 218.0
 margin_bottom = 53.0
 size_flags_horizontal = 4
 size_flags_vertical = 4

@@ -3,15 +3,16 @@
 
 - handle presence events (only leaves)
 - end authorative matches after x time when everyone left
+- scroll for editor map cards
 
 - Final MVP export :)
 
 
 #### DONE
+
 - exit match / practice match button
 - map search bar
 - added practice mode button on map card 
-
 - fix practive mode
 - finish practice once before being able to publish map
 - Fix Matchmaking Query/Properties:
@@ -58,6 +59,7 @@ query , as delimiter needs a regex expr
 - water tiles + ball reset
 - sand tiles + speed slowdown
 - delete guest accounts occasionally (sql query in run once?)
+- autotile tile übergänge ineinander
 
 #### Notes
 
@@ -72,14 +74,13 @@ UI Pixel Scale 400%
 
 #### IDEAS (Alpha)
 - currently playing status on map card
-
 - Ball to Wall collision normal with 4 spheres / ray casts? Only if current does not work
 - Match camera follows current player instead of local player
 - every player gets a color
 - screen border / ingame stats panel borader in current players color
 - "in matchmaking" screen
 - "loading map" screen
-- emotes (zb kenney pack)
+- emotes (zb kenney pack) auf map / bubble über ball
 - One Match Scene per GameMode (Practice Match, DefaultMatch) (Match Node should only handly gamemode specific things, everything else in other nodes, that should work standalone) 
 - map rating (thumbs up/down) at the end
 - show map rating in editor
@@ -104,6 +105,8 @@ UI Pixel Scale 400%
 - menu end screen with vote up / down / report, and optional vote next, save map, map card, leaderboard, statistics
 - public map "overview" window/screen with all the stats, big preview, options etc
 - seperate map metadata collection <-> map tiles/objects so clients dont have to download the whole object to display map lists for example
+- sound
+
 
 #### OP CODES
 

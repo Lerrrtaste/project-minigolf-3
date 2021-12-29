@@ -1,7 +1,7 @@
 extends Node2D
 
 """
-Tile Size
+Tile Texture Size
 32*44
 """
 
@@ -147,7 +147,7 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 func editor_object_remove(world_pos:Vector2):
 	var cell = tilemap.world_to_map(world_pos)
 	var snapped_pos = tilemap.map_to_world(cell)
-	snapped_pos.y -= TILE_Y/2 # center on cell
+	#snapped_pos.y -= TILE_Y/2 # center on cell
 
 	if not spawned_objects.keys().has(snapped_pos):
 		print("Note: %s has no object"%snapped_pos)
@@ -177,7 +177,7 @@ func editor_tile_change(world_pos:Vector2, id:int):
 func match_get_starting_position()->Vector2:
 	for i in spawned_objects:
 		if spawned_objects[i].OBJECT_ID == Objects.START:
-			return i
+			return Vector2(i.x,i.y+TILE_Y/2)
 	
 	Notifier.notify_error("No Spawn Object found, defaulting to (0,0)")
 	return Vector2()

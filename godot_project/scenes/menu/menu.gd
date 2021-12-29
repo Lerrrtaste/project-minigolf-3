@@ -4,7 +4,7 @@ var MapCard = preload("res://objects/map_card/MapCard.tscn")
 
 onready var btn_matchmaking = get_node("BtnMatchmaking")
 onready var btn_editor = get_node("BtnMatchmaking/BtnEditor")
-onready var btn_practive = get_node("BtnPractice")
+onready var btn_logout = get_node("BtnLogout")
 
 onready var box_map_cards = get_node("ContainerMaps/BoxMapCards")
 var map_cards:Array
@@ -69,6 +69,13 @@ func get_maps_included()->Array:
 			})
 	return map_pool
 
+
+func disable_input(disabled:bool):
+	btn_logout.disabled = disabled
+	btn_editor.disabled = disabled
+	for i in map_cards:
+		i.disable_input(disabled)
+
 #### Event Callbacks
 
 func _on_BtnMatchmaking_pressed():
@@ -98,14 +105,20 @@ func _on_BtnEditor_pressed():
 func _on_Networker_matchmaking_started():
 	btn_matchmaking.text = "Cancel"
 	btn_matchmaking.disabled = false
-	#btn_matchmaking.theme = load("res://assets/ui/button_red/button_red.tres")
+	btn_matchmaking.theme = load("res://assets/ui/buttons/big/red/button_red_big.tres")
+	
+	disable_input(true)
+	
 	Notifier.notify_info("Matchmaking started")
 
 
 func _on_Networker_matchmaking_ended():
 	btn_matchmaking.text = "BATTLE"
 	btn_matchmaking.disabled = false
-	#btn_matchmaking.theme = load("res://assets/ui/button_yellow/button_yellow.tres")
+	btn_matchmaking.theme = load("res://assets/ui/buttons/big/yellow/button_yellow_big.tres")
+	
+	disable_input(false)
+	
 	Notifier.notify_info("Matchmaking cancled")
 
 

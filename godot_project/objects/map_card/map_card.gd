@@ -9,6 +9,7 @@ onready var players_root = get_node("GridContainer/BoxPlayers/TexPlayers")
 onready var lbl_players = get_node("GridContainer/BoxPlayers/TexPlayers/LblPlayers")
 
 onready var check_include = get_node("GridContainer/CheckInclude")
+onready var btn_practice = get_node("BtnPractice")
 
 var map_id:String
 var creator_id:String
@@ -57,6 +58,10 @@ func refresh_player_count():
 func is_included():
 	return check_include.pressed
 
+
+func disable_input(disabled:bool):
+	btn_practice.disabled = disabled
+	check_include.disabled = disabled
 
 func _on_BtnPractice_pressed():
 	emit_signal("practice",map_id,creator_id)

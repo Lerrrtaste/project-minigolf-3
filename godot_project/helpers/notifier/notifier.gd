@@ -20,7 +20,7 @@ func notify_info(title:String, message:String = ""):
 
 
 func notify_game(title:String, message:String = ""):
-	_spawn_notification(TexturePanelYellow, title, message, 2.0)
+	_spawn_notification(TexturePanelYellow, title, message, 3.0)
 
 
 func notify_error(title:String, message:String = ""):
