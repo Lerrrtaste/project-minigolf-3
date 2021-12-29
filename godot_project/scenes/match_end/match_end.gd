@@ -80,7 +80,10 @@ func _on_BtnMenu_pressed():
 
 func _on_BtnPublish_pressed():
 	var result = yield(MapStorage.publish_map_async(map_id), "completed")
-	Notifier.notify_info("Publish rpc Result", result.to_string())
+	if result.is_exception():
+		Notifier.notify_error("Publishing Map failed", result.to_string())
+	else:
+		Notifier.notify_info("Your map is now published")
 	get_tree().change_scene("res://scenes/editor_menu/EditorMenu.tscn")
 
 

@@ -50,7 +50,6 @@ var current_state = States.INVALID
 
 func _ready():
 	Networker.connect("match_joined", self,"_on_Networker_match_joined")
-	Networker.connect("match_presences_updated", self, "_on_Networker_presences_updated")
 	Networker.connect("match_state", self, "_on_Networker_match_state")
 	
 	Networker.match_join_async(Networker.matched_match)

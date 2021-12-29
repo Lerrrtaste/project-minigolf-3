@@ -6,7 +6,7 @@ onready var container_maps = get_node("Control/PanelContainer/ContainerMaps")
 onready var lbl_placeholder = get_node("Control/PanelContainer/ContainerMaps/LblPlaceholder")
 onready var popup_delete = get_node("Control/PopupDelete")
 onready var btn_delete_confirm = get_node("Control/PopupDelete/VBoxContainer/HBoxContainer/BtnDeleteConfirm")
-
+onready var btn_delete_cancel = get_node("Control/PopupDelete/VBoxContainer/HBoxContainer/BtnDeleteCancel")
 var deleting_map_id:String
 var items:Array
 
@@ -50,6 +50,7 @@ func _on_MapItem_open_editor(map_id, map_name):
 func _on_MapItem_delete(map_id):
 	deleting_map_id = map_id
 	btn_delete_confirm.disabled = true
+	btn_delete_cancel.disabled = false
 	popup_delete.popup_centered()
 	yield(get_tree().create_timer(1), "timeout")
 	btn_delete_confirm.disabled = false
@@ -80,6 +81,8 @@ func _on_BtnBack_pressed():
 
 
 func _on_BtnDeleteConfirm_pressed():
+	btn_delete_confirm.disabled = true
+	btn_delete_cancel.disabled = true
 	MapStorage.delete_map(deleting_map_id)
 	yield(get_tree().create_timer(0.5),"timeout")
 	Notifier.notify_editor("Map deleted")

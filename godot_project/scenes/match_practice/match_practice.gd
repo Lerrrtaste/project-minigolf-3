@@ -89,11 +89,10 @@ func change_state(new_state:int):
 
 func spawn_ball():
 	local_ball = Ball.instance()
-	map.add_child(local_ball)
-	local_ball.position = map.match_get_starting_position()
-	
 	local_ball.setup_playercontroller(PlayerControllerPractice)
+	map.add_child(local_ball)
 	local_ball.set_map(map)
+	local_ball.position = map.match_get_starting_position()
 	
 	local_ball.connect("turn_completed", self, "_on_Ball_turn_completed")
 	local_ball.connect("reached_finish", self, "_on_Ball_reached_finish")

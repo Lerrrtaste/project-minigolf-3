@@ -11,6 +11,8 @@ var connected_presences:Dictionary
 var joined_match:NakamaRTAPI.Match
 var matched_match:NakamaRTAPI.MatchmakerMatched
 
+const HEALTHCHECK_INTERVAL = 10
+
 signal socket_connected
 signal socket_connection_failed
 
@@ -42,6 +44,11 @@ enum WritePermissions {
 func _ready():
 	reset()
 
+func healthcheck():
+	if socket != null:
+		if not is_socket_connected():
+			emit_signal("socket_connection_failed")
+	yield(get_tree().create_timer(HEALTHCHECK_INTERVAL), "timeout")
 
 func socket_connect()->void:
 	socket = Nakama.create_socket_from(client)
@@ -73,29 +80,35 @@ func login_guest_asnyc(display_name:String)->void:
 		printerr("Already logged in")
 		return
 	
-	var custom_id = OS.get_unique_id()
+	var custom_id #= OS.get_unique_id()
 	
 	# deviceID disabled for now
 	if true:# custom_id == "":
 		randomize()
-		custom_id = "guestid_os_%s" % ((OS.get_unix_time() * OS.get_system_time_msecs())%(randi()%19521982))
+		custom_id = "guestid_os_%s" % ((OS.get_unix_time())%(randi()%19521982))
 	else:
 		custom_id = "guestid_rand_%s" % custom_id
 	
 	var username = "guest_%s_%s"%[display_name,randi()%8999+1000]
 	
 	session = yield(client.authenticate_custom_async(custom_id, username, true, {"guest": true}), "completed")
-	
-	var update : NakamaAsyncResult = yield(client.update_account_async(session, null, display_name, null, null, null), "completed")
-	if update.is_exception():
-		print("An error occured: %s" % update)
+	if session.is_exception():
+		Notifier.notify_error("An error occured while creating the acc: %s" % session)
+		#emit_signal("authentication_failed",session.get_exception())
 		return
+		
+	var update = yield(client.update_account_async(session, null, display_name), "completed")
+	if update.is_exception():
+		Notifier.notify_error("An error when updating: %s" % update)
+		emit_signal("authentication_failed",update.get_exception())
+		return
+		
 	print("Guest display name set")
 	
-	if !is_logged_in(): #failed
-		printerr("Could not log in with given custom ID!")
-		emit_signal("authentication_failed",session.get_exception())
-		return
+#	if !is_logged_in(): #failed
+#		printerr("Could not log in with given custom ID!")
+#		emit_signal("authentication_failed",session.get_exception())
+#		return
 	
 	#worked
 	emit_signal("authentication_successful")
@@ -120,7 +133,7 @@ func login_email_async(email:String, password:String):
 	
 	#worked
 	print("Logged in with email %s successfully"%email)
-	emit_signal("authentication_successfull")
+	emit_signal("authentication_successful")
 	socket_connect()
 	return
 
@@ -142,7 +155,7 @@ func register_email_async(email:String, password:String, username:String):
 	
 	#worked
 	print("Registered and Logged in with mail %s successfully"%email)
-	emit_signal("authentication_successfull")
+	emit_signal("authentication_successful")
 	socket_connect()
 	return
 

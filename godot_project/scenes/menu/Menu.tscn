@@ -179,6 +179,8 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_right = -8.0
+margin_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
 text = "X.X.X"
@@ -186,6 +188,16 @@ valign = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Label" type="Label" parent="."]
+margin_left = -1.0
+margin_top = 272.0
+margin_right = 305.0
+margin_bottom = 356.0
+custom_colors/font_color = Color( 0.666667, 0, 0, 1 )
+custom_fonts/font = ExtResource( 11 )
+text = "This is an early alpha build. incomplete and potentially buggy"
+autowrap = true
 
 [connection signal="pressed" from="BtnMatchmaking" to="." method="_on_BtnMatchmaking_pressed"]
 [connection signal="pressed" from="BtnMatchmaking/BtnEditor" to="." method="_on_BtnEditor_pressed"]

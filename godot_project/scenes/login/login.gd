@@ -27,16 +27,13 @@ func _ready():
 	
 	Networker.connect("socket_connected", self, "_on_Networker_socket_connected")
 	Networker.connect("socket_connection_failed", self, "_on_Networker_socket_connection_failed")
-
-	Networker.connect("authentication_successful", self, "_on_Networker_authentication_successful")
+	
 	Networker.connect("authentication_failed", self, "_on_Networker_authentication_failed")
 	
-	if true: # autologin
-		if not OS.get_cmdline_args().empty():
-			line_username_guest.text = OS.get_cmdline_args()[0]
-			#_on_BtnLogin_pressed() #autologin for dbg
-
-
+#	if true: # autologin
+#		if not OS.get_cmdline_args().empty():
+#			line_username_guest.text = OS.get_cmdline_args()[0]
+#			#_on_BtnLogin_pressed() #autologin for dbg
 
 
 # called when socket is connected
@@ -76,13 +73,8 @@ func _on_Networker_socket_connection_failed():
 
 
 func _on_Networker_authentication_failed(exception):
-	Notifier.notify_error("Login failed :/",exception.message)
+	Notifier.notify_error("Login failed :/",str(exception.message))
 	disable_inputs(false)
-
-
-func _on_Networker_authentication_successful():
-	disable_inputs(false)
-
 
 
 func _on_BtnLoginGuest_pressed():

@@ -149,7 +149,7 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
 
         -- wait for all players to join
         for _, user in pairs(state.players) do
-            if user.joined == false then
+            if user.joined == false or user.ready == false then
                 return state --abort
             end
         end

@@ -18,19 +18,20 @@ func _ready():
 # TODO allow non strings and do str() everywhere
 
 func notify_info(title:String, message:String = ""):
-	_spawn_notification(TexturePanelGreen, title, message, 3.0)
+	_spawn_notification(TexturePanelGreen, title, message, 4.0)
 
 
 func notify_game(title:String, message:String = ""):
-	_spawn_notification(TexturePanelYellow, title, message, 3.0)
+	_spawn_notification(TexturePanelYellow, title, message, 4.0)
 
 
 func notify_error(title:String, message:String = ""):
-	_spawn_notification(TexturePanelRed, title, message, 3.0)
+	_spawn_notification(TexturePanelRed, title, message, 5.0)
 
 
 func notify_editor(title:String, message:String = ""):
-	_spawn_notification(TexturePanelBlue, title, message, 3.0)
+	_spawn_notification(TexturePanelBlue, title, message, 4.0)
+
 
 func notify_debug(title, message:String = ""):
 	_spawn_notification(TexturePanelWhite, "Dbg: "+str(title), message, 3.0)

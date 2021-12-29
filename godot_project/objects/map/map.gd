@@ -191,9 +191,8 @@ func update_metadata(map_id:String, map_name:String, creator_user_id:String, cre
 	metadata["creator_display_name"] = creator_display_name
 	var size = Vector2()
 	size.x = _get_used_cells().max().x - _get_used_cells().min().x + 1
-	size.y = _get_used_cells().max().y - _get_used_cells().min().y
+	size.y = _get_used_cells().max().y - _get_used_cells().min().y + 1
 	metadata["size"] = size
-	Notifier.notify_debug("Calculated size is %s"%size, "Is this correct?")
 	metadata["updated"] = true
 
 

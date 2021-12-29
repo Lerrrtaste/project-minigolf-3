@@ -21,12 +21,11 @@ func _ready():
 		get_tree().change_scene("res://scenes/login/Login.tscn")
 	
 	if not Networker.is_socket_connected():
-		btn_matchmaking.disabled = true
+		disable_input(true)
 		Notifier.notify_error("Reconnecting...", "Server connection was interrupted")
 		Networker.socket_connect()
 	else:
 		load_ui()
-		
 	
 	
 	Networker.connect("matchmaking_started", self,"_on_Networker_matchmaking_started")
@@ -34,7 +33,7 @@ func _ready():
 	Networker.connect("matchmaking_matched", self, "_on_Networker_matchmaking_matched")
 	
 	Networker.connect("socket_connected", self, "_on_Networker_socket_connected")
-
+	Networker.connect("socket_connection_failed", self, "_on_Networker_socket_connection_failed")
 
 func load_ui():
 	lbl_display_name.text = Networker.get_username(true)
@@ -132,6 +131,7 @@ func _on_Networker_matchmaking_matched(matched):
 func _on_Networker_socket_connected():
 	Notifier.notify_info("Connection established")
 	load_ui()
+	disable_input(false)
 
 
 func _on_Networker_socket_connection_failed():
@@ -143,6 +143,7 @@ func _on_BtnLogout_pressed():
 	Networker.reset()
 	Notifier.notify_info("Logged out")
 	get_tree().change_scene("res://scenes/login/Login.tscn")
+
 
 func _on_MapCard_practice(map_id, creator_id):
 	var params = { "map_id": map_id, "creator_id": creator_id, "verifying": false}

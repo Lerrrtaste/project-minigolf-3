@@ -92,7 +92,7 @@ func setup_playercontroller(pc_scene:PackedScene,account=null)->void:
 	
 	# for name tag
 	if account == null:
-		lbl_player_name.visible = false
+		display_name = "YOU"
 	elif account.display_name != "":
 		display_name = account.display_name
 	else:
@@ -143,11 +143,7 @@ func reached_finish():
 #### Movement
 
 func move_step(movement,delta):
-	#var movement = direction * speed
-	
-	#move_and_slide(movement)
 	var collision = move_and_collide(movement*delta)
-	#z_index = position.y
 	total_distance += movement.length() * delta
 	
 	if collision is KinematicCollision2D:

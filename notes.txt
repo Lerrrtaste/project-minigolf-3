@@ -1,7 +1,8 @@
 #### TODOS
+- server starts match too early
+(sends match start before client sent 111 client ready)
 
 
-- move remainder after collision
 - Final MVP export :)
 
 
@@ -81,6 +82,8 @@ UI Pixel Scale 400%
 
 
 #### IDEAS (Alpha)
+- When I use playlists etc for matchmaking, update nakama version because 3.10.0 my matchmaking query hack does not work anymore (use 3.2.1
+- refresh session properly
 - currently playing status on map card
 - Ball to Wall collision normal with 4 spheres / ray casts? Only if current does not work
 - Match camera follows current player instead of local player
@@ -114,6 +117,7 @@ UI Pixel Scale 400%
 - seperate map metadata collection <-> map tiles/objects so clients dont have to download the whole object to display map lists for example
 - sound
 - Map Selection: Playlists (Trending, and curated ones like Simple, Hard, Big, Small, ...) or single maps
+- move remainder after collision
 
 
 #### OP CODES
