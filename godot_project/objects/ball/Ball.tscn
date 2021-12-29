@@ -35,7 +35,7 @@ __meta__ = {
 
 [node name="SprArrow" type="Sprite" parent="."]
 visible = false
-position = Vector2( 0, -15 )
+position = Vector2( 0, -19 )
 scale = Vector2( 0.3125, 0.3 )
 texture = ExtResource( 4 )
 

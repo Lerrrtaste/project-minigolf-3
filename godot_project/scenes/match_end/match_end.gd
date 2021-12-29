@@ -52,6 +52,8 @@ func _ready():
 			var winner_shots := 99999
 			for i in params["presences"]:
 				var username = params["presences"][i]["username"]
+				if not params["turn_count"].has(i):
+					continue
 				var shots = params["turn_count"][i]
 				text += "%s: %s\n"%[username,shots]
 				
@@ -65,7 +67,7 @@ func _ready():
 				text += "\n[b]%s won[/b]"%i
 			
 			text += "\n\n\n"
-			text += "The Map was \"%s[/i]\" by %s"%[params["map_metadata"]["name"],params["map_metadata"]["create_display_name"]]
+			text += "The Map was \"%s\" by %s"%[params["map_metadata"]["name"],params["map_metadata"]["creator_display_name"]]
 			text += "\n(MapID %s)"%params["map_metadata"]["id"]
 	
 	text_result.bbcode_text = text

@@ -37,7 +37,7 @@ anchor_top = 0.2
 anchor_right = 0.8
 anchor_bottom = 0.8
 custom_styles/bg = ExtResource( 9 )
-scroll_vertical_enabled = false
+scroll_horizontal_enabled = false
 __meta__ = {
 "_edit_group_": true,
 "_edit_use_anchors_": false

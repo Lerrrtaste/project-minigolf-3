@@ -1,5 +1,18 @@
 extends KinematicBody2D
 
+"""
+Ball
+
+Needs PlayerController before entering tree with setup_playercontroller 
+Playercontrollers need:
+	- signal impact(pos) # required
+	- signal sync_position(pos) # required
+	- const LOCAL = true # required
+	- var active := false # required (ball is awaiting impact)
+	- func activate()
+
+"""
+
 onready var lbl_player_name = get_node("LblPlayerName")
 onready var spr_arrow = get_node("SprArrow")
 onready var shape_body = get_node("ShapeBody")
@@ -32,7 +45,7 @@ signal reached_finish(user_id)
 
 func _ready():
 	if not is_instance_valid(connected_pc):
-		printerr("Ball without PC entered Tree")
+		Notifier.notify_error("Ball without PC entered Tree", "Please report")
 		return
 	
 	# name tag
@@ -40,6 +53,8 @@ func _ready():
 		lbl_player_name.text = "YOU"
 	else:
 		lbl_player_name.text = display_name
+	
+	connected_pc.position  = center_pos.position
 
 
 func _process(delta):
@@ -74,7 +89,6 @@ func setup_playercontroller(pc_scene:PackedScene,account=null)->void:
 	if new_pc.has_method("register_user_id") and account != null:
 		new_pc.register_user_id(account.id)
 	add_child(new_pc)
-	new_pc.position = center_pos.position
 	
 	# for name tag
 	if account == null:
@@ -106,9 +120,11 @@ func turn_ready():
 
 
 # called by finished_moving callback if it was this balls turn
-func turn_complete():
+func turn_complete(left:bool=false):
 	assert(my_turn)
-	assert(not connected_pc.active) #he ball finished moving because of a previous collision, player took no turn yet
+	assert(not connected_pc.active or left) #he ball finished moving because of a previous collision, player took no turn yet
+	if left:
+		lbl_player_name.text += " (left)" 
 	my_turn = false
 	emit_signal("turn_completed", connected_pc.LOCAL)
 
@@ -268,7 +284,6 @@ func get_pc_user_id()->String:
 
 #### TEMP
 func _get(property):
-	print("Getting ", property)
 	match property:
 		"position":
 			return position + center_pos.position

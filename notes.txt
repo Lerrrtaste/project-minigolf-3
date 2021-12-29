@@ -1,14 +1,14 @@
 #### TODOS
 
-- scroll for editor map cards
 
-- handle presence events (only leaves)
-- end authorative matches after x time when everyone left
-
+- move remainder after collision
 - Final MVP export :)
 
 
 #### DONE
+- handle presence events (only leaves)
+- end authorative matches after x time when everyone left
+
 - THEY DONT - test if tiles as nodes work (for juicy effects and better collision and better tile property detection
 - finally got tilemap / ball y sort to work,
 - balls position is now faked with _get / _set
@@ -17,8 +17,7 @@
 - move pc to ball get_pos (center)
 - replace map_dict object keys world pos -> cell coord
 - editor respawn objects on tile change to make sure they are allowed
-
-
+- scroll for editor map cards
 - exit match / practice match button
 - map search bar
 - added practice mode button on map card 

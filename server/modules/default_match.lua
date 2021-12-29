@@ -20,19 +20,6 @@ OpCodes = {
 
 function match_handler.match_init(context, setupstate)
     -- setup inital state
-
-    -- load map object
-    --local user_id = "4ec4f126-3f9d-11e7-84ef-b7c182b36521" -- some user ID.
-    --local object_ids = {
-    --{collection = "maps", key = "1640202596", user_id = setupstate.map_owner_id} --a5e9f13a-3a2c-4dbf-a490-bc02412fb4f9"} --.map_id}
-    --}
-    --local objects = nk.storage_read(object_ids)
-    --nk.logger_info("Should read now: ")
-    --for _, r in ipairs(objects) do
-    --    local message = string.format("read: %q, write: %q, value: %q", r.permission_read, r.permission_write, r.value.metadata.name)
-    --    nk.logger_info(message)
-    --end
-
     local gamestate = {
         map_id = setupstate.map_id,
         map_owner_id = setupstate.map_owner_id,
@@ -115,8 +102,23 @@ function match_handler.match_leave(context, dispatcher, tick, state, presences)
     dispatcher.broadcast_message(op_code, data, nil)
 
 
+    if is_match_finished(state) then
+        end_match(state, dispatcher)
+        return nil
+    end
+
+    -- if leaving player was current_player
+    local current_player = state.turn_order[state.next_player_idx]
+    if state.players[current_player].left then
+        -- next_player
+        increment_next_player_idx(state)
+        -- broadcast NEXT_TURN
+        local data = nk.json_encode({next_player = state.turn_order[state.next_player_idx]})
+        dispatcher.broadcast_message(OpCodes.NEXT_TURN, data, nil)
+    end
+
     return state
-end
+    end
 
 
 function match_handler.match_loop(context, dispatcher, tick, state, messages)
@@ -202,13 +204,7 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
                     state.players[msg.sender.user_id].turn_count = state.players[msg.sender.user_id].turn_count + 1
 
                     -- increment next_player_idx
-                    for k, v in ipairs(state.turn_order)do
-                        state.next_player_idx = ((state.next_player_idx) % #state.turn_order) +1 -- increment next player idx (indices start at 1)
-                        if state.players[state.turn_order[state.next_player_idx]].finished == false then -- skip finished players TODO skip left players too
-                            break
-                        end
-                    end
-
+                    increment_next_player_idx(state)
 
                     -- broadcast NEXT_TURN
                     local data = nk.json_encode({next_player = state.turn_order[state.next_player_idx]})
@@ -223,31 +219,14 @@ function match_handler.match_loop(context, dispatcher, tick, state, messages)
                 -- remove from turn_order
                 for k, user_id in ipairs(state.turn_order) do
                     if user_id == msg.sender.user_id then
-                        -- table.remove(state.turn_order,k)
-                        -- state.next_player_idx = state.next_player_idx -1 -- hack because it gets incremented again below
                         state.players[msg.sender.user_id].finished = true
                         break
                     end
                 end
 
-                -- end match if no players left
-                local all_finished = true
-                for k, player in pairs(state.players) do
-                    if player.finished == false then
-                        all_finished = false
-                        break -- not all finished
-                    end
-                end
-
-                -- end match
-                if all_finished then
+                if is_match_finished(state) then
                     state.players[msg.sender.user_id].turn_count = 1 + state.players[msg.sender.user_id].turn_count -- because last players TURN_COMPLETED wont be recognized
-                    local _turn_count = {}
-                    for _, v in ipairs(state.turn_order) do
-                        _turn_count[v] = state.players[v].turn_count
-                    end
-                    local data = nk.json_encode({turn_count = _turn_count})
-                    dispatcher.broadcast_message(OpCodes.MATCH_END, data)
+                    end_match(state, dispatcher)
                     return nil
                 end
 
@@ -265,6 +244,39 @@ end
 
 function match_handler.match_signal(context, dispatcher, tick, state, data)
   return state, data
+end
+
+function is_match_finished(state)
+    local all_finished = true
+    for k, player in pairs(state.players) do
+        if player.finished == false and player.left == false then
+            all_finished = false
+            break -- not all finished
+        end
+    end
+    return all_finished
+end
+
+function end_match(state, dispatcher)
+    local _turn_count = {}
+    for _, v in ipairs(state.turn_order) do
+        if state.players[v].left == false then
+            _turn_count[v] = state.players[v].turn_count
+        end
+    end
+    local data = nk.json_encode({turn_count = _turn_count})
+    dispatcher.broadcast_message(OpCodes.MATCH_END, data)
+end
+
+function increment_next_player_idx(state)
+   for k, v in ipairs(state.turn_order)do
+        state.next_player_idx = ((state.next_player_idx) % #state.turn_order) +1 -- increment next player idx (indices start at 1)
+        if state.players[state.turn_order[state.next_player_idx]].left == false then -- skip left players
+            if state.players[state.turn_order[state.next_player_idx]].finished == false then -- skip finished players
+                break -- meaning this one is next (not left and not finished)
+            end
+        end
+    end
 end
 
 return match_handler

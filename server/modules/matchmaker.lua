@@ -2,8 +2,6 @@ local nk = require("nakama")
 
 local function matchmaker_matched(context, matched_users)
     -- get and check map_id
-    local _map_id
-    local _map_owner_id
     local _map_pool = {} -- [{map_id=, creator_id=},...]
 
 

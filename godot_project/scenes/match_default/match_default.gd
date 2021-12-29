@@ -92,7 +92,6 @@ func spawn_ball(local:bool, account):
 		return
 	
 	var new_ball = Ball.instance()
-	map.add_child(new_ball)
 	
 	if local:
 		new_ball.setup_playercontroller(PlayerControllerLocal, account)
@@ -102,6 +101,7 @@ func spawn_ball(local:bool, account):
 		new_ball.setup_playercontroller(PlayerControllerRemote, account)
 		remote_balls[account.id] = new_ball
 	
+	map.add_child(new_ball)
 	new_ball.set_map(map)
 	new_ball.position = map.match_get_starting_position()
 	new_ball.connect("reached_finish", self, "_on_Ball_reached_finish")
@@ -139,8 +139,8 @@ func load_map(map_id:String, map_owner_id:String="")->void:
 
 func get_accounts_async(expected_user_ids:Array):
 	return yield(Networker.fetch_accounts_async(expected_user_ids), "completed")
-	
-		
+
+
 func update_ui():
 	var text := ""
 	
@@ -189,6 +189,7 @@ func get_ball(user_id:String):
 	else:
 		assert(false) # looking for non existent ball
 
+
 #### Callbacks
 
 func _on_Networker_match_joined(joined_match)->void:
@@ -215,7 +216,14 @@ func _on_Networker_match_state(state):
 		Global.OpCodes.NEXT_TURN:
 			var data_dict = JSON.parse(state.data).result
 			next_turn(data_dict["next_player"])
-			
+		
+		Global.OpCodes.PLAYER_LEFT:
+			var data_dict = JSON.parse(state.data).result
+			for i in data_dict["left_players"]:
+				if current_turn_user == i.user_id:
+					get_ball(i.user_id).turn_complete(true)
+				
+		
 		Global.OpCodes.REACHED_FINISH:
 			assert(false) # this is only sent by the client
 #			print("Player %s has reached the finish"%state.presence.username)
