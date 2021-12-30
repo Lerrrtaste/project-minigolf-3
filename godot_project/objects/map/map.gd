@@ -397,6 +397,9 @@ func get_tile_property(world_pos:Vector2, property:String):
 func get_tile_id_at(world_pos:Vector2)->int:
 	return _get_tile(world_to_map(world_pos))
 
+func get_tile_id_at_cell(cell:Vector2)->int:
+	return _get_tile(cell)
+
 
 func get_tilemap_id(tile_id:int)->int:
 	if not TILE_DATA.keys().has(tile_id):

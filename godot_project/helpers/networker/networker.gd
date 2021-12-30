@@ -33,6 +33,8 @@ signal match_joined(presences)
 signal match_presences_updated(joined_match)
 signal match_state(state)
 
+signal collection_write_success
+signal collection_write_failed
 
 enum ReadPermissions {
 	NOONE = 0,
@@ -124,7 +126,7 @@ func login_email_async(email:String, password:String): #-> NakamaSession
 		return session
 	
 	#worked
-	Notifier.notify_info("Login success")
+	Notifier.notify_info("Login success", "Connecting...")
 	emit_signal("authentication_successful")
 	yield(socket_connect_async(), "completed")
 	return session
@@ -325,8 +327,10 @@ func collection_write_object_async(collection:String, key:String, value:String, 
 	]), "completed")
 	
 	if not _check_result(acks, "Could not write to Storage"):
+		emit_signal("collection_write_failed")
 		return acks
 	
+	emit_signal("collection_write_success")
 	return acks.acks[0]
 
 

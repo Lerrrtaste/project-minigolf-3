@@ -38,7 +38,7 @@ func _ready():
 
 # called when socket is connected
 func login_complete():
-	Notifier.notify_info("Logged in as %s"%Networker.get_username(true))
+	Notifier.notify_info("Connected", "As %s"%Networker.get_username(true))
 	get_tree().change_scene("res://scenes/menu/Menu.tscn")
 
 

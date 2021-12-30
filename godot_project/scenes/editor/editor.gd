@@ -157,13 +157,15 @@ func _process(delta):
 	
 	if Input.is_action_just_pressed("editor_tool_use"):
 		tool_dragged = true
-		tool_dragged_from = get_global_mouse_position()
+		var cell =  tilemap_cursor.world_to_map(get_global_mouse_position())
+		tool_dragged_from = tilemap_cursor.map_to_world(cell)
 		tool_use()
 	
 		
 	if Input.is_action_just_released("editor_tool_use"):
 		tool_dragged = false
 		tool_use()
+	
 	
 	var coord = tilemap_cursor.world_to_map(get_global_mouse_position())
 	if coord != selected_cell:
@@ -172,9 +174,6 @@ func _process(delta):
 		selected_cell = coord
 		if Input.is_action_pressed("editor_tool_use"):
 			tool_use()
-
-
-
 
 	# moved to process
 #				if tool_dragged:
@@ -203,7 +202,6 @@ func tool_use()->void:
 			var mode = select_mode.get_item_metadata(item_mode)
 			var pos = get_global_mouse_position()
 			
-			print("mode ", item_mode)
 			match mode:
 				"single":
 					map.editor_tile_change(pos,tile)
@@ -211,19 +209,12 @@ func tool_use()->void:
 				"line":
 					if tool_dragged:
 						return # line not started
-					
-					var from_cell = map.world_to_map(tool_dragged_from)
-					var to_cell = map.world_to_map(get_global_mouse_position())
-					var line_vec = to_cell - from_cell
-					var prog = Vector2()
-					
-					for i in range(line_vec.length()+1):
-						var world = map.map_to_world(from_cell + i * (line_vec/line_vec.length()))
-						map.editor_tile_change(world, tile)
+					var from = tool_dragged_from
+					var to = get_global_mouse_position()
+					_tilemap_set_line(map,from, to, tile)
 					tilemap_cursor.clear()
-				
 				"fill":
-					pass
+					_tilemap_set_flood(map, get_global_mouse_position(), tile)
 					
 					# test w/o # tool_draw(selected_cell) # hide shadow of removed tile
 			
@@ -244,6 +235,7 @@ func tool_use()->void:
 			map.editor_object_remove(pos)
 
 
+# TODO replace coord (does not need to be parameter)
 func tool_draw(coord:Vector2)->void:
 	if select_tool.get_selected_items().size() == 0:
 		return
@@ -273,27 +265,26 @@ func tool_draw(coord:Vector2)->void:
 				"single":
 					tilemap_cursor.clear()
 					tilemap_cursor.set_cell(coord.x,coord.y,tile)
+					
 				"line":
 					if not tool_dragged: # line not started
 						tilemap_cursor.clear()
 						tilemap_cursor.set_cell(coord.x,coord.y,tile)
 						return
-					var from_cell = tilemap_cursor.world_to_map(tool_dragged_from)
-					var to_cell = coord
-					var line_vec = to_cell - from_cell
-					var prog = Vector2()
 					tilemap_cursor.clear()
-					for i in range(line_vec.length()+1):
-						tilemap_cursor.set_cellv(from_cell + i * (line_vec/line_vec.length()), tile)
-					
+					var from = tool_dragged_from
+					var to = get_global_mouse_position()
+					_tilemap_set_line(tilemap_cursor,from, to, tile)
 					
 				"fill":
-					pass
+					tilemap_cursor.clear()
+					tilemap_cursor.set_cell(coord.x,coord.y,tile)
+					  
+					
 				"remove":
+					tilemap_cursor.clear()
 					map.editor_tile_change(get_global_mouse_position(),-1)
 			
-			tilemap_cursor.set_cell(selected_cell.x,selected_cell.y,-1)
-			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id(select_tile.get_item_metadata(select_tile.get_selected_items()[0])))
 		Tools.TILE_REMOVE:
 			tilemap_cursor.set_cell(selected_cell.x,selected_cell.y,-1)
 			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id(map.get_tile_id_at(get_global_mouse_position())))
@@ -320,10 +311,13 @@ func save_map_async():
 	var public = false # menu_check_public.pressed
 	var ack = yield(MapStorage.save_map_async(map_id, map_jstring,public), "completed")
 	if ack.is_exception():
-		Notifier.notify_error("ERROR: Map saving failed", str(ack))
+		#Notifier.notify_error("ERROR: Map saving failed", str(ack.message))
+		menu_btn_save.disabled = false
+		menu_btn_save.text = "Save and exit"
 	else:
 		Notifier.notify_editor("Saved succesfully")
 	return ack
+
 
 # Signal Callbacks
 
@@ -353,6 +347,86 @@ func _on_SelectObject_item_selected(index):
 	var obj_id = select_object.get_item_metadata(index)
 	spr_object_cursor.texture = load(map.OBJECT_DATA[obj_id]["texture_path"])
 
+
+
+#### Helpers
+
+# Set cells in a line 
+# uses editor_tile_change if available else set_cell
+func _tilemap_set_line(tilemap, start_world:Vector2, end_world:Vector2, tile:int):
+	var from_cell = tilemap.world_to_map(start_world)
+	var to_cell = tilemap.world_to_map(end_world)
+	var line_vec = to_cell - from_cell
+	var prog = Vector2()
+	for i in range(line_vec.length()+1):
+		if tilemap.has_method("editor_tile_change"):
+			print(from_cell + i * (line_vec/line_vec.length()))
+			var world = map.map_to_world(from_cell + i * (line_vec/line_vec.length()))
+			tilemap.editor_tile_change(world, tile)
+		else:
+			tilemap.set_cellv(from_cell + i * (line_vec/line_vec.length()), tile)
+
+
+# Set cells using a flood fill algorithm
+# needs the Map scene and optional the cursor tilemap
+func _tilemap_set_flood(map, from_world:Vector2, tile:int):
+	var from_cell = map.world_to_map(from_world)
+	var x = from_cell.x
+	var y = from_cell.y
+	var new_tile = tile
+	var old_tile = map.get_tile_id_at_cell(from_cell)
+	if old_tile == new_tile:
+		return
+		
+	var w = 50 #max width
+	var h = 50 # maxheight
+	
+	# floodFillScanlineStack Algorithm
+	var x1:int #  int x1
+	var spanAbove:bool #  bool spanAbove, spanBelow;
+	var spanBelow:bool
+	var stack:Array #  std::vector<int> stack;
+	stack.push_back(Vector2(x,y))#  push(stack, x, y)
+	
+	while not stack.empty():#  while(pop(stack, x, y))  {
+		var popped = stack.pop_back()
+		x = popped.x
+		y = popped.y
+		
+		x1 = x #    x1 = x;
+		while x1 >= -w and map.get_tile_id_at_cell(Vector2(x1,y)) == old_tile:
+			x1 -= 1#    while(x1 >= 0 && screenBuffer[y * w + x1] == oldColor) x1--;
+		x1 += 1 #    x1++;
+		spanAbove = false#    spanAbove = spanBelow = 0;
+		spanBelow = false
+		
+		while x1 < w and map.get_tile_id_at_cell(Vector2(x1,y)) == old_tile: #    while(x1 < w && screenBuffer[y * w + x1] == oldColor)
+			#    {
+			var world = map.map_to_world(Vector2(x1,y))#      screenBuffer[y * w + x1] = newColor;
+			map.editor_tile_change(world, new_tile)
+			
+			if not spanAbove and y > -h and map.get_tile_id_at_cell(Vector2(x1,y-1)) == old_tile: #      if(!spanAbove && y > 0 && screenBuffer[(y - 1) * w + x1] == oldColor)
+				#      {
+				stack.push_back(Vector2(x1, y - 1))#        push(stack, x1, y - 1);
+				spanAbove = true #        spanAbove = 1;
+				#      }
+			elif spanAbove and y > -h and map.get_tile_id_at_cell(Vector2(x1,y-1)) != old_tile: #      else if(spanAbove && y > 0 && screenBuffer[(y - 1) * w + x1] != oldColor)
+				#      {
+				spanAbove = false#        spanAbove = 0;
+				#      }
+			
+			if not spanBelow and y < h-1 and map.get_tile_id_at_cell(Vector2(x1,y+1)) == old_tile: #      if(!spanBelow && y < h - 1 && screenBuffer[(y + 1) * w + x1] == oldColor)
+			#      {
+				stack.push_back(Vector2(x1,y+1))#        push(stack, x1, y + 1);
+				spanBelow = true#        spanBelow = 1;
+			#      }
+			elif spanBelow and y < h -1 and map.get_tile_id_at_cell(Vector2(x1,y+1)) != old_tile:#      else if(spanBelow && y < h - 1 && screenBuffer[(y + 1) * w + x1] != oldColor)
+			#      {
+				spanBelow = false#        spanBelow = 0;
+			#      }
+			x1 += 1#      x1++;
+		#    }
+	#  }
 
 #### Menu
 
