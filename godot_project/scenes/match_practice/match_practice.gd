@@ -19,10 +19,10 @@ Exits to:
 
 onready var map = get_node("Map")
 onready var text_score = get_node("UI/PanelScore/TextScore")
+onready var match_camera = get_node("MatchCamera")
 
 var Ball = preload("res://objects/ball/Ball.tscn")
 var PlayerControllerPractice = preload("res://helpers/player_controller_practice/PlayerControllerPractice.tscn")
-var MatchCamera = preload("res://helpers/cameras/match_camera/MatchCamera.tscn")
 
 var local_ball
 var turn_count:int
@@ -97,10 +97,7 @@ func spawn_ball():
 	local_ball.connect("turn_completed", self, "_on_Ball_turn_completed")
 	local_ball.connect("reached_finish", self, "_on_Ball_reached_finish")
 
-	var cam = MatchCamera.instance()
-	local_ball.add_child(cam)
-	cam.make_current()
-
+	match_camera.follow(local_ball,false,false)
 
 func load_map()->void:
 	var map_jstring = yield(MapStorage.load_map_async(map_id, creator_id), "completed")
@@ -126,6 +123,7 @@ func update_ui():
 #### Callbacks
 
 func _on_Ball_turn_completed(local:bool):
+	match_camera.follow(local_ball,false,true)
 	local_ball.turn_ready()
 	turn_count += 1
 

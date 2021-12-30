@@ -17,14 +17,14 @@ Exits to:
 """
 
 onready var map = get_node("Map")
-onready var text_score = get_node("UI/PanelScore/TextScore")
+onready var match_camera = get_node("MatchCamera")
 
+onready var text_score = get_node("UI/PanelScore/TextScore")
 onready var popup_leave = get_node("UI/PopupLeave")
 
 var Ball = preload("res://objects/ball/Ball.tscn")
 var PlayerControllerLocal = preload("res://helpers/player_controller_local/PlayerControllerLocal.tscn")
 var PlayerControllerRemote = preload("res://helpers/player_controller_remote/PlayerControllerRemote.tscn")
-var MatchCamera = preload("res://helpers/cameras/match_camera/MatchCamera.tscn")
 
 var remote_balls:Dictionary
 var local_ball
@@ -61,10 +61,13 @@ func _process(delta):
 
 func change_state(new_state:int):
 	assert(current_state != new_state)
+	current_state = new_state
 	match new_state:
 		States.LOADING:
 			Notifier.notify_game("Game is loading")
 			load_map(map_id, map_owner_id)
+			yield(map, "loaded")
+			match_camera.move_to(map.match_get_starting_position(), false)
 			var accs = yield(get_accounts_async(expected_user_ids), "completed")
 			for i in accs:
 				accounts[i.id] = i
@@ -78,7 +81,7 @@ func change_state(new_state:int):
 			printerr("Trying to change to nonexistent state")
 			return
 	
-	current_state = new_state
+	
 
 
 func spawn_ball(local:bool, account):
@@ -105,11 +108,11 @@ func spawn_ball(local:bool, account):
 	new_ball.position = map.match_get_starting_position()
 	new_ball.connect("reached_finish", self, "_on_Ball_reached_finish")
 	
-	if local: # TODO add as own child and always follow current player (implement in match camera scipt
-		# attach camera
-		var cam = MatchCamera.instance()
-		local_ball.add_child(cam)
-		cam.make_current()
+#	if local: # TODO add as own child and always follow current player (implement in match camera scipt
+#		# attach camera
+#		var cam = MatchCameraClass.instance()
+#		local_ball.add_child(cam)
+#		cam.make_current()
 
 
 func _start_match():
@@ -170,12 +173,8 @@ func next_turn(user_id:String):
 	
 	Notifier.notify_game("It is %s's turn"%get_ball(user_id).display_name)
 	
-	if(user_id == Networker.get_user_id()): #copied from below only used for first turn
-		local_ball.turn_ready()
-	elif remote_balls.has(user_id):
-		remote_balls[user_id].turn_ready()
-	else:
-		printerr("Could not find the server announced next user's ball")
+	get_ball(user_id).turn_ready()
+	match_camera.follow(get_ball(user_id),false,true)
 	
 	current_turn_user = user_id
 
@@ -225,14 +224,7 @@ func _on_Networker_match_state(state):
 		
 		Global.OpCodes.REACHED_FINISH:
 			assert(false) # this is only sent by the client
-#			print("Player %s has reached the finish"%state.presence.username)
-#			if state.presence.user_id == Networker.get_user_id():
-#				local_ball.reached_finish()
-#				Notifier.notify_game("You reached the finish :)")
-#			else:
-#				remote_balls[state.presence.user_id].reached_finish()
-#				Notifier.notify_game("%s reached the finish", remote_balls[state.presence.user_id].display_name)
-#
+		
 		Global.OpCodes.MATCH_END:
 			change_state(States.FINISHED)
 			var params = {
@@ -269,3 +261,8 @@ func _on_BtnLeaveConfirm_pressed():
 
 func _on_BtnLeaveCancel_pressed():
 	popup_leave.visible = false
+
+
+func _on_Map_loading_failed():
+	Networker.match_leave()
+	get_tree().change_scene("res://scenes/menu/Menu.tscn")

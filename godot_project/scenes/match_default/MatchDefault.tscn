@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://assets/ui/fonts/data/kenney_pixel.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=2]
@@ -10,6 +10,7 @@
 [ext_resource path="res://assets/ui/icons/icon_leave.png" type="Texture" id=8]
 [ext_resource path="res://assets/ui/buttons/small/red/button_red_small.tres" type="Theme" id=9]
 [ext_resource path="res://assets/ui/panels/metal/panel_red_metal.tres" type="StyleBox" id=10]
+[ext_resource path="res://helpers/cameras/match_camera/MatchCamera.tscn" type="PackedScene" id=11]
 
 [sub_resource type="DynamicFont" id=2]
 font_data = ExtResource( 2 )
@@ -109,6 +110,9 @@ margin_bottom = 48.0
 theme = ExtResource( 7 )
 text = "cancel"
 
+[node name="MatchCamera" parent="." instance=ExtResource( 11 )]
+
+[connection signal="loading_failed" from="Map" to="." method="_on_Map_loading_failed"]
 [connection signal="pressed" from="UI/BtnLeave" to="." method="_on_BtnLeave_pressed"]
 [connection signal="pressed" from="UI/PopupLeave/VBoxContainer/HBoxContainer/BtnLeaveConfirm" to="." method="_on_BtnLeaveConfirm_pressed"]
 [connection signal="pressed" from="UI/PopupLeave/VBoxContainer/HBoxContainer/BtnLeaveCancel" to="." method="_on_BtnLeaveCancel_pressed"]

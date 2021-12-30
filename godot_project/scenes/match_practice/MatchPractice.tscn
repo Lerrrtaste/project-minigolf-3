@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://assets/ui/fonts/data/kenney_pixel.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="DynamicFontData" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://scenes/match_practice/match_practice.gd" type="Script" id=6]
 [ext_resource path="res://assets/ui/icons/icon_leave.png" type="Texture" id=7]
 [ext_resource path="res://assets/ui/buttons/small/red/button_red_small.tres" type="Theme" id=8]
+[ext_resource path="res://helpers/cameras/match_camera/MatchCamera.tscn" type="PackedScene" id=9]
 
 [sub_resource type="DynamicFont" id=2]
 font_data = ExtResource( 2 )
@@ -56,5 +57,7 @@ icon = ExtResource( 7 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="MatchCamera" parent="." instance=ExtResource( 9 )]
 
 [connection signal="pressed" from="UI/BtnLeave" to="." method="_on_BtnLeave_pressed"]

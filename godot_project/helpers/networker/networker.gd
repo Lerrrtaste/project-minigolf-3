@@ -47,6 +47,7 @@ enum WritePermissions {
 
 
 func _ready():
+	randomize()
 	reset()
 
 
@@ -56,7 +57,7 @@ func reset():
 	session = null
 	socket = null
 	matchmaker_ticket = null
-	Notifier.notify_debug("Networker reset")
+	#Notifier.notify_debug("Networker reset")
 
 
 # Call any rpc function (should not be called from outside)
@@ -90,19 +91,15 @@ func login_guest_asnyc(display_name:String)->void: # -> NakamaAsyncResult (Sessi
 		return session
 	
 	var custom_id = "guestid_os_%s" % ((OS.get_unix_time())%(randi()%19521982))
-	var username = "guest_%s_%s"%[display_name,randi()%8999+1000]
+	var username = "guest_%s_%s"%[display_name,randi()%89999+10000]
 	
 	session = yield(client.authenticate_custom_async(custom_id, username, true, {"guest": true}), "completed")
-	if session.is_exception():
-		Notifier.notfy_debug(session)
-		Notifier.notify_error("Account could not be created", session.message)
+	if not _check_result(session,"Account could not be created"):
 		emit_signal("authentication_failed",session.get_exception())
 		return session
 		
 	var update = yield(client.update_account_async(session, null, display_name), "completed")
-	if update.is_exception():
-		Notifier.notfy_debug("During set Display name", update)
-		Notifier.notify_error("Error during Account creation: %s" % update.message)
+	if not _check_result(update,"Error during Account creation"):
 		emit_signal("authentication_failed",update.get_exception())
 		return update
 	
@@ -122,9 +119,7 @@ func login_email_async(email:String, password:String): #-> NakamaSession
 	
 	session = yield(client.authenticate_email_async(email,password, null, false), "completed")
 	
-	if session.is_exception():
-		Notifier.notfy_debug("During email auth", session)
-		Notifier.notify_error("Could not log in", session.message)
+	if not _check_result(session, "Could not log in"):
 		emit_signal("authentication_failed", session.get_exception())
 		return session
 	
@@ -146,9 +141,7 @@ func register_email_async(email:String, password:String, username:String): #-> N
 	
 	session = yield(client.authenticate_email_async(email, password, username, true), "completed")
 	
-	if session.is_exception():
-		Notifier.notfy_debug("During email auth", session)
-		Notifier.notify_error("Could not create account", session.message)
+	if not _check_result(session,"Could not create account"):
 		emit_signal("authentication_failed",session.get_exception())
 		return session
 	
@@ -166,9 +159,7 @@ func register_email_async(email:String, password:String, username:String): #-> N
 func socket_connect_async()->void: # -> NakamaAsyncResult
 	socket = Nakama.create_socket_from(client)
 	var connected : NakamaAsyncResult = yield(socket.connect_async(session), "completed")
-	if connected.is_exception():
-		Notifier.notfy_debug("Socket connect", connected)
-		Notifier.notify_error("Could not connect", connected.message)
+	if not _check_result(connected,"Could not connect"):
 		emit_signal("socket_connection_failed")
 		return socket
 	
@@ -211,9 +202,7 @@ func fetch_accounts_async(user_ids:Array): # -> Account Array
 #	}
 	var result : NakamaAPI.ApiUsers = yield(client.get_users_async(session, user_ids), "completed")
 	
-	if result.is_exception():
-		Notifier.notfy_debug("fetch_accounts_async", result)
-		Notifier.notify_error("Error", result.message)
+	if not _check_result(result):
 		return result
 		
 	return result.users
@@ -335,7 +324,7 @@ func collection_write_object_async(collection:String, key:String, value:String, 
 		NakamaWriteStorageObject.new(collection, key, can_read, can_write, value, "")
 	]), "completed")
 	
-	if _check_result(acks, "Could not write to Storage"):
+	if not _check_result(acks, "Could not write to Storage"):
 		return acks
 	
 	return acks.acks[0]
@@ -347,7 +336,7 @@ func collection_read_object_async(collection:String, key:String, user_id:String 
 	NakamaStorageObjectId.new(collection, key, user_id)
 	]), "completed")
 	
-	if _check_result(result, "Could not read from Storage"):
+	if not _check_result(result, "Could not read from Storage"):
 		return result
 		
 	return result.objects[0]
@@ -369,7 +358,7 @@ func collection_list_owned_objects_async(collection:String)->Array: # -> Array :
 	var limit = 100 # default is 10.
 	var objects : NakamaAPI.ApiStorageObjectList = yield(client.list_storage_objects_async(session, collection, session.user_id, limit), "completed")
 	
-	if _check_result(objects):
+	if not _check_result(objects):
 		return objects
 		
 	return objects.objects
@@ -381,8 +370,8 @@ func collection_list_public_objects_async(collection:String)->Array: # -> Array 
 	var limit = 100 # default is 10.
 	var objects : NakamaAPI.ApiStorageObjectList = yield(client.list_storage_objects_async(session, collection, "", limit), "completed")
 	
-	if _check_result(objects):
-		return 
+	if not _check_result(objects):
+		return objects
 	
 	# filter for public objects
 	var public_objects:Array

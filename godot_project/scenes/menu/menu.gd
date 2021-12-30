@@ -5,8 +5,9 @@ var MapCard = preload("res://objects/map_card/MapCard.tscn")
 onready var btn_matchmaking = get_node("BtnMatchmaking")
 onready var btn_editor = get_node("BtnMatchmaking/BtnEditor")
 onready var btn_logout = get_node("BtnLogout")
-
+onready var lbl_loading = get_node("ContainerMaps/BoxMapCards/LblLoading")
 onready var box_map_cards = get_node("ContainerMaps/BoxMapCards")
+
 var map_cards:Array
 
 onready var lbl_display_name = get_node("PanelAccount/VBoxContainer/LblDisplayName")
@@ -46,6 +47,7 @@ func load_ui():
 
 
 func refresh_map_selection():
+	lbl_loading.visible = true
 	var public_maps = yield(MapStorage.list_public_maps_async(), "completed")
 	for i in public_maps:
 		var map_name = i.name
@@ -59,6 +61,7 @@ func refresh_map_selection():
 		inst.connect("practice", self, "_on_MapCard_practice")
 		
 		map_cards.append(inst)
+	lbl_loading.visible = false
 
 func get_maps_included()->Array:
 	var map_pool:Array

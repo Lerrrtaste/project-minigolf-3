@@ -149,7 +149,7 @@ __meta__ = {
 margin_left = 20.0
 margin_top = 20.0
 margin_right = 296.0
-margin_bottom = 86.0
+margin_bottom = 114.0
 rect_pivot_offset = Vector2( -997, 248 )
 size_flags_horizontal = 3
 __meta__ = {
@@ -173,6 +173,15 @@ margin_bottom = 66.0
 theme = ExtResource( 12 )
 clear_button_enabled = true
 placeholder_text = "Search for Map ID or Name"
+
+[node name="LblLoading" type="Label" parent="ContainerMaps/BoxMapCards"]
+margin_top = 70.0
+margin_right = 276.0
+margin_bottom = 94.0
+size_flags_vertical = 6
+text = "Loading..."
+align = 1
+valign = 1
 
 [node name="LblVersion" type="Label" parent="."]
 anchor_left = 1.0

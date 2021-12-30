@@ -9,6 +9,9 @@ Tile Texture Size
 32*44
 """
 
+signal loaded
+signal loading_failed
+
 const TILE_X = 32
 const TILE_Y = 16
 
@@ -230,16 +233,19 @@ func serialize()->String:
 
 func deserialize(jstring:String)->void:
 	if metadata.has("id"):
-		printerr("A map is already loaded")
+		Notifier.notify_error("A map is already loaded")
+		emit_signal("loading_failed")
 		return
 	
 	var parse := JSON.parse(jstring)
 	if parse.error != OK:
 		Notifier.notify_error("Could not parse mapfile")
+		emit_signal("loading_failed")
 		return
 	
 	if parse.result["game_version"] != Global.GAME_VERSION:
 		Notifier.notify_error("Could not load map created with different game version")
+		emit_signal("loading_failed")
 		return
 	
 	# cells
@@ -270,6 +276,7 @@ func deserialize(jstring:String)->void:
 	metadata = parse.result["metadata"]
 	metadata["updated"] = false
 	Notifier.notify_game("Map \"%s\" loaded succesfully"%metadata["name"], "(ID %s)"%metadata["id"])
+	emit_signal("loaded")
 
 
 #### Internal Tile and Object interaction
