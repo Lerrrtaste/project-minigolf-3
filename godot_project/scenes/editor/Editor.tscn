@@ -60,6 +60,7 @@ __meta__ = {
 [node name="ContainerMapEdit" type="VBoxContainer" parent="CanvasLayer/UI"]
 margin_right = 338.0
 margin_bottom = 146.0
+mouse_filter = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }

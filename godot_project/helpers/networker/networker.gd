@@ -89,6 +89,9 @@ func login_guest_asnyc(display_name:String)->void: # -> NakamaAsyncResult (Sessi
 	# username = guest_display-name_random-number
 	
 	if is_logged_in():
+		if not is_socket_connected():
+			socket_connect_async()
+			return
 		Notifier.notify_error("Error", "Already logged in")
 		return session
 	
@@ -116,6 +119,9 @@ func login_email_async(email:String, password:String): #-> NakamaSession
 	# mail + pw
 	
 	if is_logged_in():
+		if not is_socket_connected():
+			socket_connect_async()
+			return
 		Notifier.notify_error("Error", "Already logged in")
 		return session
 	
@@ -138,6 +144,9 @@ func register_email_async(email:String, password:String, username:String): #-> N
 	# mail + pw
 	
 	if is_logged_in():
+		if not is_socket_connected():
+			socket_connect_async()
+			return
 		Notifier.notify_error("Error", "Already logged in")
 		return session
 	
