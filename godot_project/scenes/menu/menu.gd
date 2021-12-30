@@ -23,7 +23,7 @@ func _ready():
 	if not Networker.is_socket_connected():
 		disable_input(true)
 		Notifier.notify_error("Reconnecting...", "Server connection was interrupted")
-		Networker.socket_connect()
+		Networker.socket_connect_async()
 	else:
 		load_ui()
 	

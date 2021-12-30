@@ -166,7 +166,7 @@ func editor_tile_change(world_pos:Vector2, id:int):
 		var object_id = _get_object(cell).OBJECT_ID
 		_remove_object(cell)
 		editor_object_place(world_pos, object_id)
-	
+
 
 
 #### Match

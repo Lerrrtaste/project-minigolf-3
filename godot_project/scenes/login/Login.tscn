@@ -96,6 +96,7 @@ text = "guest login"
 margin_top = 197.0
 margin_right = 414.0
 margin_bottom = 215.0
+size_flags_horizontal = 5
 custom_fonts/font = SubResource( 3 )
 text = "OR"
 align = 1

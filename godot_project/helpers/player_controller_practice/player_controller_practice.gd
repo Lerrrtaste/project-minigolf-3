@@ -1,5 +1,11 @@
 extends Node2D
 
+"""
+Practice Player Controller
+For offline Matches
+
+"""
+
 # expected interface by ball
 signal impact(pos) # required
 signal sync_position(pos) # required

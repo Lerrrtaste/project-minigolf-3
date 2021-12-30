@@ -1,15 +1,20 @@
 #### TODOS
-- server starts match too early
-(sends match start before client sent 111 client ready)
 
+- plan Alpha
+  - Update GDD
+  - Categorize Ideas
+  - Slice Idea count in half
+  - write todo list with some project management tool
 
-- Final MVP export :)
 
 
 #### DONE
+- Final MVP export :)
+
 - handle presence events (only leaves)
 - end authorative matches after x time when everyone left
-
+- server starts match too early
+(sends match start before client sent 111 client ready)
 - THEY DONT - test if tiles as nodes work (for juicy effects and better collision and better tile property detection
 - finally got tilemap / ball y sort to work,
 - balls position is now faked with _get / _set
@@ -82,6 +87,8 @@ UI Pixel Scale 400%
 
 
 #### IDEAS (Alpha)
+- pipeline to add tiles, objects, gamemodes, events, skins, emotes
+- playforia map converter (need new tiles before)
 - When I use playlists etc for matchmaking, update nakama version because 3.10.0 my matchmaking query hack does not work anymore (use 3.2.1
 - refresh session properly
 - currently playing status on map card

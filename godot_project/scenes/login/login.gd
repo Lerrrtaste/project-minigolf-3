@@ -23,7 +23,7 @@ func _ready():
 		if Networker.is_socket_connected():
 			login_complete()
 		else:
-			Networker.socket_connect()
+			Networker.socket_connect_async()
 	
 	Networker.connect("socket_connected", self, "_on_Networker_socket_connected")
 	Networker.connect("socket_connection_failed", self, "_on_Networker_socket_connection_failed")

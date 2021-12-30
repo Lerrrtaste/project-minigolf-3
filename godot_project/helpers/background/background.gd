@@ -7,8 +7,10 @@ onready var bg2 = get_node("Bg2")
 
 var scroll_progress := 0
 
+
 func _ready():
 	bg1.position.x -= bg1.texture.get_width()
+
 
 func _process(delta):
 	scroll_progress += SCROLL_SPEED * delta

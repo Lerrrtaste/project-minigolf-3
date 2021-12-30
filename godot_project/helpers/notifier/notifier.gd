@@ -1,47 +1,62 @@
 extends Node
 
+"""
+Notifier Helper
+
+Prints Notifications to its own CanvasLayer 
+
+Debug notifications show when Global.DEBUG
+
+"""
+
 var active_notifications:Array
 
 var TexturePanelRed = preload("res://helpers/notifier/popup/notification_panel1.png")
 var TexturePanelYellow = preload("res://helpers/notifier/popup/notification_panel2.png")
 var TexturePanelBlue = preload("res://helpers/notifier/popup/notification_panel3.png")
 var TexturePanelGreen = preload("res://helpers/notifier/popup/notification_panel4.png")
-var TexturePanelWhite = preload("res://assets/ui/panels/panel_white_small.tres")
+var TexturePanelWhite = preload("res://assets/ui/panels/panel_white_small.png")
 
 var Notification = preload("res://helpers/notifier/popup/Notification.tscn")
 
 onready var tween = get_node("Tween")
 
+
+
 func _ready():
 	tween.connect("tween_completed", self, "_on_tween_completed")
 
-# TODO allow non strings and do str() everywhere
 
-func notify_info(title:String, message:String = ""):
+#### Print Notifications
+
+func notify_info(title, message = ""):
 	_spawn_notification(TexturePanelGreen, title, message, 4.0)
 
 
-func notify_game(title:String, message:String = ""):
+func notify_game(title, message = ""):
 	_spawn_notification(TexturePanelYellow, title, message, 4.0)
 
 
-func notify_error(title:String, message:String = ""):
+func notify_error(title, message = ""):
 	_spawn_notification(TexturePanelRed, title, message, 5.0)
 
 
-func notify_editor(title:String, message:String = ""):
+func notify_editor(title, message = ""):
 	_spawn_notification(TexturePanelBlue, title, message, 4.0)
 
 
-func notify_debug(title, message:String = ""):
-	_spawn_notification(TexturePanelWhite, "Dbg: "+str(title), message, 3.0)
+func notify_debug(title, message = ""):
+	if Global.DEBUGGING:
+		_spawn_notification(TexturePanelWhite, "Dbg: "+str(title), message, 10.0)
 
 
-func notify(color:String, message:String, title:String, duration:float):
-	pass
 
+#### Internal
 
-func _spawn_notification(panel_texture:Texture, title:String, message:String, duration:float):
+func _spawn_notification(panel_texture:Texture, title, message, duration:float):
+	title = str(title)
+	message = str(message)
+	
 	print(title, ": ", message)
 	var inst = Notification.instance()
 	#inst.get_stylebox("panel").set_texture(panel_texture)
@@ -70,11 +85,16 @@ func _update_positions():
 		next_offset += 8
 
 
+
+#### Signal Callbacks
+
 func _on_Notification_mouse_entered():
 	pass
 
+
 func _on_Notification_mouse_exited():
 	pass
+
 
 func _on_tween_completed(object: Object, key: NodePath):
 	object.visible = false

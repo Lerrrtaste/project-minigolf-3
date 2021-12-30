@@ -3,6 +3,11 @@ extends KinematicBody2D
 """
 Ball
 
+Has Physics for Ball Movement
+Needs a map ref to use tile properties
+
+To activate call turn_ready()
+
 Needs PlayerController before entering tree with setup_playercontroller 
 Playercontrollers need:
 	- signal impact(pos) # required
@@ -28,9 +33,9 @@ var display_name:String
 var starting_position: Vector2
 var direction: Vector2 # cartesian direction
 var speed: float
-var max_speed: float = 150
+var max_speed: float = 300
 var friction_modifier: float = 1.0 # changed by tile 
-var friction: float = 50
+var friction: float = 75
 
 var total_distance := 0.0 #only used for collision shabe activaten for now
 
@@ -58,13 +63,13 @@ func _ready():
 
 
 func _process(delta):
-	#update()
 	spr_arrow.visible = my_turn
 
 
 func _physics_process(delta):
 	if total_distance >= 10:
-		shape_body.set_deferred("disabled", finished) # TODO cleanup
+		if shape_body.disabled != finished:
+			shape_body.set_deferred("disabled", finished) 
 	
 	if speed > 0:
 		var _cell = map.get_cell_center(_get("position"))
@@ -77,7 +82,7 @@ func _physics_process(delta):
 
 
 
-# called before entering tree
+# Creates and configures the given player controller (call before entering tree)
 func setup_playercontroller(pc_scene:PackedScene,account=null)->void:
 	if is_instance_valid(connected_pc):
 		printerr("Ball is already controlled")
@@ -106,11 +111,11 @@ func setup_playercontroller(pc_scene:PackedScene,account=null)->void:
 # called by match when this balls turn
 func turn_ready():
 	if my_turn:
-		printerr("Ball was already at turn!!!!")
+		Notifier.notify_error("It was already this balls turn")
 		return
 	
 	if connected_pc.active:
-		printerr("The playercontroller was already active!!!!")
+		Notifier.notify_error("PlayerController was already active")
 	
 	while speed > 0:
 		yield(get_tree().create_timer(0.25),"timeout")
@@ -140,6 +145,7 @@ func reached_finish():
 	finish_moving()
 
 
+
 #### Movement
 
 func move_step(movement,delta):
@@ -156,7 +162,6 @@ func move_step(movement,delta):
 	
 	if speed <= 0:
 		finish_moving()
-		print("Sent because of physics")
 
 
 func _handle_collision(collision:KinematicCollision2D):
@@ -241,12 +246,13 @@ func update_tile_properties():
 		_set("position",starting_position)
 		finish_moving()
 		# TODO play respawn animation
-		#print("Sent because of tile property")
 	friction_modifier = map.get_tile_property(_get("position"),"friction")
+
 
 
 #### Callbacks
 
+# apply impact to speed and direction
 func _on_PlayerController_impact(_impact):
 	#Notifier.notify_debug(get_position(),str(position))
 	starting_position = _get("position")
@@ -255,9 +261,11 @@ func _on_PlayerController_impact(_impact):
 	direction = _impact.normalized()
 
 
+# updates position
 func _on_PlayerController_sync_position(pos):
 	_set("position",pos)
 	finish_moving()
+
 
 
 #### Setget
@@ -278,19 +286,6 @@ func get_pc_user_id()->String:
 	return connected_pc.user_id
 
 
-#### TEMP
-func _get(property):
-	match property:
-		"position":
-			return position + center_pos.position
-
-func _set(property, value):
-	print(property, " used _set to value ", value)
-	match property:
-		"position":
-			position = value - center_pos.position
-
-
 
 #### Helpers
 
@@ -302,3 +297,15 @@ func isometric_normalize(direction:Vector2)->Vector2:
 	direction = direction.normalized()
 	return direction * Vector2(1,0.5)
 
+
+# Override _get/_set to fake y position (needed for ysort)
+func _get(property):
+	match property:
+		"position":
+			return position + center_pos.position
+
+func _set(property, value):
+	print(property, " used _set to value ", value)
+	match property:
+		"position":
+			position = value - center_pos.position
