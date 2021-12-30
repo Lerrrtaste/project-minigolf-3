@@ -69,8 +69,8 @@ func rpc_call(rpc_id:String, payload = null):
 # Returns true if no exception
 func _check_result(result:NakamaAsyncResult, error_title:String="")->bool:
 	if result.is_exception():
-		Notifier.notify_debug(result)
-		Notifier.notify_error("Error" if error_title=="" else error_title, result.message)
+		Notifier.notify_debug("",result)
+		Notifier.notify_error("Error" if error_title=="" else error_title, result.get_exception().message)
 		return false
 	return true
 
@@ -126,7 +126,7 @@ func login_email_async(email:String, password:String): #-> NakamaSession
 	#worked
 	Notifier.notify_info("Login success")
 	emit_signal("authentication_successful")
-	yield(socket_connect_async(), "finished")
+	yield(socket_connect_async(), "completed")
 	return session
 
 

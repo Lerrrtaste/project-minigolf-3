@@ -112,7 +112,7 @@ func _ready():
 #### Editor Actions
 
 func editor_object_place(world_pos:Vector2,object_id:int):
-	var cell = _world_to_map(world_pos)
+	var cell = world_to_map(world_pos)
 	
 	
 	#dont spawn if cell already occupied
@@ -148,7 +148,7 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 
 
 func editor_object_remove(world_pos:Vector2):
-	var cell = _world_to_map(world_pos)
+	var cell = world_to_map(world_pos)
 
 	if not spawned_objects.keys().has(cell):
 		print("Note: cell %s has no object"%cell)
@@ -158,7 +158,7 @@ func editor_object_remove(world_pos:Vector2):
 
 
 func editor_tile_change(world_pos:Vector2, id:int):
-	var cell = _world_to_map(world_pos)
+	var cell = world_to_map(world_pos)
 	
 	if not TILE_DATA.keys().has(id):
 		printerr("Tile with id %s does not exist!"%id)
@@ -178,7 +178,7 @@ func match_get_starting_position()->Vector2:
 	for i in spawned_objects:
 		if spawned_objects[i].OBJECT_ID == Objects.START:
 			_get_object(i)
-			return Vector2(_map_to_world(i).x,_map_to_world(i).y+TILE_Y/2)
+			return Vector2(map_to_world(i).x,map_to_world(i).y+TILE_Y/2)
 	
 	Notifier.notify_error("No Spawn Object found, defaulting to (0,0)")
 	return Vector2()
@@ -324,7 +324,7 @@ func _get_used_cells(): # -> vector array
 func _spawn_object(cell:Vector2, id:int):
 	var path = OBJECT_DATA[id]["node_path"]
 	var obj = load(path).instance()
-	var world_pos = _map_to_world(cell)
+	var world_pos = map_to_world(cell)
 	obj.position = world_pos
 	add_child(obj)
 	spawned_objects[cell] = obj
@@ -342,19 +342,19 @@ func _remove_object(cell:Vector2):
 
 
 
-func _world_to_map(world_pos:Vector2)->Vector2:
+func world_to_map(world_pos:Vector2)->Vector2:
 	return _tilemap_ground.world_to_map(world_pos)
 
 
-func _map_to_world(cell:Vector2)->Vector2:
+func map_to_world(cell:Vector2)->Vector2:
 	return _tilemap_ground.map_to_world(cell)
 
 
 #### Helper Functions
 
 func get_cell_center(world_pos:Vector2)->Vector2:
-	var cell = _world_to_map(world_pos)
-	var snapped_pos = _map_to_world(cell)
+	var cell = world_to_map(world_pos)
+	var snapped_pos = map_to_world(cell)
 	#snapped_pos.y -= TILE_Y/2 # center on cell
 	return snapped_pos
 
@@ -385,7 +385,7 @@ func is_map_valid()->bool:
 
 
 func get_tile_property(world_pos:Vector2, property:String):
-	var tile_id = _get_tile(_world_to_map(world_pos))
+	var tile_id = _get_tile(world_to_map(world_pos))
 	
 	if not TILE_DATA[tile_id].has(property):
 		printerr("Cell %s has no \"%s\" property"%[tile_id,property])
@@ -395,7 +395,7 @@ func get_tile_property(world_pos:Vector2, property:String):
 
 
 func get_tile_id_at(world_pos:Vector2)->int:
-	return _get_tile(_world_to_map(world_pos))
+	return _get_tile(world_to_map(world_pos))
 
 
 func get_tilemap_id(tile_id:int)->int:

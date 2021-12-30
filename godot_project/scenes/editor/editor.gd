@@ -30,25 +30,24 @@ onready var menu_popup = get_node("CanvasLayer/UI/SaveMenu")
 onready var select_tile = get_node("CanvasLayer/UI/ContainerMapEdit/SelectTile")
 onready var select_tool = get_node("CanvasLayer/UI/ContainerMapEdit/SelectTool")
 onready var select_object = get_node("CanvasLayer/UI/ContainerMapEdit/SelectObject")
-
+onready var select_mode= get_node("CanvasLayer/UI/ContainerMapEdit/SelectMode")
 onready var popup_discard = get_node("CanvasLayer/UI/PopupDiscard")
 onready var btn_discard_confirm = get_node("CanvasLayer/UI/PopupDiscard/VBoxContainer/HBoxContainer/BtnDiscardConfirm")
 
-var show_cursor := true
 onready var spr_object_cursor = get_node("SprObjectCursor")
 var selected_cell := Vector2()
 var tool_dragged := false
+var tool_dragged_from := Vector2()
 var previous_tool
 
 enum Tools {
-	tile_place,
-	tile_remove
-	object_place,
-	object_remove,
+	TILE_PLACE,
+	TILE_REMOVE
+	OBJECT_PLACE,
+	OBJECT_REMOVE,
 }
-
 const TOOL_DATA = {
-	Tools.tile_place: {
+	Tools.TILE_PLACE: {
 		"name": "Place Tile",
 		"icon_path": "res://scenes/editor/editor_tool1.png",
 		"show_tilemap_cursor": true,
@@ -56,7 +55,7 @@ const TOOL_DATA = {
 		"show_object_cursor": false,
 		"show_object_select": false,
 	},
-	Tools.tile_remove: {
+	Tools.TILE_REMOVE: {
 		"name": "Remove Tile",
 		"icon_path": "res://scenes/editor/editor_tool2.png",
 		"show_tilemap_cursor": true,
@@ -64,7 +63,7 @@ const TOOL_DATA = {
 		"show_object_cursor": false,
 		"show_object_select": false,
 	},
-	Tools.object_place: {
+	Tools.OBJECT_PLACE: {
 		"name": "Place Object",
 		"icon_path": "res://scenes/editor/editor_tool3.png",
 		"show_tilemap_cursor": false,
@@ -72,7 +71,7 @@ const TOOL_DATA = {
 		"show_object_cursor": true,
 		"show_object_select": true,
 	},
-	Tools.object_remove: {
+	Tools.OBJECT_REMOVE: {
 		"name": "Remove Object",
 		"icon_path": "res://scenes/editor/editor_tool4.png",
 		"show_tilemap_cursor": false,
@@ -86,10 +85,27 @@ const TOOL_DATA = {
 func _ready():
 	# center camera
 	camera_editor.position = OS.window_size/2
+	
+	load_ui()
+	
+	# LOAD OR CREATE MAP
+	var params = Global.get_scene_parameter()
+	if params.has("load_map_id"):
+		var map_jstring = yield(MapStorage.load_map_async(params["load_map_id"]),"completed")
+		map.deserialize(map_jstring)
+		if map.metadata.has("name"):
+			menu_edit_name.text = map.metadata["name"]
+	
+		
+	elif params.has("created_new"):
+		pass
+
+
+func load_ui():
 	# populate tile dropdown
 	for i in map.TILE_DATA:
-		if i == map.Tiles.EMPTY:
-			continue
+#		if i == map.Tiles.EMPTY:
+#			continue
 		if map.TILE_DATA[i]["texture_path"] != null:
 			var icon = load(map.TILE_DATA[i]["texture_path"])
 			select_tile.add_icon_item(icon)
@@ -113,22 +129,18 @@ func _ready():
 		select_tool.set_item_metadata(select_tool.get_item_count()-1,i)
 		select_tool.set_item_tooltip(select_tool.get_item_count()-1,TOOL_DATA[i]["name"])
 	
-	
-	# LOAD OR CREATE MAP
-	var params = Global.get_scene_parameter()
-	if params.has("load_map_id"):
-		var map_jstring = yield(MapStorage.load_map_async(params["load_map_id"]),"completed")
-		map.deserialize(map_jstring)
-		if map.metadata.has("name"):
-			menu_edit_name.text = map.metadata["name"]
-	
-		
-	elif params.has("created_new"):
-		pass
+	# populate tool mode dropdown
+	select_mode.add_item("Single")
+	select_mode.set_item_metadata(select_mode.get_item_count()-1,"single")
+	select_mode.add_item("Line")
+	select_mode.set_item_metadata(select_mode.get_item_count()-1,"line")
+	select_mode.add_item("Fill")
+	select_mode.set_item_metadata(select_mode.get_item_count()-1,"fill")
+	select_mode.add_item("Remove")
+	select_mode.set_item_metadata(select_mode.get_item_count()-1,"remove")
 
 
 func _process(delta):
-	
 	if not menu_popup.visible:
 		var cam_movement := Vector2()
 		var cam_speed = 5
@@ -142,61 +154,147 @@ func _process(delta):
 			cam_movement.x += cam_speed
 		camera_editor.position += cam_movement
 	update()
-
-
-func _unhandled_input(event):
-	if event is InputEventMouseMotion:
-		# moved cursor
-		if show_cursor:
-			var coord = tilemap_cursor.world_to_map(get_global_mouse_position())
-			if coord != selected_cell:
-				# moved to new cell
-				tool_draw(coord)
-				selected_cell = coord
-				if tool_dragged:
-					tool_use()# still using (mb held)
-	if event is InputEventMouseButton:
-		# bisschen wonky
-		if event.button_mask == BUTTON_LEFT:
+	
+	if Input.is_action_just_pressed("editor_tool_use"):
+		tool_dragged = true
+		tool_dragged_from = get_global_mouse_position()
+		tool_use()
+	
+		
+	if Input.is_action_just_released("editor_tool_use"):
+		tool_dragged = false
+		tool_use()
+	
+	var coord = tilemap_cursor.world_to_map(get_global_mouse_position())
+	if coord != selected_cell:
+		# moved to new cell
+		tool_draw(coord)
+		selected_cell = coord
+		if Input.is_action_pressed("editor_tool_use"):
 			tool_use()
-		tool_dragged = event.pressed
 
 
+
+
+	# moved to process
+#				if tool_dragged:
+#					tool_use()# still using (mb held)
+#	if event is InputEventMouseButton:
+#		# bisschen wonky
+#		if event.button_mask == BUTTON_LEFT:
+#			tool_use()
+#		tool_dragged = event.pressed
+
+# Use the selected tool
+# tool_dragged needs to be set before
 func tool_use()->void:
 	if select_tool.get_selected_items().size() == 0:
 		return
 	match select_tool.get_item_metadata(select_tool.get_selected_items()[0]):
-		Tools.tile_place:
-			if select_tile.get_selected_items().size() > 0:
-				map.editor_tile_change(get_global_mouse_position(),select_tile.get_item_metadata(select_tile.get_selected_items()[0]))
-		Tools.tile_remove:
+		Tools.TILE_PLACE:
+			if not select_tile.get_selected_items().size() > 0:
+				return # tile selected
+			if not select_mode.get_selected_items().size() > 0:
+				return # tool selected
+				
+			var item_tile = select_tile.get_selected_items()[0]
+			var tile = select_tile.get_item_metadata(item_tile)
+			var item_mode = select_mode.get_selected_items()[0]
+			var mode = select_mode.get_item_metadata(item_mode)
+			var pos = get_global_mouse_position()
+			
+			print("mode ", item_mode)
+			match mode:
+				"single":
+					map.editor_tile_change(pos,tile)
+					
+				"line":
+					if tool_dragged:
+						return # line not started
+					
+					var from_cell = map.world_to_map(tool_dragged_from)
+					var to_cell = map.world_to_map(get_global_mouse_position())
+					var line_vec = to_cell - from_cell
+					var prog = Vector2()
+					
+					for i in range(line_vec.length()+1):
+						var world = map.map_to_world(from_cell + i * (line_vec/line_vec.length()))
+						map.editor_tile_change(world, tile)
+					tilemap_cursor.clear()
+				
+				"fill":
+					pass
+					
+					# test w/o # tool_draw(selected_cell) # hide shadow of removed tile
+			
+		Tools.TILE_REMOVE:
 			map.editor_tile_change(get_global_mouse_position(),-1)
 			tool_draw(selected_cell) # hide shadow of removed tile
-		Tools.object_place:
-			if select_object.get_selected_items().size() > 0:
-				map.editor_object_place(get_global_mouse_position(),select_object.get_item_metadata(select_object.get_selected_items()[0]))
-		Tools.object_remove:
-			map.editor_object_remove(get_global_mouse_position())
+			
+		Tools.OBJECT_PLACE:
+			if not select_object.get_selected_items().size() > 0:
+				return
+			var item = select_object.get_selected_items()[0]
+			var object = select_object.get_item_metadata(item)
+			var pos = get_global_mouse_position()
+			map.editor_object_place(pos,object)
+			
+		Tools.OBJECT_REMOVE:
+			var pos = get_global_mouse_position()
+			map.editor_object_remove(pos)
 
 
 func tool_draw(coord:Vector2)->void:
 	if select_tool.get_selected_items().size() == 0:
 		return
 	match select_tool.get_item_metadata(select_tool.get_selected_items()[0]):
-		Tools.object_place:
+		Tools.OBJECT_PLACE:
 			if select_object.get_selected_items().size() == 0:
 				return
+				
 			spr_object_cursor.position = map.get_cell_center(get_global_mouse_position())
 			var obj_id = select_object.get_item_metadata(select_object.get_selected_items()[0])
 			var path = map.OBJECT_DATA[obj_id]["texture_path"]
 			var icon = load(path)
 			spr_object_cursor.texture = icon
-		Tools.tile_place:
-			if select_tile.get_selected_items().size() == 0:
-				return
+			
+		Tools.TILE_PLACE:
+			if not select_tile.get_selected_items().size() > 0:
+				return # tile selected
+			if not select_mode.get_selected_items().size() > 0:
+				return # tool selected
+				
+			var item_tile = select_tile.get_selected_items()[0]
+			var tile = select_tile.get_item_metadata(item_tile)
+			var item_mode = select_mode.get_selected_items()[0]
+			var mode = select_mode.get_item_metadata(item_mode)
+			
+			match mode:
+				"single":
+					tilemap_cursor.clear()
+					tilemap_cursor.set_cell(coord.x,coord.y,tile)
+				"line":
+					if not tool_dragged: # line not started
+						tilemap_cursor.clear()
+						tilemap_cursor.set_cell(coord.x,coord.y,tile)
+						return
+					var from_cell = tilemap_cursor.world_to_map(tool_dragged_from)
+					var to_cell = coord
+					var line_vec = to_cell - from_cell
+					var prog = Vector2()
+					tilemap_cursor.clear()
+					for i in range(line_vec.length()+1):
+						tilemap_cursor.set_cellv(from_cell + i * (line_vec/line_vec.length()), tile)
+					
+					
+				"fill":
+					pass
+				"remove":
+					map.editor_tile_change(get_global_mouse_position(),-1)
+			
 			tilemap_cursor.set_cell(selected_cell.x,selected_cell.y,-1)
 			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id(select_tile.get_item_metadata(select_tile.get_selected_items()[0])))
-		Tools.tile_remove:
+		Tools.TILE_REMOVE:
 			tilemap_cursor.set_cell(selected_cell.x,selected_cell.y,-1)
 			tilemap_cursor.set_cell(coord.x,coord.y,map.get_tilemap_id(map.get_tile_id_at(get_global_mouse_position())))
 
@@ -232,7 +330,7 @@ func save_map_async():
 func _on_SelectTool_item_selected(index):
 	var _tool = select_tool.get_item_metadata(index)
 	
-	if _tool == previous_tool: 
+	if _tool == previous_tool: #select nothing
 		select_tool.unselect_all()
 		
 		select_tile.visible = false
@@ -247,7 +345,7 @@ func _on_SelectTool_item_selected(index):
 	select_object.visible = TOOL_DATA[_tool]["show_object_select"]
 	spr_object_cursor.visible = TOOL_DATA[_tool]["show_object_cursor"]
 	tilemap_cursor.visible = TOOL_DATA[_tool]["show_tilemap_cursor"]
-	
+	select_mode.visible = (_tool == Tools.TILE_PLACE)
 	previous_tool = _tool
 
 
