@@ -123,6 +123,7 @@ func login_email_async(email:String, password:String): #-> NakamaSession
 			socket_connect_async()
 			return
 		Notifier.notify_error("Error", "Already logged in")
+		emit_signal("authentication_failed","")
 		return session
 	
 	session = yield(client.authenticate_email_async(email,password, null, false), "completed")

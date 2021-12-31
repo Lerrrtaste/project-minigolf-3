@@ -243,9 +243,19 @@ func update_tile_properties():
 		return
 	
 	if map.get_tile_property(_get("position"), "resets_ball"):
+		var to_spawn = map.get_tile_property(_get("position"), "reset_to_start")
+		
+		if to_spawn != null:
+			if to_spawn:
+				_set("position",map.match_get_starting_position())
+				# TODO play respawn animation
+				finish_moving()
+				return
+		
 		_set("position",starting_position)
 		finish_moving()
 		# TODO play respawn animation
+		
 	friction_modifier = map.get_tile_property(_get("position"),"friction")
 
 

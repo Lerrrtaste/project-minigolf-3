@@ -8,6 +8,7 @@ enum Tiles {
 	WALL = 1,
 	SAND = 2,
 	WATER = 3,
+	LAVA = 4,
 }
 var _TDATA = {
 		Tiles.EMPTY: {
@@ -15,6 +16,7 @@ var _TDATA = {
 				"tilemap_id": null, # tileset index
 				"solid": true, # only used for object placement rn
 				"resets_ball": true, # maybe it doesnt work
+				"reset_to_start": true,
 				"texture_path":null, # for editor icon
 				"layer": "all",
 		},
@@ -31,7 +33,8 @@ var _TDATA = {
 				"name": "Wall",
 				"tilemap_id": null,
 				"solid": true,
-				"resets_ball": false,
+				"resets_ball": true,
+				"reset_to_start": true,
 				"friction": 1.0, 
 				"texture_path":"res://assets/tiles/wall.png",
 				"layer": "walls",
@@ -50,8 +53,19 @@ var _TDATA = {
 				"tilemap_id": null,
 				"solid": false,
 				"resets_ball": true,
+				"reset_to_start": false,
 				"friction": 1.0, 
 				"texture_path":"res://assets/tiles/water.png",
+				"layer": "ground",
+		},
+		Tiles.LAVA: {
+				"name": "Lava",
+				"tilemap_id": null,
+				"solid": false,
+				"resets_ball": true,
+				"reset_to_start": true,
+				"friction": 1.0, 
+				"texture_path":"res://assets/tiles/lava.png",
 				"layer": "ground",
 		},
 }
