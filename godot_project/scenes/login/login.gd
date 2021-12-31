@@ -38,7 +38,7 @@ func _ready():
 
 # called when socket is connected
 func login_complete():
-	Notifier.notify_info("Connected", "As %s"%Networker.get_username(true))
+	#Notifier.notify_info("Connected", "As %s"%Networker.get_username(true))
 	get_tree().change_scene("res://scenes/menu/Menu.tscn")
 
 
@@ -73,7 +73,7 @@ func _on_Networker_socket_connection_failed():
 
 
 func _on_Networker_authentication_failed(exception):
-	Notifier.notify_error("Login failed :/",str(exception.message))
+	#Notifier.notify_error("Login failed :/",str(exception.message))
 	disable_inputs(false)
 
 

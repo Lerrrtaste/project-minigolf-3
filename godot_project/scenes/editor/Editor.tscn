@@ -1,9 +1,9 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://scenes/editor/editor.gd" type="Script" id=1]
 [ext_resource path="res://objects/map_objects/finish/finish.png" type="Texture" id=2]
 [ext_resource path="res://objects/map/Map.tscn" type="PackedScene" id=3]
-[ext_resource path="res://objects/map/map_tileset.tres" type="TileSet" id=4]
+[ext_resource path="res://assets/tiles/map_tileset.tres" type="TileSet" id=4]
 [ext_resource path="res://assets/ui/buttons/small/red/button_red_small.tres" type="Theme" id=5]
 [ext_resource path="res://scenes/editor/theme_editor.tres" type="Theme" id=6]
 [ext_resource path="res://assets/ui/fonts/font_small_button.tres" type="DynamicFont" id=7]
@@ -20,6 +20,8 @@
 [ext_resource path="res://assets/ui/buttons/big/red/button_red_big.tres" type="Theme" id=18]
 [ext_resource path="res://assets/ui/fonts/font_ui_small.tres" type="DynamicFont" id=19]
 [ext_resource path="res://assets/ui/buttons/big/yellow/button_yellow_big.tres" type="Theme" id=20]
+
+[sub_resource type="StyleBoxFlat" id=7]
 
 [sub_resource type="DynamicFont" id=2]
 size = 32
@@ -90,9 +92,9 @@ icon_scale = 4.0
 
 [node name="SelectTile" type="ItemList" parent="CanvasLayer/UI/ContainerMapEdit"]
 visible = false
-margin_top = 13.0
-margin_right = 374.0
-margin_bottom = 22.0
+margin_top = 44.0
+margin_right = 338.0
+margin_bottom = 84.0
 theme = ExtResource( 6 )
 auto_height = true
 max_columns = 0
@@ -101,6 +103,24 @@ icon_scale = 2.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="TileInfo" type="PanelContainer" parent="CanvasLayer/UI/ContainerMapEdit"]
+visible = false
+margin_top = 88.0
+margin_right = 72.0
+margin_bottom = 108.0
+size_flags_horizontal = 0
+custom_styles/panel = SubResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblTileInfo" type="Label" parent="CanvasLayer/UI/ContainerMapEdit/TileInfo"]
+margin_right = 72.0
+margin_bottom = 20.0
+theme = ExtResource( 16 )
+custom_fonts/font = ExtResource( 19 )
+text = "Tile INfo"
 
 [node name="BtnMenu" type="Button" parent="CanvasLayer/UI"]
 margin_left = 918.0
@@ -315,6 +335,7 @@ text = "Cancel"
 
 [connection signal="item_selected" from="CanvasLayer/UI/ContainerMapEdit/SelectTool" to="." method="_on_SelectTool_item_selected"]
 [connection signal="item_selected" from="CanvasLayer/UI/ContainerMapEdit/SelectObject" to="." method="_on_SelectObject_item_selected"]
+[connection signal="item_selected" from="CanvasLayer/UI/ContainerMapEdit/SelectTile" to="." method="_on_SelectTile_item_selected"]
 [connection signal="pressed" from="CanvasLayer/UI/BtnMenu" to="." method="_on_BtnMenu_pressed"]
 [connection signal="toggled" from="CanvasLayer/UI/SaveMenu/VBoxContainer/GridContainer/CheckPublic" to="." method="_on_CheckPublic_toggled"]
 [connection signal="pressed" from="CanvasLayer/UI/SaveMenu/VBoxContainer/HBoxContainer/BtnPublish" to="." method="_on_BtnPublish_pressed"]

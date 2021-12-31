@@ -32,8 +32,10 @@ onready var select_tool = get_node("CanvasLayer/UI/ContainerMapEdit/SelectTool")
 onready var select_object = get_node("CanvasLayer/UI/ContainerMapEdit/SelectObject")
 onready var popup_discard = get_node("CanvasLayer/UI/PopupDiscard")
 onready var btn_discard_confirm = get_node("CanvasLayer/UI/PopupDiscard/VBoxContainer/HBoxContainer/BtnDiscardConfirm")
-
+onready var panel_tile_info = get_node("CanvasLayer/UI/ContainerMapEdit/TileInfo")
+onready var lbl_tile_info = get_node("CanvasLayer/UI/ContainerMapEdit/TileInfo/LblTileInfo")
 onready var spr_object_cursor = get_node("SprObjectCursor")
+
 var selected_cell := Vector2()
 var tool_dragged := false
 var tool_dragged_from := Vector2()
@@ -54,6 +56,7 @@ const TOOL_DATA = {
 		"show_tile_select": true,
 		"show_object_cursor": false,
 		"show_object_select": false,
+		"show_tile_info": true,
 	},
 	Tools.TILE_LINE: {
 		"name": "Remove Tile",
@@ -62,6 +65,7 @@ const TOOL_DATA = {
 		"show_tile_select": true,
 		"show_object_cursor": false,
 		"show_object_select": false,
+		"show_tile_info": true,
 	},
 	Tools.TILE_FILL: {
 		"name": "Remove Tile",
@@ -70,22 +74,25 @@ const TOOL_DATA = {
 		"show_tile_select": true,
 		"show_object_cursor": false,
 		"show_object_select": false,
+		"show_tile_info": true,
 	},
 	Tools.OBJECT_PLACE: {
 		"name": "Place Object",
 		"icon_path": "res://scenes/editor/editor_tool3.png",
 		"show_tilemap_cursor": false,
-		"show_tile_select": true,
+		"show_tile_select": false,
 		"show_object_cursor": true,
 		"show_object_select": true,
+		"show_tile_info": false,
 	},
 	Tools.OBJECT_REMOVE: {
 		"name": "Remove Object",
 		"icon_path": "res://scenes/editor/editor_tool4.png",
 		"show_tilemap_cursor": false,
-		"show_tile_select": true,
+		"show_tile_select": false,
 		"show_object_cursor": true,
 		"show_object_select": false,
+		"show_tile_info": false,
 	},
 }
 
@@ -111,24 +118,27 @@ func _ready():
 
 func load_ui():
 	# populate tile dropdown
-	for i in map.TILE_DATA:
-#		if i == map.Tiles.EMPTY:
-#			continue
-		if map.TILE_DATA[i]["texture_path"] != null:
-			var icon = load(map.TILE_DATA[i]["texture_path"])
+	for i in MapData.Tiles.values():
+		if MapData.get_tile_property(i,"texture_path") != null:
+			var icon = load(MapData.get_tile_property(i,"texture_path"))
 			select_tile.add_icon_item(icon)
 		else:
-			select_tile.add_item(map.TILE_DATA[i]["name"])
+			select_tile.add_item(MapData.get_tile_property(i,"name"))
 		select_tile.set_item_metadata(select_tile.get_item_count()-1, i)
-		select_tile.set_item_tooltip(select_tile.get_item_count()-1, map.TILE_DATA[i]["name"])
+		select_tile.set_item_tooltip(select_tile.get_item_count()-1, MapData.get_tile_property(i,"name"))
 	
 	# populate object dropdown
-	for i in map.OBJECT_DATA:
-		if map.OBJECT_DATA[i]["texture_path"] != null:
-			var icon = load(map.OBJECT_DATA[i]["texture_path"])
-			select_object.add_item(map.OBJECT_DATA[i]["name"], icon)
+	for i in MapData.Objects.values():
+		if i == MapData.Objects.NONE:
+			continue
+		var path = MapData.get_object_property(i, "texture_path")
+		var oname = MapData.get_object_property(i, "name")
+		
+		if path != null:
+			var icon = load(path)
+			select_object.add_item(oname, icon)
 		else:
-			select_object.add_item(map.OBJECT_DATA[i]["name"])
+			select_object.add_item(oname)
 		select_object.set_item_metadata(select_object.get_item_count()-1,i)
 	
 	# populate tool dropdown
@@ -197,7 +207,7 @@ func tool_use()->void:
 			if not select_tile.get_selected_items().size() > 0:
 				return # tile selected
 			if tool_dragged:
-					return # line not started
+				return # line not started
 					
 			var item_tile = select_tile.get_selected_items()[0]
 			var tile = select_tile.get_item_metadata(item_tile)
@@ -207,6 +217,8 @@ func tool_use()->void:
 			tilemap_cursor.clear()
 			
 		Tools.TILE_FILL:
+			if not select_tile.get_selected_items().size() > 0:
+				return # tile selected	
 			if tool_dragged:
 				return
 			
@@ -242,14 +254,14 @@ func tool_draw()->void:
 				return
 				
 			spr_object_cursor.position = map.get_cell_center(get_global_mouse_position())
-#			var obj_id = select_object.get_item_metadata(select_object.get_selected_items()[0])
-#			var path = map.OBJECT_DATA[obj_id]["texture_path"]
-#			var icon = load(path)
-#			spr_object_cursor.texture = icon
 		
 		Tools.OBJECT_REMOVE:
 			if map.get_object_id_at(get_global_mouse_position()) != -1:
 				pass # TODO get object preview from object file
+			var obj_id = map.get_object_id_at(get_global_mouse_position())
+			var path = MapData.get_object_property(obj_id,"texture_path")
+			var icon = load(path)
+			spr_object_cursor.texture = icon
 		
 		Tools.TILE_SINGLE:
 			if not select_tile.get_selected_items().size() > 0:
@@ -262,17 +274,23 @@ func tool_draw()->void:
 				tile = map.get_tile_id_at_cell(cell)
 				
 			tilemap_cursor.clear()
+			tile = MapData.get_tile_property(tile,"tilemap_id")
 			tilemap_cursor.set_cellv(cell, tile)
 		
 		Tools.TILE_LINE:
+			if not select_tile.get_selected_items().size() > 0:
+				return # tile selected	
+				
 			var item_tile = select_tile.get_selected_items()[0]
 			var tile = select_tile.get_item_metadata(item_tile)
 			var cell = map.world_to_map(get_global_mouse_position())
 			if tile == -1:
 				tile = map.get_tile_id_at_cell(cell)
+				
 			
 			if not tool_dragged: # line not started
 				tilemap_cursor.clear()
+				tile = MapData.get_tile_property(tile,"tilemap_id")
 				tilemap_cursor.set_cellv(cell, tile)
 				return
 				
@@ -282,6 +300,9 @@ func tool_draw()->void:
 			_tilemap_set_line(tilemap_cursor,from, to, tile)
 					
 		Tools.TILE_FILL:
+			if not select_tile.get_selected_items().size() > 0:
+				return # tile selected	
+				
 			var item_tile = select_tile.get_selected_items()[0]
 			var tile = select_tile.get_item_metadata(item_tile)
 			var cell = map.world_to_map(get_global_mouse_position())
@@ -289,6 +310,7 @@ func tool_draw()->void:
 				tile = map.get_tile_id_at_cell(cell)
 			
 			tilemap_cursor.clear()
+			tile = MapData.get_tile_property(tile,"tilemap_id")
 			tilemap_cursor.set_cellv(cell, tile)
 
 
@@ -336,7 +358,8 @@ func _tilemap_set_line(tilemap, start_world:Vector2, end_world:Vector2, tile:int
 			var world = map.map_to_world(from_cell + i * (line_vec/line_vec.length()))
 			tilemap.editor_tile_change(world, tile)
 		else:
-			tilemap.set_cellv(from_cell + i * (line_vec/line_vec.length()), tile)
+			var tm_id = MapData.get_tile_property(tile, "tilemap_id")
+			tilemap.set_cellv(from_cell + i * (line_vec/line_vec.length()), tm_id)
 
 
 # Set cells using a flood fill algorithm
@@ -411,12 +434,13 @@ func _on_SelectTool_item_selected(index):
 	select_object.visible = TOOL_DATA[_tool]["show_object_select"]
 	spr_object_cursor.visible = TOOL_DATA[_tool]["show_object_cursor"]
 	tilemap_cursor.visible = TOOL_DATA[_tool]["show_tilemap_cursor"]
+	panel_tile_info.visible = TOOL_DATA[_tool]["show_tile_info"]
 	previous_tool = _tool
 
 
 func _on_SelectObject_item_selected(index):
 	var obj_id = select_object.get_item_metadata(index)
-	spr_object_cursor.texture = load(map.OBJECT_DATA[obj_id]["texture_path"])
+	spr_object_cursor.texture = load(MapData.get_object_property(obj_id,"texture_path"))
 
 
 #### Menu
@@ -487,3 +511,27 @@ func _on_BtnPublish_pressed():
 	}
 	Global.set_scene_parameters(params)
 	get_tree().change_scene("res://scenes/match_practice/MatchPractice.tscn")
+
+
+func _on_SelectTile_item_selected(index):
+	var dict = MapData.get_tile_dict(select_tile.get_item_metadata(index))
+	var text = ""
+	text += dict["name"]
+	
+	if dict.has("resets_ball"):
+		if dict["resets_ball"]:
+			text += "\n\t - Resets ball"
+		
+	if dict.has("Friction"):
+		if dict["friction"] != 1.0:
+			text += "\n\t - Friction Modifier: %s" % dict["friction"]
+			
+	if dict.has("solid"):
+		if dict["solid"]:
+			text += "\n\t - Solid"
+	
+	if dict.has("force"):
+		if dict["force"] > 0.0:
+			text += "\n\t - Force %s" % dict["force"] 
+	
+	lbl_tile_info.text = text
