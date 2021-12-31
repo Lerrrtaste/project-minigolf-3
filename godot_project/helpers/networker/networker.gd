@@ -236,7 +236,7 @@ func matchmaking_start_async(map_pool:Array)->void: # -> NakamaRTAPI.MatchmakerT
 	
 	var query = ""
 	var min_count = 2
-	var max_count = 2
+	var max_count = 3
 	var string_properties = {}
 	
 	for i in range(map_pool.size()):

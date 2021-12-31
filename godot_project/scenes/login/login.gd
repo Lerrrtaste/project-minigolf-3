@@ -30,11 +30,11 @@ func _ready():
 	
 	Networker.connect("authentication_failed", self, "_on_Networker_authentication_failed")
 	
-	if true: # autologin
-		if not OS.get_cmdline_args().empty():
-			line_username_guest.text = OS.get_cmdline_args()[0]
-			_on_BtnLoginGuest_pressed() #autologin for dbg
-
+#	if true: # autologin
+#		if not OS.get_cmdline_args().empty():
+#			line_username_guest.text = OS.get_cmdline_args()[0]
+#			_on_BtnLoginGuest_pressed() #autologin for dbg
+#
 
 # called when socket is connected
 func login_complete():

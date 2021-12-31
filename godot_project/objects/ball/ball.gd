@@ -247,12 +247,17 @@ func update_tile_properties():
 		
 		if to_spawn != null:
 			if to_spawn:
+				total_distance = 0
+				shape_body.set_deferred("disabled", true) 
 				_set("position",map.match_get_starting_position())
 				# TODO play respawn animation
 				finish_moving()
 				return
 		
+#		total_distance = 0
+#		shape_body.set_deferred("disabled", true) 
 		_set("position",starting_position)
+		
 		finish_moving()
 		# TODO play respawn animation
 		
