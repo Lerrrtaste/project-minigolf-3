@@ -70,6 +70,7 @@ var TILE_DATA = {
 }
 
 enum Objects {
+	NONE = -1,
 	START = 0,
 	FINISH = 1
 }
@@ -320,7 +321,6 @@ func _get_used_cells(): # -> vector array
 	return used_cells
 
 
-
 func _spawn_object(cell:Vector2, id:int):
 	var path = OBJECT_DATA[id]["node_path"]
 	var obj = load(path).instance()
@@ -330,7 +330,10 @@ func _spawn_object(cell:Vector2, id:int):
 	spawned_objects[cell] = obj
 
 
+# returns object ref or null
 func _get_object(cell:Vector2): # -> object ref
+	if not spawned_objects.has(cell):
+		return null
 	return spawned_objects[cell]
 
 
@@ -342,23 +345,36 @@ func _remove_object(cell:Vector2):
 
 
 
+
+#### Helper Functions
+
+# forwards to TilemapGround
 func world_to_map(world_pos:Vector2)->Vector2:
 	return _tilemap_ground.world_to_map(world_pos)
 
 
+# forwards to TilemapGround
 func map_to_world(cell:Vector2)->Vector2:
 	return _tilemap_ground.map_to_world(cell)
 
 
-#### Helper Functions
+# Return object id at world_pos or -1
+func get_object_id_at(world_pos:Vector2)->int:
+	var obj = _get_object(world_to_map(world_pos))
+	
+	if obj == null or not "OBJECT_ID" in obj:
+		return Objects.NONE # -1
+	
+	return obj.OBJECT_ID
 
+# 
 func get_cell_center(world_pos:Vector2)->Vector2:
 	var cell = world_to_map(world_pos)
 	var snapped_pos = map_to_world(cell)
-	#snapped_pos.y -= TILE_Y/2 # center on cell
 	return snapped_pos
 
 
+# Checks mobject limits (only this for now)
 func is_map_valid()->bool:
 	# objects
 	for id in OBJECT_DATA.keys():
@@ -397,14 +413,7 @@ func get_tile_property(world_pos:Vector2, property:String):
 func get_tile_id_at(world_pos:Vector2)->int:
 	return _get_tile(world_to_map(world_pos))
 
+
 func get_tile_id_at_cell(cell:Vector2)->int:
 	return _get_tile(cell)
 
-
-func get_tilemap_id(tile_id:int)->int:
-	if not TILE_DATA.keys().has(tile_id):
-		printerr("Could not find tile with id %s"%tile_id)
-		return -1
-	
-	return TILE_DATA[tile_id]["tilemap_id"]
-	

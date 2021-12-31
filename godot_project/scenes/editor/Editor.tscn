@@ -77,20 +77,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="SelectMode" type="ItemList" parent="CanvasLayer/UI/ContainerMapEdit"]
-visible = false
-margin_top = 44.0
-margin_right = 338.0
-margin_bottom = 84.0
-theme = ExtResource( 6 )
-allow_reselect = true
-auto_height = true
-max_columns = 0
-icon_mode = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="SelectObject" type="ItemList" parent="CanvasLayer/UI/ContainerMapEdit"]
 visible = false
 margin_top = 13.0
