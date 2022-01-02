@@ -40,7 +40,7 @@ scale = Vector2( 0.3125, 0.3 )
 texture = ExtResource( 4 )
 
 [node name="CenterPos" type="Position2D" parent="."]
-position = Vector2( 0, -4 )
+position = Vector2( 0, -3 )
 
 [node name="ShapeBody" type="CollisionShape2D" parent="."]
 position = Vector2( 0, -4 )

@@ -34,8 +34,12 @@ var starting_position: Vector2
 var direction: Vector2 # cartesian direction
 var speed: float
 var max_speed: float = 300
-var friction_modifier: float = 1.0 # changed by tile 
-var friction: float = 75
+var friction: float = 80
+
+# tile properties
+var tile_friction_modifier: float = 1.0 # changed by tile 
+var tile_force: float = 0.0
+var tile_force_direction:Vector2 = Vector2()
 
 var total_distance := 0.0 #only used for collision shabe activaten for now
 
@@ -67,18 +71,31 @@ func _process(delta):
 
 
 func _physics_process(delta):
-	if total_distance >= 10:
-		if shape_body.disabled != finished:
-			shape_body.set_deferred("disabled", finished) 
-	
+	# update cell properties
 	if speed > 0:
 		var _cell = map.get_cell_center(_get("position"))
 		if _cell != current_cell: # moved to new cell
 			current_cell = _cell
 			update_tile_properties()
 	
+	# add tile force
+	if tile_force > 0:
+		var tile_vec = tile_force * tile_force_direction * delta
+		var ball_vec = speed * direction
+		var new_vec = ball_vec + tile_vec
+		speed = new_vec.length()
+		direction = new_vec.normalized()
+	
+	# enable shape after moving
+#	if total_distance >= 10:
+	if not test_move(Transform2D(0.0,Vector2()), direction * speed):
+		if shape_body.disabled != finished:
+			shape_body.set_deferred("disabled", finished) 
+	
+	# move
 	if speed > 0:  # seperate because update_tile_properties can change speed (if ball resets)
 		move_step(direction * speed, delta)
+	
 
 
 
@@ -158,7 +175,7 @@ func move_step(movement,delta):
 	else:
 		collision_blacklist.clear()
 
-	speed -= (friction*friction_modifier) * delta
+	speed -= (friction*tile_friction_modifier) * delta
 	
 	if speed <= 0:
 		finish_moving()
@@ -189,7 +206,7 @@ func _handle_collision(collision:KinematicCollision2D):
 		print("NewRemoteVel: %s"%new_collider_vel)
 		
 		direction = isometric_normalize(new_local_vel)
-		speed = new_local_vel.length()
+		speed = new_local_vel.length() * 0.9
 		collision.collider.collision_impact(new_collider_vel, self)
 
 		#ollision_blacklist.append(collision.collider)
@@ -215,7 +232,8 @@ func _handle_collision(collision:KinematicCollision2D):
 			# left up
 			wall_normal =  Vector2(1,1).normalized()
 
-	direction = isometric_normalize(reflect_vector(direction,wall_normal))
+	direction = isometric_normalize(reflect_vector(Vector2(1,2)*direction,wall_normal)).normalized()
+	speed *=  0.9
 
 
 func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
@@ -243,25 +261,22 @@ func update_tile_properties():
 		return
 	
 	if map.get_tile_property(_get("position"), "resets_ball"):
-		var to_spawn = map.get_tile_property(_get("position"), "reset_to_start")
-		
-		if to_spawn != null:
-			if to_spawn:
-				total_distance = 0
-				shape_body.set_deferred("disabled", true) 
-				_set("position",map.match_get_starting_position())
-				# TODO play respawn animation
-				finish_moving()
-				return
-		
-#		total_distance = 0
-#		shape_body.set_deferred("disabled", true) 
+		total_distance = 0
+		shape_body.set_deferred("disabled", true) 
 		_set("position",starting_position)
-		
-		finish_moving()
 		# TODO play respawn animation
+		finish_moving()
 		
-	friction_modifier = map.get_tile_property(_get("position"),"friction")
+	if map.get_tile_property(_get("position"), "resets_ball_to_start"):
+		total_distance = 0
+		shape_body.set_deferred("disabled", true) 
+		_set("position",map.match_get_starting_position())
+		# TODO play respawn animation
+		finish_moving()
+	
+	tile_force = map.get_tile_property(_get("position"), "force") 
+	tile_force_direction = map.get_tile_property(_get("position"), "force_direction")
+	tile_friction_modifier = map.get_tile_property(_get("position"),"friction")
 
 
 

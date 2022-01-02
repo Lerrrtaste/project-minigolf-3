@@ -44,9 +44,11 @@ func editor_object_place(world_pos:Vector2,object_id:int):
 	
 	
 	# check if the tile beneath is valid
-	var tdata = MapData.get_tile_dict(_get_tile(cell))
-	
-	if tdata["solid"] or tdata["resets_ball"]:
+	var tile_id =_get_tile(cell)
+	var solid = MapData.get_tile_property(tile_id, "solid")
+	var resets_ball = MapData.get_tile_property(tile_id, "resets_ball")
+	var resets_ball_to_start = MapData.get_tile_property(tile_id, "resets_ball_to_start")
+	if solid or resets_ball or resets_ball_to_start:
 		Notifier.notify_editor("This object cant be placed on this tile")
 		return
 	

@@ -140,7 +140,8 @@ func load_ui():
 		else:
 			select_object.add_item(oname)
 		select_object.set_item_metadata(select_object.get_item_count()-1,i)
-	
+
+
 	# populate tool dropdown
 	for i in TOOL_DATA:
 		select_tool.add_icon_item(load(TOOL_DATA[i]["icon_path"]))
@@ -174,16 +175,19 @@ func _process(delta):
 
 	
 func _unhandled_input(event):
-	if Input.is_action_just_pressed("editor_tool_use"):
-		tool_dragged = true
-		var cell =  tilemap_cursor.world_to_map(get_global_mouse_position())
-		tool_dragged_from = tilemap_cursor.map_to_world(cell)
-		tool_use()
-	
+	if event is InputEventMouseButton:
+#		if event.is_action_just_pressed("editor_tool_use"):
+		if event.pressed and event.button_index == BUTTON_LEFT:
+			tool_dragged = true
+			var cell =  tilemap_cursor.world_to_map(get_global_mouse_position())
+			tool_dragged_from = tilemap_cursor.map_to_world(cell)
+			tool_use()
 		
-	if Input.is_action_just_released("editor_tool_use") and tool_dragged:
-		tool_dragged = false
-		tool_use()
+			
+#		if event.is_action_just_released("editor_tool_use") and tool_dragged:
+		if not event.pressed and event.button_index == BUTTON_LEFT:
+			tool_dragged = false
+			tool_use()
 
 
 # Use the selected tool
@@ -256,10 +260,14 @@ func tool_draw()->void:
 			spr_object_cursor.position = map.get_cell_center(get_global_mouse_position())
 		
 		Tools.OBJECT_REMOVE:
-			if map.get_object_id_at(get_global_mouse_position()) != -1:
-				pass # TODO get object preview from object file
 			var obj_id = map.get_object_id_at(get_global_mouse_position())
+			if obj_id == -1:
+				return # no object under cursor
+				
 			var path = MapData.get_object_property(obj_id,"texture_path")
+			if path == null:
+				return # no icon set
+				
 			var icon = load(path)
 			spr_object_cursor.texture = icon
 		
@@ -399,10 +407,10 @@ func _tilemap_set_flood(map, from_world:Vector2, tile:int):
 			var world = map.map_to_world(Vector2(x1,y))
 			map.editor_tile_change(world, new_tile)
 			
-			if not spanAbove and y > -h and map.get_tile_id_at_cell(Vector2(x1,y-1)) == old_tile:
+			if not spanAbove and y > -w and map.get_tile_id_at_cell(Vector2(x1,y-1)) == old_tile:
 				stack.push_back(Vector2(x1, y - 1))
 				spanAbove = true
-			elif spanAbove and y > -h and map.get_tile_id_at_cell(Vector2(x1,y-1)) != old_tile:
+			elif spanAbove and y > -w and map.get_tile_id_at_cell(Vector2(x1,y-1)) != old_tile:
 				spanAbove = false
 			
 			if not spanBelow and y < h-1 and map.get_tile_id_at_cell(Vector2(x1,y+1)) == old_tile:
@@ -440,7 +448,9 @@ func _on_SelectTool_item_selected(index):
 
 func _on_SelectObject_item_selected(index):
 	var obj_id = select_object.get_item_metadata(index)
-	spr_object_cursor.texture = load(MapData.get_object_property(obj_id,"texture_path"))
+	var path = MapData.get_object_property(obj_id,"texture_path")
+	if path != null:
+		spr_object_cursor.texture = load(path)
 
 
 #### Menu
@@ -521,10 +531,14 @@ func _on_SelectTile_item_selected(index):
 	if dict.has("resets_ball"):
 		if dict["resets_ball"]:
 			text += "\n\t - Resets ball"
-		
-	if dict.has("Friction"):
+	
+	if dict.has("resets_ball"):
+		if dict["resets_ball"]:
+			text += "\n\t - Resets ball to Start"
+	
+	if dict.has("friction"):
 		if dict["friction"] != 1.0:
-			text += "\n\t - Friction Modifier: %s" % dict["friction"]
+			text += "\n\t - Friction Multiplier: %s" % dict["friction"]
 			
 	if dict.has("solid"):
 		if dict["solid"]:
@@ -532,6 +546,6 @@ func _on_SelectTile_item_selected(index):
 	
 	if dict.has("force"):
 		if dict["force"] > 0.0:
-			text += "\n\t - Force %s" % dict["force"] 
+			text += "\n\t - Force %s" % dict["force"]
 	
 	lbl_tile_info.text = text

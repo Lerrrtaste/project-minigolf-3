@@ -47,6 +47,7 @@ current = true
 zoom = Vector2( 0.5, 0.5 )
 
 [node name="SprObjectCursor" type="Sprite" parent="."]
+modulate = Color( 0.203922, 0.458824, 1, 0.937255 )
 texture = ExtResource( 2 )
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -62,7 +63,7 @@ __meta__ = {
 [node name="ContainerMapEdit" type="VBoxContainer" parent="CanvasLayer/UI"]
 margin_right = 338.0
 margin_bottom = 146.0
-mouse_filter = 0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -109,6 +110,7 @@ visible = false
 margin_top = 88.0
 margin_right = 72.0
 margin_bottom = 108.0
+mouse_filter = 2
 size_flags_horizontal = 0
 custom_styles/panel = SubResource( 7 )
 __meta__ = {
