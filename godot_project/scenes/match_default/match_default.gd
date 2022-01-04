@@ -219,7 +219,7 @@ func _on_Networker_match_state(state):
 			var data_dict = JSON.parse(state.data).result
 			for i in data_dict["left_players"]:
 				if current_turn_user == i.user_id:
-					get_ball(i.user_id).turn_complete(true)
+					get_ball(i.user_id).player_left()
 				
 		
 		Global.OpCodes.REACHED_FINISH:

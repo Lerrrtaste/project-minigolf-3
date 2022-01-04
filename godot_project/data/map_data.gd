@@ -43,7 +43,7 @@ var _TDATA = {
 		Tiles.WALL: {
 				"name": "Wall",
 				"solid": true,
-				"resets_ball": true,
+				"resets_ball_to_start": true,
 				"texture_path":"res://assets/tiles/wall.png",
 				"layer": "walls",
 		},

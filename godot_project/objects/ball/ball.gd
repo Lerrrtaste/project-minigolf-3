@@ -42,6 +42,7 @@ var tile_force: float = 0.0
 var tile_force_direction:Vector2 = Vector2()
 
 var total_distance := 0.0 #only used for collision shabe activaten for now
+var collide_with_balls := false
 
 # match
 var finished := false
@@ -78,26 +79,16 @@ func _physics_process(delta):
 			current_cell = _cell
 			update_tile_properties()
 	
-	# add tile force
-	if tile_force > 0:
-		var tile_vec = tile_force * tile_force_direction * delta
-		var ball_vec = speed * direction
-		var new_vec = ball_vec + tile_vec
-		speed = new_vec.length()
-		direction = new_vec.normalized()
-	
-	# enable shape after moving
-#	if total_distance >= 10:
-	if not test_move(Transform2D(0.0,Vector2()), direction * speed):
-		if shape_body.disabled != finished:
-			shape_body.set_deferred("disabled", finished) 
-	
 	# move
 	if speed > 0:  # seperate because update_tile_properties can change speed (if ball resets)
+		apply_tile_properties(delta)
 		move_step(direction * speed, delta)
 	
+	if shape_body.disabled and total_distance > 10:
+		shape_body.disabled = false 
 
 
+#### Match
 
 # Creates and configures the given player controller (call before entering tree)
 func setup_playercontroller(pc_scene:PackedScene,account=null)->void:
@@ -142,11 +133,9 @@ func turn_ready():
 
 
 # called by finished_moving callback if it was this balls turn
-func turn_complete(left:bool=false):
+func turn_complete():
 	assert(my_turn)
-	assert(not connected_pc.active or left) #he ball finished moving because of a previous collision, player took no turn yet
-	if left:
-		lbl_player_name.text += " (left)" 
+	assert(not connected_pc.active)
 	my_turn = false
 	emit_signal("turn_completed", connected_pc.LOCAL)
 
@@ -161,6 +150,9 @@ func reached_finish():
 	
 	finish_moving()
 
+
+func player_left():
+	lbl_player_name.text += " (left)" 
 
 
 #### Movement
@@ -182,10 +174,11 @@ func move_step(movement,delta):
 
 
 func _handle_collision(collision:KinematicCollision2D):
-	# ball to ball collision
+	
 	if collision_blacklist.has(collision.collider):
 		return
-		 
+		
+	# ball to ball collision
 	if collision.collider is KinematicBody2D: # atm only balls are kinematic bodies
 		print("ball %s colliding with %s"%[self,collision.collider])
 		#You can get the collision components by creating a unit vector pointing in the direction
@@ -232,6 +225,9 @@ func _handle_collision(collision:KinematicCollision2D):
 			# left up
 			wall_normal =  Vector2(1,1).normalized()
 
+	#wall_normal = collision.normal * Vector2(2,1) # Test if this works
+	
+#	direction = isometric_normalize(reflect_vector(direction,wall_normal)).normalized()
 	direction = isometric_normalize(reflect_vector(Vector2(1,2)*direction,wall_normal)).normalized()
 	speed *=  0.9
 
@@ -261,15 +257,15 @@ func update_tile_properties():
 		return
 	
 	if map.get_tile_property(_get("position"), "resets_ball"):
+		shape_body.disabled = true
 		total_distance = 0
-		shape_body.set_deferred("disabled", true) 
 		_set("position",starting_position)
 		# TODO play respawn animation
 		finish_moving()
 		
 	if map.get_tile_property(_get("position"), "resets_ball_to_start"):
+		shape_body.disabled = true
 		total_distance = 0
-		shape_body.set_deferred("disabled", true) 
 		_set("position",map.match_get_starting_position())
 		# TODO play respawn animation
 		finish_moving()
@@ -279,6 +275,13 @@ func update_tile_properties():
 	tile_friction_modifier = map.get_tile_property(_get("position"),"friction")
 
 
+func apply_tile_properties(delta):
+	if tile_force > 0:
+		var tile_vec = tile_force * tile_force_direction * delta
+		var ball_vec = speed * direction
+		var new_vec = ball_vec + tile_vec
+		speed = new_vec.length()
+		direction = new_vec.normalized()
 
 #### Callbacks
 
@@ -335,7 +338,6 @@ func _get(property):
 			return position + center_pos.position
 
 func _set(property, value):
-	print(property, " used _set to value ", value)
 	match property:
 		"position":
 			position = value - center_pos.position

@@ -46,4 +46,3 @@ position = Vector2( 0, -3 )
 position = Vector2( 0, -4 )
 rotation = 1.5708
 shape = SubResource( 1 )
-disabled = true

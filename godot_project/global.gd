@@ -21,7 +21,7 @@ const NK_ADDRESS = "minigolf.lerrrtaste.com"
 const NK_PORT = 7350
 const NK_PROTOCOL = "https"
 const NK_TIMEOUT = 3
-const NK_LOG_LEVEL = NakamaLogger.LOG_LEVEL.DEBUG # {NONE, ERROR, WARNING, INFO, VERBOSE, DEBUG}
+const NK_LOG_LEVEL = NakamaLogger.LOG_LEVEL.INFO # {NONE, ERROR, WARNING, INFO, VERBOSE, DEBUG}
 const NK_ADDON_VERSION = "2.1.0" # primarily note for me
 
 
