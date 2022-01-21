@@ -181,8 +181,7 @@ func _handle_collision(collision:KinematicCollision2D):
 	# ball to ball collision
 	if collision.collider is KinematicBody2D: # atm only balls are kinematic bodies
 		print("ball %s colliding with %s"%[self,collision.collider])
-		#You can get the collision components by creating a unit vector pointing in the direction
-		#from one ball to the other, then taking the dot product with the velocity vectors of the balls. 
+
 		var coll:Vector2 = _get("position") - collision.collider.position
 		var distance:float = coll.length()
 
@@ -229,7 +228,13 @@ func _handle_collision(collision:KinematicCollision2D):
 	
 #	direction = isometric_normalize(reflect_vector(direction,wall_normal)).normalized()
 	direction = isometric_normalize(reflect_vector(Vector2(1,2)*direction,wall_normal)).normalized()
-	speed *=  0.9
+	
+	if map.get_tile_property(collision.position -wall_normal*5, "sticky"):
+		speed = 0
+	elif map.get_tile_property(collision.position -wall_normal*5, "bouncy"):
+		speed *= 1.5
+	else:
+		speed *=  0.9
 
 
 func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):

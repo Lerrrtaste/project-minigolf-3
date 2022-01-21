@@ -47,7 +47,7 @@ func notify_editor(title, message = ""):
 
 func notify_debug(title, message = ""):
 	if Global.DEBUGGING:
-		_spawn_notification(TexturePanelWhite, "Dbg: "+str(title), message, 10.0)
+		_spawn_notification(null, "Dbg: "+str(title), message, 10.0)
 
 
 
@@ -61,7 +61,10 @@ func _spawn_notification(panel_texture:Texture, title, message, duration:float):
 	var inst = Notification.instance()
 	#inst.get_stylebox("panel").set_texture(panel_texture)
 	var stylebox = inst.get_stylebox("panel").duplicate()
-	stylebox.set_texture(panel_texture)
+	if panel_texture:
+		stylebox.set_texture(panel_texture)
+	else:
+		stylebox = StyleBoxEmpty.new()
 	inst.add_stylebox_override("panel",stylebox)
 	inst.get_node("VBox/LblTitle").text = title
 	if message == "":

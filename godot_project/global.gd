@@ -2,7 +2,7 @@ extends Node
 
 
 #### Game ####
-const GAME_VERSION = "0.0.4"
+const GAME_VERSION = "0.0.5"
 const DEBUGGING = true
 
 

@@ -6,14 +6,29 @@ enum Tiles {
 	EMPTY = -1,
 	GRASS = 0,
 	WALL = 1,
-	SAND = 2,
-	WATER = 3,
-	LAVA = 4,
-	ICE = 5,
-	CONVEYOR_U_L = 6,
-	CONVEYOR_U_R = 7,
-	CONVEYOR_D_L = 8,
-	CONVEYOR_D_R = 9,
+	WALL_STICKY = 2,
+	WALL_BOUNCY = 3,
+	# TODO # WALL_U_R = 4,
+	# TODO # WALL_D_R = 5,
+	# TODO # WALL_D_L = 6,
+	# TODO # WALL_U_L = 7,
+	ICE = 8,
+	SAND = 9,
+	# TODO # MUD = 10,
+	WATER = 11,
+	LAVA = 12,
+	# TODO # CONVEYOR_U = 13,
+	CONVEYOR_U_R = 14,
+	# TODO # CONVEYOR_R = 15,
+	CONVEYOR_D_R = 16,
+	# TODO # CONEYOR_D = 17,
+	CONVEYOR_D_L = 18,
+	# TODO # CONEYOR_L = 19,
+	CONVEYOR_U_L = 20,
+	# TODO # ONEWAY_U_R = 21,
+	# TODO # ONEWAY_D_R = 22,
+	# TODO # ONEWAY_D_L = 23,
+	# TODO # ONEWAY_U_L = 24,
 }
 var _TDATA = {
 		"defaults": {
@@ -27,6 +42,9 @@ var _TDATA = {
 			"layer": "ground",  # Tilemap (all, ground, walls)
 			"force": 0, # applied force per second
 			"force_direction": Vector2(), # the direction of the force
+			"allowed_direction": Vector2(), # direction in which balls ignore solid 
+			"sticky": false,
+			"bouncy": false,
 		},
 		Tiles.EMPTY: {
 				"name": "Empty",
@@ -37,65 +55,81 @@ var _TDATA = {
 		},
 		Tiles.GRASS: {
 				"name": "Grass",
-				"texture_path":"res://assets/tiles/grass.png",
+				"texture_path":"res://assets/tiles/00_grass.png",
 				"layer": "ground",
 				},
 		Tiles.WALL: {
 				"name": "Wall",
 				"solid": true,
 				"resets_ball_to_start": true,
-				"texture_path":"res://assets/tiles/wall.png",
+				"texture_path":"res://assets/tiles/01_wall.png",
 				"layer": "walls",
 		},
-		Tiles.SAND: {
-				"name": "Sand",
-				"friction": 3.0, 
-				"texture_path":"res://assets/tiles/sand.png",
-				"layer": "ground",
+		Tiles.WALL_STICKY: {
+				"name": "Sticky Wall",
+				"solid": true,
+				"resets_ball_to_start": true,
+				"sticky": true,
+				"texture_path":"res://assets/tiles/02_wall_sticky.png",
+				"layer": "walls",
 		},
-		Tiles.WATER: {
-				"name": "Water",
-				"resets_ball": true,
-				"texture_path":"res://assets/tiles/water.png",
-				"layer": "ground",
-		},
-		Tiles.LAVA: {
-				"name": "Lava",
-				"resets_ball_to_start": true, 
-				"texture_path":"res://assets/tiles/lava.png",
-				"layer": "ground",
+		Tiles.WALL_BOUNCY: {
+				"name": "Bouncy Wall",
+				"solid": true,
+				"resets_ball_to_start": true,
+				"bouncy": true,
+				"texture_path":"res://assets/tiles/03_wall_bouncy.png",
+				"layer": "walls",
 		},
 		Tiles.ICE: {
 				"name": "Ice",
 				"friction": 0.3,
 				"direction": null,
-				"texture_path":"res://assets/tiles/ice.png",
+				"texture_path":"res://assets/tiles/08_ice.png",
+				"layer": "ground",
+		},
+		Tiles.SAND: {
+				"name": "Sand",
+				"friction": 3.0, 
+				"texture_path":"res://assets/tiles/09_sand.png",
+				"layer": "ground",
+		},
+		Tiles.WATER: {
+				"name": "Water",
+				"resets_ball": true,
+				"texture_path":"res://assets/tiles/11_water.png",
+				"layer": "ground",
+		},
+		Tiles.LAVA: {
+				"name": "Lava",
+				"resets_ball_to_start": true, 
+				"texture_path":"res://assets/tiles/12_lava.png",
 				"layer": "ground",
 		},
 		Tiles.CONVEYOR_U_L: {
 				"name": "Conveyor Up Left",
-				"texture_path":"res://assets/tiles/conveyor_up_left.png",
+				"texture_path":"res://assets/tiles/20_conveyor_up_left.png",
 				"layer": "ground",
 				"force": 500,
 				"force_direction": Vector2(-2,-1).normalized(),
 		},
 		Tiles.CONVEYOR_U_R: {
 				"name": "Conveyor Up Right",
-				"texture_path":"res://assets/tiles/conveyor_up_right.png",
+				"texture_path":"res://assets/tiles/14_conveyor_up_right.png",
 				"layer": "ground",
 				"force": 500,
 				"force_direction": Vector2(2,-1).normalized(),
 		},
 		Tiles.CONVEYOR_D_L: {
 				"name": "Conveyor Down Left",
-				"texture_path":"res://assets/tiles/conveyor_down_left.png",
+				"texture_path":"res://assets/tiles/18_conveyor_down_left.png",
 				"layer": "ground",
 				"force": 500,
 				"force_direction": Vector2(-2,1).normalized(),
 		},
 		Tiles.CONVEYOR_D_R: {
 				"name": "Conveyor Down Right",
-				"texture_path":"res://assets/tiles/conveyor_down_right.png",
+				"texture_path":"res://assets/tiles/16_conveyor_down_right.png",
 				"layer": "ground",
 				"force": 500,
 				"force_direction": Vector2(2,1).normalized()
@@ -139,8 +173,8 @@ func get_tile_property(tile_id:int, property:String):
 		Notifier.notify_error("Tile %s does not exist"%tile_id)
 		return null
 	
+	# use default
 	if not _TDATA[tile_id].has(property):
-		#Notifier.notify_error("Tile %s does not have a %s property"%[tile_id,property], "Defaulting to %s"%_TDATA["defaults"][property])
 		return _TDATA["defaults"][property]
 	
 	return _TDATA[tile_id][property]
