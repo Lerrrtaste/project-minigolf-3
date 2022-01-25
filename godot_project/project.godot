@@ -197,9 +197,10 @@ editor_tool_use={
 
 [layer_names]
 
-2d_physics/layer_1="Map"
+2d_physics/layer_1="MapWalls"
 2d_physics/layer_2="Balls"
 2d_physics/layer_3="MapObjects"
+2d_physics/layer_4="MapOnewayWalls"
 
 [physics]
 

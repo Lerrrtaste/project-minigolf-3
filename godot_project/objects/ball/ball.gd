@@ -25,7 +25,7 @@ onready var center_pos = get_node("CenterPos")
 
 var connected_pc #has active player controller attached
 var map # set by match before entering tree (map ref)
-var current_cell:Vector2
+var current_cell:Vector2 # FIXME curre
 var collision_blacklist:Array # TODO maybe remove
 var display_name:String
 
@@ -43,6 +43,7 @@ var tile_force_direction:Vector2 = Vector2()
 
 var total_distance := 0.0 #only used for collision shabe activaten for now
 var collide_with_balls := false
+var oneway_override_active := false
 
 # match
 var finished := false
@@ -74,7 +75,7 @@ func _process(delta):
 func _physics_process(delta):
 	# update cell properties
 	if speed > 0:
-		var _cell = map.get_cell_center(_get("position"))
+		var _cell = map.world_to_map(_get("position"))
 		if _cell != current_cell: # moved to new cell
 			current_cell = _cell
 			update_tile_properties()
@@ -158,9 +159,12 @@ func player_left():
 #### Movement
 
 func move_step(movement,delta):
-	var collision = move_and_collide(movement*delta)
 	total_distance += movement.length() * delta
 	
+#	if oneway_override_active:
+#		position += movement*delta
+#	else:
+	var collision = move_and_collide(movement*delta)
 	if collision is KinematicCollision2D:
 		_handle_collision(collision)
 		total_distance -= collision.remainder.length()
@@ -168,7 +172,6 @@ func move_step(movement,delta):
 		collision_blacklist.clear()
 
 	speed -= (friction*tile_friction_modifier) * delta
-	
 	if speed <= 0:
 		finish_moving()
 
@@ -206,8 +209,20 @@ func _handle_collision(collision:KinematicCollision2D):
 	
 	#wall collision
 	var coll_pos_delta = collision.position - _get("position")
-	var collision_normal = coll_pos_delta.normalized()
+	#var collision_normal = coll_pos_delta.normalized()
+	var wall_tile_id = map.get_tile_id_at(collision.position - collision.normal*5) # approximation (could fail)
+	
+	
+	
+	# oneway walls
+#	var allowed_direction = MapData.get_tile_property(wall_tile_id,"allowed_direction")
+#	if allowed_direction:
+#		print(direction.dot(allowed_direction) )
+#		if direction.dot(allowed_direction) > 0:
+#			oneway_override_active = true
+#			return
 
+	
 	var wall_normal := Vector2()
 	if coll_pos_delta.x > 0:
 		if coll_pos_delta.y > 0: 
@@ -227,14 +242,13 @@ func _handle_collision(collision:KinematicCollision2D):
 	#wall_normal = collision.normal * Vector2(2,1) # Test if this works
 	
 #	direction = isometric_normalize(reflect_vector(direction,wall_normal)).normalized()
+
+
 	direction = isometric_normalize(reflect_vector(Vector2(1,2)*direction,wall_normal)).normalized()
 	
-	if map.get_tile_property(collision.position -wall_normal*5, "sticky"):
-		speed = 0
-	elif map.get_tile_property(collision.position -wall_normal*5, "bouncy"):
-		speed *= 1.5
-	else:
-		speed *=  0.9
+	#var bounce = map.get_tile_property(collision.position -wall_normal*5, "bounce")
+	speed *=  0.9
+	#speed += bounce
 
 
 func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
@@ -274,6 +288,19 @@ func update_tile_properties():
 		_set("position",map.match_get_starting_position())
 		# TODO play respawn animation
 		finish_moving()
+	
+	var allowed_direction = map.get_tile_property(_get("position"), "allowed_direction")
+	if allowed_direction and not oneway_override_active:
+		if direction.dot(allowed_direction) > 0:
+			# entered oneway tile in the right direction
+			set_collision_mask_bit(3, false)
+			oneway_override_active = true
+	elif not allowed_direction and oneway_override_active:
+		# exited oneway wall
+		set_collision_mask_bit(3, true)
+		oneway_override_active = false
+#
+		
 	
 	tile_force = map.get_tile_property(_get("position"), "force") 
 	tile_force_direction = map.get_tile_property(_get("position"), "force_direction")

@@ -19,12 +19,25 @@ var metadata = {
 	"updated": false
 }
 
-onready var _tilemap_ground = get_node("TileMapGround")
-onready var _tilemap_walls = get_node("TileMapWalls")
+
+onready var _tilemap_templates = { # dict order is node order
+	"walls": get_node("TmTemplateWalls"),
+	"ground": get_node("TmTemplateGround"), # default for unspecified layers
+	"oneway_walls": get_node("TmTemplateOnewayWalls")
+}
+var tilemap_layers := {}
+
 #var MapTileset = preload("res://objects/map/map_tileset.tres")
 
 var spawned_objects:Dictionary
 
+
+func _ready():
+	# instance tilemaps
+	for i in _tilemap_templates:
+		var inst = _tilemap_templates[i].duplicate()
+		add_child(inst)
+		tilemap_layers[i] = inst
 
 #### Editor Actions
 
@@ -205,26 +218,24 @@ func _set_tile(cell:Vector2, tile_id:int):
 	var tilemap_id = MapData.get_tile_property(tile_id, "tilemap_id")
 	if _get_tile(cell) != -1 and layer != "all": # clear other layers to only have one tile per coordinate across all tilemaps
 		_set_tile(cell, MapData.Tiles.EMPTY)
-		
-	match layer:
-			"ground":
-				_tilemap_ground.set_cell(cell.x,cell.y,tilemap_id)
-			"walls":
-				_tilemap_walls.set_cell(cell.x,cell.y,tilemap_id)
-			"all":
-				_tilemap_walls.set_cell(cell.x,cell.y,tilemap_id)
-				_tilemap_ground.set_cell(cell.x,cell.y,tilemap_id)
-			_:
-				Notifier.notify_error("Tile has unkown layer: ", layer)
+	
+	# create tilemap layer
+	if not tilemap_layers.has(layer):
+		Notifier.notify_error("Tile has unkown layer: "+ layer, "Using Ground Template TM")
+		var inst = _tilemap_templates["ground"].duplicate()
+		add_child(inst)
+		tilemap_layers[layer] = inst
+	
+	tilemap_layers[layer].set_cell(cell.x,cell.y,tilemap_id)
 
 
 func _get_tile(cell:Vector2)->int: # -> tile_id
 	var tilemap_id := -1
 	
-	if _tilemap_ground.get_cellv(cell) != -1:
-		tilemap_id = _tilemap_ground.get_cellv(cell)
-	elif _tilemap_walls.get_cellv(cell) != -1:
-		tilemap_id = _tilemap_walls.get_cellv(cell)
+	for i in tilemap_layers:
+		tilemap_id = tilemap_layers[i].get_cellv(cell)
+		if tilemap_id != -1:
+			break
 		
 	for i in MapData.Tiles.values():
 		if tilemap_id == MapData.get_tile_property(i, "tilemap_id"):
@@ -233,11 +244,13 @@ func _get_tile(cell:Vector2)->int: # -> tile_id
 	printerr("Tile at ", cell, "could not be determined (error! investiage _get_tile)")
 	return -1
 
+# Return Tilemap node of tile at cell
+# For collision blacklisting
 
 func _get_used_cells(): # -> vector array
 	var used_cells = []
-	used_cells.append_array(_tilemap_ground.get_used_cells())
-	used_cells.append_array(_tilemap_walls.get_used_cells())
+	for i in tilemap_layers:
+		used_cells.append_array(tilemap_layers[i]._get_used_cells())
 	return used_cells
 
 
@@ -269,13 +282,18 @@ func _remove_object(cell:Vector2):
 
 # forwards to TilemapGround
 func world_to_map(world_pos:Vector2)->Vector2:
-	return _tilemap_ground.world_to_map(world_pos)
+	return _tilemap_templates["ground"].world_to_map(world_pos)
 
 
 # forwards to TilemapGround
 func map_to_world(cell:Vector2)->Vector2:
-	return _tilemap_ground.map_to_world(cell)
+	return _tilemap_templates["ground"].map_to_world(cell)
 
+func get_tilemap_node_at_cell(cell:Vector2)->TileMap:
+	for i in tilemap_layers:
+		if tilemap_layers[i].get_cellv(cell) != -1:
+			return tilemap_layers[i]
+	return null
 
 # Return object id at world_pos or -1
 func get_object_id_at(world_pos:Vector2)->int:

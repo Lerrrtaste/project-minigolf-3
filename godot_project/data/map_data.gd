@@ -8,13 +8,13 @@ enum Tiles {
 	WALL = 1,
 	WALL_STICKY = 2,
 	WALL_BOUNCY = 3,
-	# TODO # WALL_U_R = 4,
-	# TODO # WALL_D_R = 5,
-	# TODO # WALL_D_L = 6,
-	# TODO # WALL_U_L = 7,
+	WALL_U_R = 4,
+	WALL_D_R = 5,
+	WALL_D_L = 6,
+	WALL_U_L = 7,
 	ICE = 8,
 	SAND = 9,
-	# TODO # MUD = 10,
+	MUD = 10,
 	WATER = 11,
 	LAVA = 12,
 	# TODO # CONVEYOR_U = 13,
@@ -42,9 +42,8 @@ var _TDATA = {
 			"layer": "ground",  # Tilemap (all, ground, walls)
 			"force": 0, # applied force per second
 			"force_direction": Vector2(), # the direction of the force
-			"allowed_direction": Vector2(), # direction in which balls ignore solid 
-			"sticky": false,
-			"bouncy": false,
+			"allowed_direction": null, # direction in which balls ignore solid 
+			"bounce": 0, # additional speed
 		},
 		Tiles.EMPTY: {
 				"name": "Empty",
@@ -69,7 +68,7 @@ var _TDATA = {
 				"name": "Sticky Wall",
 				"solid": true,
 				"resets_ball_to_start": true,
-				"sticky": true,
+				"bounce": -99999,
 				"texture_path":"res://assets/tiles/02_wall_sticky.png",
 				"layer": "walls",
 		},
@@ -77,9 +76,45 @@ var _TDATA = {
 				"name": "Bouncy Wall",
 				"solid": true,
 				"resets_ball_to_start": true,
-				"bouncy": true,
+				"bounce": 100,
 				"texture_path":"res://assets/tiles/03_wall_bouncy.png",
 				"layer": "walls",
+		},
+		Tiles.WALL_U_R: {
+				"name": "Oneway Wall Up Right",
+				"solid": true,
+				"allowed_direction": Vector2(2,-1).normalized(),
+				"force_direction":Vector2(2,-1).normalized(),
+				"force": 0,
+				"texture_path":"res://assets/tiles/04_wall_up_right.png",
+				"layer": "oneway_walls",
+		},
+		Tiles.WALL_D_R: {
+				"name": "Oneway Wall Down Right",
+				"solid": true,
+				"allowed_direction": Vector2(2,1).normalized(),
+				"force_direction":Vector2(2,1).normalized(),
+				"force": 0,
+				"texture_path":"res://assets/tiles/05_wall_down_right.png",
+				"layer": "oneway_walls",
+		},
+		Tiles.WALL_D_L: {
+				"name": "Oneway Wall Down Left",
+				"solid": true,
+				"allowed_direction": Vector2(-2,1).normalized(),
+				"force_direction":Vector2(-2,1).normalized(),
+				"force": 0,
+				"texture_path":"res://assets/tiles/06_wall_down_left.png",
+				"layer": "oneway_walls",
+		},
+		Tiles.WALL_U_L: {
+				"name": "Oneway Wall Up Left",
+				"solid": true,
+				"allowed_direction": Vector2(-2,-1).normalized(),
+				"force_direction":Vector2(-2,-1).normalized(),
+				"force": 10,
+				"texture_path":"res://assets/tiles/07_wall_up_left.png",
+				"layer": "oneway_walls",
 		},
 		Tiles.ICE: {
 				"name": "Ice",
@@ -90,8 +125,14 @@ var _TDATA = {
 		},
 		Tiles.SAND: {
 				"name": "Sand",
-				"friction": 3.0, 
+				"friction": 2.5, 
 				"texture_path":"res://assets/tiles/09_sand.png",
+				"layer": "ground",
+		},
+		Tiles.MUD: {
+				"name": "Mud",
+				"friction": 4.5, 
+				"texture_path":"res://assets/tiles/10_mud.png",
 				"layer": "ground",
 		},
 		Tiles.WATER: {

@@ -6,7 +6,7 @@
 [node name="Map" type="YSort"]
 script = ExtResource( 1 )
 
-[node name="TileMapWalls" type="TileMap" parent="."]
+[node name="TmTemplateWalls" type="TileMap" parent="."]
 mode = 1
 tile_set = ExtResource( 2 )
 cell_size = Vector2( 32, 16 )
@@ -15,11 +15,23 @@ cell_y_sort = true
 collision_mask = 0
 format = 1
 
-[node name="TileMapGround" type="TileMap" parent="."]
+[node name="TmTemplateGround" type="TileMap" parent="."]
 show_behind_parent = true
 mode = 1
 tile_set = ExtResource( 2 )
 cell_size = Vector2( 32, 16 )
 cell_y_sort = true
+show_collision = true
+collision_mask = 0
+format = 1
+
+[node name="TmTemplateOnewayWalls" type="TileMap" parent="."]
+show_behind_parent = true
+mode = 1
+tile_set = ExtResource( 2 )
+cell_size = Vector2( 32, 16 )
+cell_y_sort = true
+show_collision = true
+collision_layer = 8
 collision_mask = 0
 format = 1

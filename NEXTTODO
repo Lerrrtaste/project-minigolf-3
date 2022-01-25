@@ -1,0 +1,2 @@
+Oneway tile collision needs to be fixed. rn oneway_override_active skips move and collide but it does not work for neighboring real walls
+and when leaving the oneway walls (need different solution probably)
