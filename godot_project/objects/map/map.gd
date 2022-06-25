@@ -219,6 +219,11 @@ func _set_tile(cell:Vector2, tile_id:int):
 	if _get_tile(cell) != -1 and layer != "all": # clear other layers to only have one tile per coordinate across all tilemaps
 		_set_tile(cell, MapData.Tiles.EMPTY)
 	
+	if layer == "all":
+		for i in tilemap_layers:
+			tilemap_layers[i].set_cellv(cell, tilemap_id)
+		return
+	
 	# create tilemap layer
 	if not tilemap_layers.has(layer):
 		Notifier.notify_error("Tile has unkown layer: "+ layer, "Using Ground Template TM")
@@ -226,7 +231,7 @@ func _set_tile(cell:Vector2, tile_id:int):
 		add_child(inst)
 		tilemap_layers[layer] = inst
 	
-	tilemap_layers[layer].set_cell(cell.x,cell.y,tilemap_id)
+	tilemap_layers[layer].set_cellv(cell,tilemap_id)
 
 
 func _get_tile(cell:Vector2)->int: # -> tile_id
@@ -250,7 +255,7 @@ func _get_tile(cell:Vector2)->int: # -> tile_id
 func _get_used_cells(): # -> vector array
 	var used_cells = []
 	for i in tilemap_layers:
-		used_cells.append_array(tilemap_layers[i]._get_used_cells())
+		used_cells.append_array(tilemap_layers[i].get_used_cells())
 	return used_cells
 
 

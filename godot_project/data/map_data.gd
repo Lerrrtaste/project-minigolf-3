@@ -17,18 +17,14 @@ enum Tiles {
 	MUD = 10,
 	WATER = 11,
 	LAVA = 12,
-	# TODO # CONVEYOR_U = 13,
+	CONVEYOR_U = 13,
 	CONVEYOR_U_R = 14,
-	# TODO # CONVEYOR_R = 15,
+	CONVEYOR_R = 15,
 	CONVEYOR_D_R = 16,
-	# TODO # CONEYOR_D = 17,
+	CONVEYOR_D = 17,
 	CONVEYOR_D_L = 18,
-	# TODO # CONEYOR_L = 19,
+	CONVEYOR_L = 19,
 	CONVEYOR_U_L = 20,
-	# TODO # ONEWAY_U_R = 21,
-	# TODO # ONEWAY_D_R = 22,
-	# TODO # ONEWAY_D_L = 23,
-	# TODO # ONEWAY_U_L = 24,
 }
 var _TDATA = {
 		"defaults": {
@@ -43,7 +39,7 @@ var _TDATA = {
 			"force": 0, # applied force per second
 			"force_direction": Vector2(), # the direction of the force
 			"allowed_direction": null, # direction in which balls ignore solid 
-			"bounce": 0, # additional speed
+			"bounce": 1.0, # speed multiplier (* default 0.9)
 		},
 		Tiles.EMPTY: {
 				"name": "Empty",
@@ -68,7 +64,7 @@ var _TDATA = {
 				"name": "Sticky Wall",
 				"solid": true,
 				"resets_ball_to_start": true,
-				"bounce": -99999,
+				"bounce": 0,
 				"texture_path":"res://assets/tiles/02_wall_sticky.png",
 				"layer": "walls",
 		},
@@ -76,7 +72,7 @@ var _TDATA = {
 				"name": "Bouncy Wall",
 				"solid": true,
 				"resets_ball_to_start": true,
-				"bounce": 100,
+				"bounce": 1.7,
 				"texture_path":"res://assets/tiles/03_wall_bouncy.png",
 				"layer": "walls",
 		},
@@ -147,12 +143,12 @@ var _TDATA = {
 				"texture_path":"res://assets/tiles/12_lava.png",
 				"layer": "ground",
 		},
-		Tiles.CONVEYOR_U_L: {
-				"name": "Conveyor Up Left",
-				"texture_path":"res://assets/tiles/20_conveyor_up_left.png",
+		Tiles.CONVEYOR_U: {
+				"name": "Conveyor Up",
+				"texture_path":"res://assets/tiles/13_conveyor_up.png",
 				"layer": "ground",
 				"force": 500,
-				"force_direction": Vector2(-2,-1).normalized(),
+				"force_direction": Vector2(0,-1).normalized(),
 		},
 		Tiles.CONVEYOR_U_R: {
 				"name": "Conveyor Up Right",
@@ -161,12 +157,12 @@ var _TDATA = {
 				"force": 500,
 				"force_direction": Vector2(2,-1).normalized(),
 		},
-		Tiles.CONVEYOR_D_L: {
-				"name": "Conveyor Down Left",
-				"texture_path":"res://assets/tiles/18_conveyor_down_left.png",
+		Tiles.CONVEYOR_R: {
+				"name": "Conveyor Right",
+				"texture_path":"res://assets/tiles/15_conveyor_right.png",
 				"layer": "ground",
 				"force": 500,
-				"force_direction": Vector2(-2,1).normalized(),
+				"force_direction": Vector2(1,0).normalized(),
 		},
 		Tiles.CONVEYOR_D_R: {
 				"name": "Conveyor Down Right",
@@ -174,6 +170,34 @@ var _TDATA = {
 				"layer": "ground",
 				"force": 500,
 				"force_direction": Vector2(2,1).normalized()
+		},
+		Tiles.CONVEYOR_D: {
+				"name": "Conveyor Down",
+				"texture_path":"res://assets/tiles/17_conveyor_down.png",
+				"layer": "ground",
+				"force": 500,
+				"force_direction": Vector2(0,1).normalized(),
+		},
+		Tiles.CONVEYOR_D_L: {
+				"name": "Conveyor Down Left",
+				"texture_path":"res://assets/tiles/18_conveyor_down_left.png",
+				"layer": "ground",
+				"force": 500,
+				"force_direction": Vector2(-2,1).normalized(),
+		},
+		Tiles.CONVEYOR_L: {
+				"name": "Conveyor Left",
+				"texture_path":"res://assets/tiles/19_conveyor_left.png",
+				"layer": "ground",
+				"force": 500,
+				"force_direction": Vector2(-1,0).normalized(),
+		},
+		Tiles.CONVEYOR_U_L: {
+				"name": "Conveyor Up Left",
+				"texture_path":"res://assets/tiles/20_conveyor_up_left.png",
+				"layer": "ground",
+				"force": 500,
+				"force_direction": Vector2(-2,-1).normalized(),
 		},
 }
 

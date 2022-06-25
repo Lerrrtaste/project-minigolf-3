@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=25 format=2]
+[gd_resource type="TileSet" load_steps=29 format=2]
 
 [ext_resource path="res://assets/tiles/18_conveyor_down_left.png" type="Texture" id=1]
 [ext_resource path="res://assets/tiles/16_conveyor_down_right.png" type="Texture" id=2]
@@ -17,6 +17,10 @@
 [ext_resource path="res://assets/tiles/06_wall_down_left.png" type="Texture" id=15]
 [ext_resource path="res://assets/tiles/07_wall_up_left.png" type="Texture" id=16]
 [ext_resource path="res://assets/tiles/05_wall_down_right.png" type="Texture" id=17]
+[ext_resource path="res://assets/tiles/15_conveyor_right.png" type="Texture" id=18]
+[ext_resource path="res://assets/tiles/17_conveyor_down.png" type="Texture" id=19]
+[ext_resource path="res://assets/tiles/19_conveyor_left.png" type="Texture" id=20]
+[ext_resource path="res://assets/tiles/13_conveyor_up.png" type="Texture" id=21]
 
 [sub_resource type="ConvexPolygonShape2D" id=1]
 points = PoolVector2Array( 16, 18, 32, 26, 16, 34, 0, 26, 0, 26 )
@@ -327,3 +331,59 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 "shape_transform": Transform2D( 1, 0, 0, 1, 0, -19 )
 } ]
 17/z_index = 0
+18/name = "Conveyor Up"
+18/texture = ExtResource( 21 )
+18/tex_offset = Vector2( 0, -10 )
+18/modulate = Color( 1, 1, 1, 1 )
+18/region = Rect2( 0, 0, 32, 34 )
+18/tile_mode = 0
+18/occluder_offset = Vector2( 0, 0 )
+18/navigation_offset = Vector2( 0, 0 )
+18/shape_offset = Vector2( 0, 0 )
+18/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+18/shape_one_way = false
+18/shape_one_way_margin = 0.0
+18/shapes = [  ]
+18/z_index = 0
+19/name = "Conveyor Right"
+19/texture = ExtResource( 18 )
+19/tex_offset = Vector2( 0, -10 )
+19/modulate = Color( 1, 1, 1, 1 )
+19/region = Rect2( 0, 0, 32, 34 )
+19/tile_mode = 0
+19/occluder_offset = Vector2( 0, 0 )
+19/navigation_offset = Vector2( 0, 0 )
+19/shape_offset = Vector2( 0, 0 )
+19/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+19/shape_one_way = false
+19/shape_one_way_margin = 0.0
+19/shapes = [  ]
+19/z_index = 0
+20/name = "Conveyor Down"
+20/texture = ExtResource( 19 )
+20/tex_offset = Vector2( 0, -10 )
+20/modulate = Color( 1, 1, 1, 1 )
+20/region = Rect2( 0, 0, 32, 34 )
+20/tile_mode = 0
+20/occluder_offset = Vector2( 0, 0 )
+20/navigation_offset = Vector2( 0, 0 )
+20/shape_offset = Vector2( 0, 0 )
+20/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+20/shape_one_way = false
+20/shape_one_way_margin = 0.0
+20/shapes = [  ]
+20/z_index = 0
+21/name = "Conveyor Left"
+21/texture = ExtResource( 20 )
+21/tex_offset = Vector2( 0, -10 )
+21/modulate = Color( 1, 1, 1, 1 )
+21/region = Rect2( 0, 0, 32, 34 )
+21/tile_mode = 0
+21/occluder_offset = Vector2( 0, 0 )
+21/navigation_offset = Vector2( 0, 0 )
+21/shape_offset = Vector2( 0, 0 )
+21/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+21/shape_one_way = false
+21/shape_one_way_margin = 0.0
+21/shapes = [  ]
+21/z_index = 0

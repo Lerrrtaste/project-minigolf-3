@@ -35,6 +35,8 @@ var direction: Vector2 # cartesian direction
 var speed: float
 var max_speed: float = 300
 var friction: float = 80
+var bounce_count := 0
+const BOUNCE_LIMIT = 3 # max bounces per turn
 
 # tile properties
 var tile_friction_modifier: float = 1.0 # changed by tile 
@@ -214,15 +216,6 @@ func _handle_collision(collision:KinematicCollision2D):
 	
 	
 	
-	# oneway walls
-#	var allowed_direction = MapData.get_tile_property(wall_tile_id,"allowed_direction")
-#	if allowed_direction:
-#		print(direction.dot(allowed_direction) )
-#		if direction.dot(allowed_direction) > 0:
-#			oneway_override_active = true
-#			return
-
-	
 	var wall_normal := Vector2()
 	if coll_pos_delta.x > 0:
 		if coll_pos_delta.y > 0: 
@@ -246,9 +239,10 @@ func _handle_collision(collision:KinematicCollision2D):
 
 	direction = isometric_normalize(reflect_vector(Vector2(1,2)*direction,wall_normal)).normalized()
 	
-	#var bounce = map.get_tile_property(collision.position -wall_normal*5, "bounce")
-	speed *=  0.9
-	#speed += bounce
+	var bounce = map.get_tile_property(collision.position -wall_normal*5, "bounce")
+	if bounce > 1.0:
+		bounce_count += 1
+	speed *=  0.9 * (bounce if bounce_count < BOUNCE_LIMIT else 1.0)
 
 
 func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
@@ -262,7 +256,7 @@ func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
 
 func finish_moving():
 	speed = 0
-	
+	bounce_count = 0
 	if connected_pc.LOCAL and connected_pc.has_method("send_sync_position"):
 		connected_pc.send_sync_position(_get("position"))
 		#emit_signal("finished_moving")
@@ -349,7 +343,6 @@ func get_pc_user_id()->String:
 		return ""
 	
 	return connected_pc.user_id
-
 
 
 #### Helpers
