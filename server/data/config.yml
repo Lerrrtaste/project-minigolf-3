@@ -1,0 +1,37 @@
+name: minigolf-node-1
+data_dir: "./data/"
+
+logger:
+  stdout: true
+  level: "debug"
+  file: "/nakama/data/logfile.log"
+
+console:
+  port: 7351
+  username: "lerrrtaste"
+  password: "MiHT9ou83EaiMi86H!"
+  signing_key: "hW66Hzi^t#dNk4GW&VN$4!bPLTamBAKH"
+
+socket:
+  server_key: "K&W^EDjq5%sBU4W^yCFnrMd4L9Cr%H7s"
+  port: 7350
+
+runtime:
+  http_key: "A^AAz*GhVbDC8SjbQQ23r!F&x4CemevJ"
+
+session:
+  encryption_key: "n!GNke@kML$LvFpDu$p^F%9CB5d8XF6#"
+  refresh_encryption_key: "B6W3W!EW!2ANmZd&HudAJm!Jb5dm#3Ne"
+  token_expiry_sec: 3600
+#  single_socket: false
+#  single_match: false
+
+#matchmaker:
+#  max_tickets: 3
+#  interval_sec: 5
+#  max_intervals: 2
+
+metrics:
+  reporting_freq_sec: 60
+  namespace: ""
+  prometheus_port: 9100
