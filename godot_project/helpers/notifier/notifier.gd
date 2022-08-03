@@ -27,7 +27,7 @@ func _ready():
 	tween.connect("tween_completed", self, "_on_tween_completed")
 
 
-#### Print Notifications
+#### Show InGame Notifications
 
 func notify_info(title, message = ""):
 	_spawn_notification(TexturePanelGreen, title, message, 4.0)
@@ -50,8 +50,48 @@ func notify_debug(title, message = ""):
 		_spawn_notification(null, "Dbg: "+str(title), message, 10.0)
 
 
+#### Print to Console
+func log_debug(message = ""):
+	_log_console(Global.LogLevel.DEBUG, message)
+
+
+func log_verbose(message = ""):
+	_log_console(Global.LogLevel.VERBOSE, message)
+
+
+func log_info(message = ""):
+	_log_console(Global.LogLevel.INFO, message)
+
+
+func log_warning(message = ""):
+	_log_console(Global.LogLevel.WARNING, message)
+
+
+func log_error(message = ""):
+	_log_console(Global.LogLevel.ERROR, message)
+
+
 
 #### Internal
+
+func _log_console(level:int, message:String):
+	if Global.LOG_LEVEL < level:
+		return
+
+    message = "["+str(level)+"] "+str(message)
+
+	# Print Caller for Verbose and Debug Levels
+	if Global.LOG_LEVEL <= Global.LogLevel.VERBOSE:
+		message += "\n\t"+get_stack()[1]
+
+	# Push to Godots Debugger if error or warning
+	if level >= Global.LogLevel.ERROR:
+		push_error(message)
+	elif level >= Global.LogLevel.WARNING:
+		push_warning(message)
+	else:
+		print(message)
+
 
 func _spawn_notification(panel_texture:Texture, title, message, duration:float):
 	title = str(title)
@@ -65,7 +105,8 @@ func _spawn_notification(panel_texture:Texture, title, message, duration:float):
 		stylebox.set_texture(panel_texture)
 	else:
 		stylebox = StyleBoxEmpty.new()
-	inst.add_stylebox_override("panel",stylebox)
+	inst.add_stylebox_override("panel",stylebo
+x)
 	inst.get_node("VBox/LblTitle").text = title
 	if message == "":
 		inst.get_node("VBox/LblMessage").visible = false #text = ""

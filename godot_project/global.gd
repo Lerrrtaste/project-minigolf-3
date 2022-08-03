@@ -3,8 +3,16 @@ extends Node
 
 #### Game ####
 const GAME_VERSION = "0.0.5"
+enum LogLevel {
+	DEBUG, # includes full stack trace
+	VERBOSE, # includes calling function
+	INFO,
+	WARNING,
+	ERROR,
+	NONE,
+}
+const LOG_LEVEL = LogLevel.DEBUG
 const DEBUGGING = true
-
 
 #### Maps ####
 # MAP SIZE
