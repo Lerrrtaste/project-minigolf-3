@@ -1,31 +1,42 @@
 extends Camera2D
 class_name MatchCameraClass
 
-"""
-A camera to be used during matches
+## The camera for matches.
+##
+## Intended to follow one ball at a time.
+## Follow behavior can be overriden by userinput.
+##
+## Usage:
+##     [codeblock]
+##         matchcamera.follow(ball) # Transition to and then follow ball.
+##         matchcamera.move_to(x, y) # Transitions and moves to cooradinate.
+##     [/codeblock]
 
-Intended to follow() balls
-Can be taken over by user input
 
-"""
+## The node to follow. Set with follow()
+var _target:Node2D
 
-var target:Node2D
-var transition_to := Vector2() # for temporary smooth
-var manual_movement_speed := 100
- 
-func _ready():
-	pass
+
+## Target for temporary smooth transition.
+## Disabled when set to (0,0)
+var _transition_to := Vector2()
+
+
+## The max speed for direct user movement.
+var _manual_movement_speed := 100
 
 
 func _process(delta):
-	if transition_to != Vector2():
-		if (get_camera_screen_center()-transition_to).length() < 1:
+	if _transition_to != Vector2():
+		# Perform initial smooth transition
+		if (get_camera_screen_center()-_transition_to).length() < 1:
 			reset_smoothing()
 			smoothing_enabled = false
-			transition_to = Vector2()
+			_transition_to = Vector2()
 	else:
-		if target is Node2D:
-			position = target.position
+		# Follow target
+		if _target is Node2D:
+			position = _target.position
 	
 	# user takeover
 	var manual_movement := Vector2()
@@ -38,28 +49,37 @@ func _process(delta):
 	if Input.is_action_pressed("camera_left"):
 		manual_movement.x -= 1
 	if manual_movement.length() > 0:
-		target = null
+		_target = null
 		smoothing_enabled = false
-		position += manual_movement.normalized() * delta * manual_movement_speed
+		position += manual_movement.normalized() * delta * _manual_movement_speed
 
-# focus a position
+## Move the camera to a fixed position.
+##
+## Makes the camera current, clears the target, and moves to the position.
+##
+## @param target_pos The position to move to.
+## @param smooth Smooth movement
 func move_to(target_pos:Vector2, smooth:bool):
 	make_current()
-	target = null
-	transition_to = Vector2()
+	_target = null
+	_transition_to = Vector2()
 	position = target_pos
 	smoothing_enabled = smooth
 
 
-# follow a node's position
-func follow(_target:Node2D, smooth_follow:bool, smooth_transition:bool):
+## Makes the camera current, sets the target and starts following.
+##
+## @param target:Node2D The node to follow.
+## @param smooth_follow:bool Whether to keep the camera smooth while following.
+## @param smooth_transition:bool Wheter to smooth only the inital transition to the target. (No effect if smooth_follow is true)
+func follow(target:Node2D, smooth_follow:bool, smooth_transition:bool):
 	make_current()
 	
 	if smooth_transition and not smooth_follow:
 		smoothing_enabled = true
-		transition_to = _target.position
+		_transition_to = _target.position
 		position = _target.position
 	else:
-		transition_to = Vector2()
+		_transition_to = Vector2()
 	
-	target = _target
+	_target = target

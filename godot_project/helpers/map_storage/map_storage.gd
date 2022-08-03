@@ -1,29 +1,33 @@
 extends Node
 
-"""
-Map Storage Helper
+## Mapdata Handler and Cache
+##
+## Interface to Nakama Collections via Networker
+##
+## - Loading
+## - Saving existing mapobjext
+## - Publishing new maps
+##
+##
+## Notes:
+## ApiStorageObject Schema
+## {
+## 	"collection": {"name": "_collection", "type": TYPE_STRING, "required": false},
+## 	"create_time": {"name": "_create_time", "type": TYPE_STRING, "required": false},
+## 	"key": {"name": "_key", "type": TYPE_STRING, "required": false},
+## 	"permission_read": {"name": "_permission_read", "type": TYPE_INT, "required": false},
+## 	"permission_write": {"name": "_permission_write", "type": TYPE_INT, "required": false},
+## 	"update_time": {"name": "_update_time", "type": TYPE_STRING, "required": false},
+## 	"user_id": {"name": "_user_id", "type": TYPE_STRING, "required": false},
+## 	"value": {"name": "_value", "type": TYPE_STRING, "required": false},
+## 	"version": {"name": "_version", "type": TYPE_STRING, "required": false},
+## }
 
-Handles Map Loading, Saving and Publishing
 
-
-Notes:
-ApiStorageObject Schema
-{
-	"collection": {"name": "_collection", "type": TYPE_STRING, "required": false},
-	"create_time": {"name": "_create_time", "type": TYPE_STRING, "required": false},
-	"key": {"name": "_key", "type": TYPE_STRING, "required": false},
-	"permission_read": {"name": "_permission_read", "type": TYPE_INT, "required": false},
-	"permission_write": {"name": "_permission_write", "type": TYPE_INT, "required": false},
-	"update_time": {"name": "_update_time", "type": TYPE_STRING, "required": false},
-	"user_id": {"name": "_user_id", "type": TYPE_STRING, "required": false},
-	"value": {"name": "_value", "type": TYPE_STRING, "required": false},
-	"version": {"name": "_version", "type": TYPE_STRING, "required": false},
-}
-
-"""
-
-
-var cached_maps:=[]
+## MapIds of known cached maps
+##
+## Updated with _update_cached_maps()
+var _cached_maps:=[]
 
 
 func _ready():
@@ -33,32 +37,47 @@ func _ready():
 		dir.make_dir_recursive(Global.MAP_CACHE_PATH)
 
 
-# Load a single map
+## Loads a single map
+##
+## @param map_id string map id
+## @param owner_id string ownerId (optional, only needed for public maps)
+## @returns map_jstring
 func load_map_async(map_id:String, owner_id:String=""): # -> map_jstring
 	var map_jstring = yield(_load_from_server_async(map_id,owner_id), "completed")
 	return map_jstring
 
 
-# save a map
-func save_map_async(map_id:String, map_jstring:String,public:bool): # -> ApiStorageObjectAck/s
+## Saves a map without publishing it
+##
+## @param map_id string existing map id
+## @param map_jstring string serialized map object
+## @returns ApiStorageObjectAck
+func save_map_async(map_id:String, map_jstring:String): # -> ApiStorageObjectAck/s
 	assert(not public) # use publish_map instead
 	var ack = yield(_save_to_server_async(map_id, map_jstring, public), "completed")
 	return ack
 
 
-# Set a map to public (rpc "publish_map")
+## Publishes an existing map
+##
+## @param map_id string existing map id
+## @returns ?
 func publish_map_async(map_id:String):
 	return yield(Networker.rpc_call("publish_map", JSON.print({"map_id": map_id})), "completed")
 
 
-# Delete a map
+## Deletes a map
+##
+## @param map_id string existing map id
 func delete_map(map_id:String)->void:
 	#_delete_from_cache(map_id)
 	_delete_from_server(map_id)
 
 
-# List all owned maps
-func list_owned_maps_async()->Dictionary: # -> {"map_id": "name", ...}
+## Lists all owned maps
+##
+## @returns dictionary owned maps {"map_id": "name", ...}
+func list_owned_maps_async()->Dictionary:
 	var result = yield(Networker.collection_list_owned_objects_async(Global.MAP_COLLECTION), "completed")
 	
 	var owned_maps = {}
@@ -68,8 +87,10 @@ func list_owned_maps_async()->Dictionary: # -> {"map_id": "name", ...}
 	return owned_maps
 
 
-# List first 100 public maps
-func list_public_maps_async()->Array: # ->  [{"map_id":, "creator_id":, "name":, "owner_name":},...]
+## Lists first 100 public maps
+##
+## @returns array public map dictionaries [{"map_id":, "creator_id":, "name":, "owner_name":},...]
+func list_public_maps_async()->Array: # ->
 	var result = yield(Networker.collection_list_public_objects_async(Global.MAP_COLLECTION), "completed")
 	
 	var public_maps:Array
@@ -89,8 +110,13 @@ func list_public_maps_async()->Array: # ->  [{"map_id":, "creator_id":, "name":,
 
 #### Internal
 
-## Server
+### Server
 
+## Loads a map from the server
+##
+## @param map_id string map id
+## @param owner_id string ownerId (optional, only needed for public maps)
+## @returns String serialized map jstring
 func _load_from_server_async(map_id:String, owner_id:String="")->String: # -> map_jstring
 	var object
 	if owner_id == "":
@@ -103,16 +129,28 @@ func _load_from_server_async(map_id:String, owner_id:String="")->String: # -> ma
 	return object.value
 
 
+## Saves a map_jstring to the server
+##
+## @param map_id string existing map id
+## @param map_jstring string serialized map object
+## @param public boolean is map public?
 func _save_to_server_async(map_id:String, map_jstring:String, public:bool=false): # -> ApiStorageObjectAck/s
 	return yield(Networker.collection_write_object_async(Global.MAP_COLLECTION, map_id, map_jstring, public), "completed")
 
 
+## Deletes a map from the server
+##
+## @param map_id string existing map id
 func _delete_from_server(map_id:String):
 	Networker.collection_remove_object_asnyc(Global.MAP_COLLECTION,map_id)
 
 
-## Cache
+### Cache
 
+## Saves a map jstring to cache
+##
+## @param map_id string map id
+## @param map_jstring string serialized map object
 func _save_to_cache(map_id:String, map_jstring:String)->void:
 	var file = File.new()
 	var path = "%s%s.map"%[Global.MAP_CACHE_PATH, map_id]
@@ -128,6 +166,10 @@ func _save_to_cache(map_id:String, map_jstring:String)->void:
 		cached_maps.append(map_id)
 
 
+## Loads a map from cache, if cached
+##
+## @param map_id string map id
+## @returns String serialized map jstring (empty string if not cached)
 func _load_from_cache(map_id:String)->String: # -> map_jstring
 	if not cached_maps.has(map_id):
 		printerr("Trying to load nonexistent map from cache")
@@ -146,6 +188,9 @@ func _load_from_cache(map_id:String)->String: # -> map_jstring
 	return content
 
 
+## Deletes a map from cache
+##
+## @param map_id string map id
 func _delete_from_cache(map_id:String):
 	var dir = Directory.new()
 	dir.open(Global.MAP_CACHE_PATH)
@@ -154,7 +199,7 @@ func _delete_from_cache(map_id:String):
 	else:
 		printerr("Cant delete file from cache, because it does not exist")
 
-
+## Refresh list of cached maps
 func _update_cached_maps():
 	var map_files = []
 	var dir = Directory.new()
@@ -173,5 +218,9 @@ func _update_cached_maps():
 		cached_maps.append(i.split(".map")[0])
 
 
+## Checks if a map is known to be cached
+##
+## @param map_id string map id
+## @returns boolean true if cached
 func _is_map_cached(map_id:String)->bool:
 	return cached_maps.has(map_id)
