@@ -23,7 +23,9 @@ lib/
 ### Server ###
 .cookie
 server/db/*
+*.log
 
 
 ### Misc ###
 .scannerwork
+*.swp
