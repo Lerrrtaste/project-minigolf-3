@@ -3,9 +3,9 @@ services:
   cockroachdb:
     image: cockroachdb/cockroach:latest-v20.2
     command: start-single-node --insecure --store=attrs=ssd,path=/var/lib/cockroach/
-    restart: always
+    restart: "no"
     volumes:
-      - ./db:/var/lib/cockroach
+      - data:/var/lib/cockroach
     expose:
       - "8080"
       - "26257"
@@ -19,20 +19,20 @@ services:
       - "-ecx"
       - >
         /nakama/nakama migrate up --database.address root@cockroachdb:26257 &&
-        exec /nakama/nakama --config /nakama/data/config.yml --database.address root@cockroachdb:26257 
-    restart: always
+        exec /nakama/nakama --name nakama1 --database.address root@cockroachdb:26257 --logger.level DEBUG --session.token_expiry_sec 7200 --metrics.prometheus_port 9100
+    restart: "no"
     links:
       - "cockroachdb:db"
     depends_on:
       - cockroachdb
       - prometheus
     volumes:
-      - ./data:/nakama/data
-#    expose:
-#      - "7349"
-#      - "7350"
-#      - "7351"
-#      - "9100"
+      - ./:/nakama/data
+    expose:
+      - "7349"
+      - "7350"
+      - "7351"
+      - "9100"
     ports:
       - "7349:7349"
       - "7350:7350"
@@ -64,22 +64,5 @@ services:
       EOF'
     ports:
       - '9090:9090'
-#  nginx:
-#    image: jonasal/nginx-certbot:latest
-#    environment:
-#      CERTBOT_EMAIL: "lerrrtaste+minigolf@protonmail.com"
-#    ports:
-#      - "80:80"
-#      - "443:443"
-#      - "7349:7349"
-#      - "7350:7350"
-#      - "7351:7351"
-#    volumes:
-#      - nginx_secrets:/etc/letsencrypt
-#      - ./nginx_conf.d:/etc/nginx/user_conf.d
-#    links:
-#      - nakama
-#    depends_on:
-#      - nakama
 volumes:
-  nginx_secrets: {}
+  data:

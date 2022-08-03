@@ -18,3 +18,12 @@ data_*/
 bin/
 build/
 lib/
+
+
+### Server ###
+.cookie
+server/db/*
+
+
+### Misc ###
+.scannerwork
