@@ -4,6 +4,7 @@ extends Node
 ##
 ## Interface to Nakama Collections via Networker
 ##
+## Functionality:
 ## - Loading
 ## - Saving existing mapobjext
 ## - Publishing new maps
@@ -34,6 +35,7 @@ func _ready():
 	# create folder if not exists
 	var dir = Directory.new()
 	if not dir.dir_exists(Global.MAP_CACHE_PATH):
+		Notifier.log_info("Cache Directory not found, creating at: " + Global.MAP_CACHE_PATH)
 		dir.make_dir_recursive(Global.MAP_CACHE_PATH)
 
 
@@ -43,6 +45,7 @@ func _ready():
 ## @param owner_id string ownerId (optional, only needed for public maps)
 ## @returns map_jstring
 func load_map_async(map_id:String, owner_id:String=""): # -> map_jstring
+	Notifier.log_verbose("Loading map id: " + map_id + " owner: " + owner_id)
 	var map_jstring = yield(_load_from_server_async(map_id,owner_id), "completed")
 	return map_jstring
 
@@ -53,8 +56,8 @@ func load_map_async(map_id:String, owner_id:String=""): # -> map_jstring
 ## @param map_jstring string serialized map object
 ## @returns ApiStorageObjectAck
 func save_map_async(map_id:String, map_jstring:String): # -> ApiStorageObjectAck/s
-	assert(not public) # use publish_map instead
-	var ack = yield(_save_to_server_async(map_id, map_jstring, public), "completed")
+	Notifier.log_verbose("Saving map id: " + map_id)
+	var ack = yield(_save_to_server_async(map_id, map_jstring, false), "completed")
 	return ack
 
 
@@ -63,6 +66,7 @@ func save_map_async(map_id:String, map_jstring:String): # -> ApiStorageObjectAck
 ## @param map_id string existing map id
 ## @returns ?
 func publish_map_async(map_id:String):
+	Notifier.log_verbose("Publishing map id: " + map_id)
 	return yield(Networker.rpc_call("publish_map", JSON.print({"map_id": map_id})), "completed")
 
 
@@ -70,7 +74,7 @@ func publish_map_async(map_id:String):
 ##
 ## @param map_id string existing map id
 func delete_map(map_id:String)->void:
-	#_delete_from_cache(map_id)
+	Notifier.log_verbose("Deleting map id: " + map_id)
 	_delete_from_server(map_id)
 
 
@@ -108,6 +112,7 @@ func list_public_maps_async()->Array: # ->
 
 
 
+##########################################################################################
 #### Internal
 
 ### Server
@@ -162,8 +167,8 @@ func _save_to_cache(map_id:String, map_jstring:String)->void:
 	file.close()
 	
 	print("Map ID %s succesfully cached to %s "%[map_id,Global.MAP_CACHE_PATH])
-	if not cached_maps.has(map_id):
-		cached_maps.append(map_id)
+	if not _cached_maps.has(map_id):
+		_cached_maps.append(map_id)
 
 
 ## Loads a map from cache, if cached
@@ -171,7 +176,7 @@ func _save_to_cache(map_id:String, map_jstring:String)->void:
 ## @param map_id string map id
 ## @returns String serialized map jstring (empty string if not cached)
 func _load_from_cache(map_id:String)->String: # -> map_jstring
-	if not cached_maps.has(map_id):
+	if not _cached_maps.has(map_id):
 		printerr("Trying to load nonexistent map from cache")
 		return ""
 
@@ -213,9 +218,9 @@ func _update_cached_maps():
 			map_files.append(file)
 	dir.list_dir_end()
 	
-	cached_maps.clear()
+	_cached_maps.clear()
 	for i in map_files:
-		cached_maps.append(i.split(".map")[0])
+		_cached_maps.append(i.split(".map")[0])
 
 
 ## Checks if a map is known to be cached
@@ -223,4 +228,4 @@ func _update_cached_maps():
 ## @param map_id string map id
 ## @returns boolean true if cached
 func _is_map_cached(map_id:String)->bool:
-	return cached_maps.has(map_id)
+	return _cached_maps.has(map_id)

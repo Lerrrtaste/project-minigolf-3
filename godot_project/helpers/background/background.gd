@@ -19,11 +19,11 @@ func _ready():
 
 func _process(delta):
 	_scroll_progress += SCROLL_SPEED * delta
-	bg1.position.x += SCROLL_SPEED * delta
-	bg2.position.x += SCROLL_SPEED * delta
+	_bg1.position.x += SCROLL_SPEED * delta
+	_bg2.position.x += SCROLL_SPEED * delta
 	
 	if _bg1.position.x >= _bg1.texture.get_width():
-		bg1.position.x = _bg2.position.x-bg1.texture.get_width()
+		_bg1.position.x = _bg2.position.x-_bg1.texture.get_width()
 		
 	if _bg2.position.x >= _bg2.texture.get_width():
-		bg2.position.x = _bg1.position.x-bg2.texture.get_width()
+		_bg2.position.x = _bg1.position.x-_bg2.texture.get_width()

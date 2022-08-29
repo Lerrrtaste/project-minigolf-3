@@ -1,22 +1,19 @@
 extends Node
 
-"""
-Networker Helper
+## Networker Helper
+##
+## Interface to Game Server
+## AutoLoad Singleton
 
-Interface to everything Nakama related
+var _client : NakamaClient
+var _session : NakamaSession
+var _socket : NakamaSocket
+var _matchmaker_ticket : NakamaRTAPI.MatchmakerTicket
 
-"""
+var _account : NakamaAPI.ApiAccount
 
-
-var client : NakamaClient
-var session : NakamaSession
-var socket : NakamaSocket 
-var matchmaker_ticket : NakamaRTAPI.MatchmakerTicket
-
-var account : NakamaAPI.ApiAccount
-
-var joined_match:NakamaRTAPI.Match
-var matched_match:NakamaRTAPI.MatchmakerMatched
+var _joined_match:NakamaRTAPI.Match
+var _matched_match:NakamaRTAPI.MatchmakerMatched
 
 signal socket_connected
 signal socket_connection_failed
@@ -30,7 +27,7 @@ signal authentication_failed(exception)
 
 signal match_join_failed
 signal match_joined(presences)
-signal match_presences_updated(joined_match)
+signal match_presences_updated(_joined_match)
 signal match_state(state)
 
 signal collection_write_success
@@ -48,171 +45,212 @@ enum WritePermissions {
 }
 
 
+#### General
+
 func _ready():
 	randomize()
 	reset()
 
 
-# Recreate client and clear session, socket and ticket
+## Reset everything
+##
+## Recreates _client and clear _session, _socket and _matchmaker_ticket
 func reset():
-	client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL, Global.NK_TIMEOUT, Global.NK_LOG_LEVEL)
-	session = null
-	socket = null
-	matchmaker_ticket = null
-	#Notifier.notify_debug("Networker reset")
+	_client = Nakama.create_client(Global.NK_KEY, Global.NK_ADDRESS, Global.NK_PORT, Global.NK_PROTOCOL, Global.NK_TIMEOUT, Global.NK_LOG_LEVEL)
+	_session = null
+	_socket = null
+	_matchmaker_ticket = null
+	Notifier.log_debug("networker was reset")
 
 
-# Call any rpc function (should not be called from outside)
-func rpc_call(rpc_id:String, payload = null):
-	return yield(client.rpc_async(session, rpc_id, payload), "completed")
+## Calls any rpc function
+##
+## @param rpc_id string the registered id of the rpc function
+## @param payload dict (optional) the payload to send to the rpc function
+func _rpc_call(rpc_id:String, payload = null):
+	return yield(_client.rpc_async(_session, rpc_id, payload), "completed")
 
 
-# Check NakamaAsyncResult and notify on exception
-# Returns true if no exception
+## Test and Log NakamaAsyncResult error
+##
+## Every public networker function should call this before doing anything else!
+##
+## Note: Can not log_console errors here because it is unknown if it can be recovered from an exception
+##       Log error in the caller function, if not!
+##
+## @param result NakamaAsyncResult the result to test
+## @param message string (optional) Notification Title if error
+## @return bool true if no exception
 func _check_result(result:NakamaAsyncResult, error_title:String="")->bool:
 	if result.is_exception():
-		Notifier.notify_debug("",result)
+		Notifier.log_debug("NakamaAsyncResult returned exception: " + str(result.get_exception()))
 		Notifier.notify_error("Error" if error_title=="" else error_title, result.get_exception().message)
 		return false
 	return true
 
 
+#### Authentication
 
-#### Authenticate
+## Create and login temporary guest account
+##
+## Temporary Accounts meant for onetime use by unregistered users
+## - CustomID is device_uuid, if available (otherwise random+unix timestamp)
+## - sets metadata "guest=true"
+## - (real) username is "guest_displayname_randomnumber"
+##
+## @param display_name string the display name of the account
+func login_guest_asnyc(display_name:String)->void: # -> NakamaAsyncResult (_Session or Update on error)
 
-# Create a new guest account
-func login_guest_asnyc(display_name:String)->void: # -> NakamaAsyncResult (Session or Update on error)
-	# create/login account with
-	# tries device uid, then random with unix time
-	# metadata guest = true
-	# display name = entered name
-	# username = guest_display-name_random-number
-	
+	# Abort if already logged in
 	if is_logged_in():
 		if not is_socket_connected():
-			socket_connect_async()
+			_socket_connect_async()
 			return
 		Notifier.notify_error("Error", "Already logged in")
-		return session
-	
+		return _session
+
+	# Create account w/ metadata
 	var custom_id = "guestid_os_%s" % ((OS.get_unix_time())%(randi()%19521982))
 	var username = "guest_%s_%s"%[display_name,randi()%89999+10000]
-	
-	session = yield(client.authenticate_custom_async(custom_id, username, true, {"guest": true}), "completed")
-	if not _check_result(session,"Account could not be created"):
-		emit_signal("authentication_failed",session.get_exception())
-		return session
-		
-	var update = yield(client.update_account_async(session, null, display_name), "completed")
+	_session = yield(_client.authenticate_custom_async(custom_id, username, true, {"guest": true}), "completed")
+	if not _check_result(_session,"Account could not be created"):
+		emit_signal("authentication_failed",_session.get_exception())
+		return _session
+
+	# Set display name and confirm login success
+	var update = yield(_client.update_account_async(_session, null, display_name), "completed")
 	if not _check_result(update,"Error during Account creation"):
 		emit_signal("authentication_failed",update.get_exception())
 		return update
-	
+
+	# Login successful
 	emit_signal("authentication_successful")
-	yield(socket_connect_async(), "completed")
-	return session
+	yield(_socket_connect_async(), "completed")
+	return _session
 
 
-# Login to email account
-func login_email_async(email:String, password:String): #-> NakamaSession
-	# login account with
-	# mail + pw
-	
+## Login to email account
+##
+## @param email string the email address of the account
+## @param password string the password of the account
+func login_email_async(email:String, password:String): #-> Nakama_Session
+
+	# Abort if already logged in
 	if is_logged_in():
 		if not is_socket_connected():
-			socket_connect_async()
+			_socket_connect_async()
 			return
 		Notifier.notify_error("Error", "Already logged in")
 		emit_signal("authentication_failed","")
-		return session
-	
-	session = yield(client.authenticate_email_async(email,password, null, false), "completed")
-	
-	if not _check_result(session, "Could not log in"):
-		emit_signal("authentication_failed", session.get_exception())
-		return session
-	
-	#worked
+		return _session
+
+	# Login
+	_session = yield(_client.authenticate_email_async(email,password, null, false), "completed")
+
+	# Confirm login success
+	if not _check_result(_session, "Could not log in"):
+		emit_signal("authentication_failed", _session.get_exception())
+		return _session
+
+	# Successful
 	Notifier.notify_info("Login success", "Connecting...")
 	emit_signal("authentication_successful")
-	yield(socket_connect_async(), "completed")
-	return session
+	yield(_socket_connect_async(), "completed")
+	return _session
 
 
-# Create email account
-func register_email_async(email:String, password:String, username:String): #-> NakamaSession
-	# login account with
-	# mail + pw
-	
+## Register email account
+##
+## @param email string
+## @param password string
+## @param username string
+func register_email_async(email:String, password:String, username:String): #-> Nakama_Session
+
+	# Abort if already logged in
 	if is_logged_in():
 		if not is_socket_connected():
-			socket_connect_async()
+			_socket_connect_async()
 			return
 		Notifier.notify_error("Error", "Already logged in")
-		return session
-	
-	session = yield(client.authenticate_email_async(email, password, username, true), "completed")
-	
-	if not _check_result(session,"Could not create account"):
-		emit_signal("authentication_failed",session.get_exception())
-		return session
-	
-	#worked
-	Notifier.notify_info("Account creation success")
+		return _session
+
+	# Register
+	_session = yield(_client.authenticate_email_async(email, password, username, true), "completed")
+
+	# Confirm register success
+	if not _check_result(_session,"Could not create _account"):
+		emit_signal("authentication_failed",_session.get_exception())
+		return _session
+
+	# Successful
+	Notifier.notify_info("_Account creation success")
 	emit_signal("authentication_successful")
-	yield(socket_connect_async(), "completed")
-	return session
+	yield(_socket_connect_async(), "completed")
+	return _session
 
 
 
-#### Socket
+#### _Socket
 
-# (Re)Connect socket (called automatically after successful auth 
-func socket_connect_async()->void: # -> NakamaAsyncResult
-	socket = Nakama.create_socket_from(client)
-	var connected : NakamaAsyncResult = yield(socket.connect_async(session), "completed")
+## Connect to socket from _client and connect signals
+##
+## Called automatically after successful authentication
+func _socket_connect_async()->void: # -> NakamaAsyncResult
+	# create socket
+	_socket = Nakama.create_socket_from(_client)
+
+	# abort if socket could not connect
+	var connected : NakamaAsyncResult = yield(_socket.connect_async(_session), "completed")
 	if not _check_result(connected,"Could not connect"):
 		emit_signal("socket_connection_failed")
-		return socket
+		return _socket
+
+	# get account info and store in _account
+	_account = yield(_client.get_account_async(_session),"completed")
 	
-	account = yield(client.get_account_async(session),"completed")
-	
-	# register socket events
-	socket.connect("received_matchmaker_matched", self, "_on_matchmaker_matched")
-	socket.connect("received_match_presence", self, "_on_match_presence")
-	socket.connect("received_match_state", self, "_on_match_state")
+	# register _socket events
+	_socket.connect("received_matchmaker_matched", self, "_on_matchmaker_matched") #warning-ignore:return_value_discarded
+	_socket.connect("received_match_presence", self, "_on_match_presence") #warning-ignore:return_value_discarded
+	_socket.connect("received_match_state", self, "_on_match_state") #warning-ignore:return_value_discarded
 	
 	emit_signal("socket_connected")
-	
-	return socket
+	return _socket
 
 
+## Get connection status of socket
+##
+## @return bool true if connected
 func is_socket_connected()->bool:
 	if !is_logged_in():
-		printerr("Not even logged in")
+		Notifier.log_warning("Testing socket while not even logged in")
 		return false
 	
-	if not socket is NakamaSocket:
+	if not _socket is NakamaSocket:
 		return false
 	
-	return socket.is_connected_to_host()
+	return _socket.is_connected_to_host()
 
 
 
-#### Accounts
+#### _Accounts
 
-# Fetch an array of accounts
+## Fetch an array of _accounts
+##
+##	Account Schema:
+##	{
+##		"custom_id": {"name": "_custom_id", "type": TYPE_STRING, "required": false},
+##		"devices": {"name": "_devices", "type": TYPE_ARRAY, "required": false, "content": "Api_AccountDevice"},
+##		"disable_time": {"name": "_disable_time", "type": TYPE_STRING, "required": false},
+##		"email": {"name": "_email", "type": TYPE_STRING, "required": false},
+##		"user": {"name": "_user", "type": "ApiUser", "required": false},
+##		"verify_time": {"name": "_verify_time", "type": TYPE_STRING, "required": false},
+##		"wallet": {"name": "_wallet", "type": TYPE_STRING, "required": false},
+##	}
+##
+## @param ids array of user_ids
+## @return array of accounts with above schema
 func fetch_accounts_async(user_ids:Array): # -> Account Array
-#	Account schmea = {
-#		"custom_id": {"name": "_custom_id", "type": TYPE_STRING, "required": false},
-#		"devices": {"name": "_devices", "type": TYPE_ARRAY, "required": false, "content": "ApiAccountDevice"},
-#		"disable_time": {"name": "_disable_time", "type": TYPE_STRING, "required": false},
-#		"email": {"name": "_email", "type": TYPE_STRING, "required": false},
-#		"user": {"name": "_user", "type": "ApiUser", "required": false},
-#		"verify_time": {"name": "_verify_time", "type": TYPE_STRING, "required": false},
-#		"wallet": {"name": "_wallet", "type": TYPE_STRING, "required": false},
-#	}
-	var result : NakamaAPI.ApiUsers = yield(client.get_users_async(session, user_ids), "completed")
+	var result : NakamaAPI.ApiUsers = yield(_client.get_users_async(_session, user_ids), "completed")
 	
 	if not _check_result(result):
 		return result
@@ -223,22 +261,29 @@ func fetch_accounts_async(user_ids:Array): # -> Account Array
 
 #### Matchmaking
 
-# Start Matchmaking 
-# Map Pool # [{map_id:, creator_id:}, ...]
+## Start Matchmaking
+##
+## Requires a map pool selection (will change soon)
+##
+## Map Pool # [{map_id:, creator_id:}, ...]
 func matchmaking_start_async(map_pool:Array)->void: # -> NakamaRTAPI.MatchmakerTicket
+
+	# Abort if not connected
 	if !is_socket_connected():
 		printerr("Not connected")
 		return
-		
+
+	# Abort if already in matchmaking
 	if is_in_matchmaking():
 		Notifier.notify_error("Error", "You are already in Matchmaking")
 		return
-	
+
+	# Build query
 	var query = ""
 	var min_count = 2
 	var max_count = 2
 	var string_properties = {}
-	
+
 	for i in range(map_pool.size()):
 		#query += "properties./[0-9]{1,}_map_id/:%s "%str(map_pool[i].map_id)
 		query += "map_%s " % str(map_pool[i].map_id)
@@ -246,39 +291,49 @@ func matchmaking_start_async(map_pool:Array)->void: # -> NakamaRTAPI.MatchmakerT
 		#map 2d array to 1d 
 		string_properties["map_pool_%s"%(2 * i + 0)] = "map_%s"%map_pool[i].map_id
 		string_properties["map_pool_%s"%(2 * i + 1)] = "creator_%s"%map_pool[i].creator_id
-		
-	
+
 	var numeric_properties = { # broken atm
 		
 	} 
-	
-	matchmaker_ticket = yield(
-	  socket.add_matchmaker_async(query, min_count, max_count, string_properties, numeric_properties),
+
+	# Send Query
+	_matchmaker_ticket = yield(
+	  _socket.add_matchmaker_async(query, min_count, max_count, string_properties, numeric_properties),
 	  "completed"
 	)
-	if matchmaker_ticket.is_exception():
-		Notifier.notify_debug("Error", matchmaker_ticket)
-		Notifier.notify_error("Error", matchmaker_ticket.message)
-		return matchmaker_ticket
-	
+
+	# Confirm matchmaking start success
+	if not _check_result(_matchmaker_ticket,"Could not start matchmaking"):
+		Notifier.notify_debug("Error", _matchmaker_ticket)
+		Notifier.notify_error("Error", _matchmaker_ticket.message)
+		return _matchmaker_ticket
+
+	# Successful
 	Notifier.notify_info("Matchmaking started")
 	emit_signal("matchmaking_started")
-	return matchmaker_ticket
+	return _matchmaker_ticket
 
 
-# Cancel current Matchmaker Ticket
+## Cancel Matchmaking
 func matchmaking_cancel_async()->void:
+
+	# Abort if not currently in matchmaking
 	if not is_in_matchmaking():
 		Notifier.notify_error("Not in matchmaking","Cant cancel")
 		return
-	
-	var removed : NakamaAsyncResult = yield(socket.remove_matchmaker_async(matchmaker_ticket.ticket), "completed")
-	if removed.is_exception():
-		Notifier.notify_debug("cancel matchmaking", matchmaker_ticket)
-		Notifier.notify_error("Error", matchmaker_ticket.message)
+
+	# Send query
+	var removed : NakamaAsyncResult = yield(_socket.remove_matchmaker_async(_matchmaker_ticket.ticket), "completed")
+
+	#Confirm cancel success
+	if not _check_result(removed,"Could not cancel matchmaking"):
+		Notifier.notify_debug("cancel matchmaking", _matchmaker_ticket)
+		Notifier.notify_error("Error", _matchmaker_ticket.message)
 		return removed
 
-	matchmaker_ticket = null
+	# successful
+	_matchmaker_ticket = null
+	Notifier.notify_info("Matchmaking cancelled")
 	emit_signal("matchmaking_ended")
 	return removed
 
@@ -286,105 +341,205 @@ func matchmaking_cancel_async()->void:
 
 #### Matches
 
-# Join a Match with Matchmaker Token
+## Join a Match via Matchmaker Token
+##
+## @param matchmaker_token
 func match_join_async(matchmaker_token)->void: #-> AsyncResult
-	joined_match = yield(socket.join_matched_async(matchmaker_token), "completed")
-	if joined_match.is_exception():
-		Notifier.notify_debug(joined_match)
-		Notifier.notify_error("Could not join match", joined_match.message)
-		joined_match = null
-		return joined_match
-	
-	matchmaker_ticket = null
-	emit_signal("match_joined",joined_match)
-	return joined_match
+	# Abort if not connected
+	if !is_socket_connected():
+		Notifier.notify_error("Connection Error","Cant join match")
+		return
+
+	# send query
+	_joined_match = yield(_socket.join_matched_async(matchmaker_token), "completed")
+
+	# confirm join success
+	if _joined_match.is_exception():
+		Notifier.notify_debug(_joined_match)
+		Notifier.notify_error("Could not join match", _joined_match.message)
+		_joined_match = null
+		return _joined_match
+
+	# successful
+	_matchmaker_ticket = null
+	emit_signal("match_joined",_joined_match)
+	return _joined_match
 
 
-# Send Match state
+## Send Match state
+##
+## Default message for the match handler
+## TODO handle exceptions (idk if necessary)
+##
+## @param op_code int message op code
+## @param new_state string (optional)
 func match_send_state_async(op_code:int,new_state=""):
+
+	# abort if not in a match
 	if not is_in_match():
 		Notifier.notify_error("Not in a match")
 		return
-	
-	var result = yield(socket.send_match_state_async(joined_match.match_id, op_code, JSON.print(new_state)), "completed")
-	_check_result(result)
+
+	# send query
+	var result = yield(_socket.send_match_state_async(_joined_match.match_id, op_code, JSON.print(new_state)), "completed")
+
+	# confirm send success
+	if result.is_exception():
+		Notifier.log_error(result.message)
+		return result
+
+	# successful
 	return result
 
 
-# Gracefully leave the current match
+## Gracefully leave the current match
 func match_leave():
+
+	# abort if not in a match
 	if not is_in_match():
 		Notifier.notify_error("Not in any match, cant leave")
 		return
-	
-	yield(socket.leave_match_async(joined_match.match_id), "completed")
+
+	# send query
+	var response = yield(_socket.leave_match_async(_joined_match.match_id), "completed")
+
+	# confirm leave success
+	if not _check_result(response,"Could not leave match"):
+		Notifier.log_error(response.message)
+		return response
+
+	#successful
 	Notifier.notify_info("Left the match")
 
 
 
 #### Collections
 
-# Write to collection
+## Write key value pair to a collection
+##
+## @param collection string
+## @param key string
+## @param value string
+## @param public_read bool true to publish something
 func collection_write_object_async(collection:String, key:String, value:String, public_read:bool): # -> ApiStorageObjectAck/s
+
+	# abort if not logged in
 	if not is_logged_in():
-		printerr("Cant save to collection, NOT LOGGED IN")
+		Notifier.notify_error("Cant save to collection","NOT LOGGED IN")
 		return
-	
+
+	# send query
 	var can_read =  ReadPermissions.PUBLIC if public_read else ReadPermissions.OWNER
 	var can_write = WritePermissions.OWNER
-	var acks : NakamaAPI.ApiStorageObjectAcks = yield(client.write_storage_objects_async(session, [
+	var acks : NakamaAPI.ApiStorageObjectAcks = yield(_client.write_storage_objects_async(_session, [
 		NakamaWriteStorageObject.new(collection, key, can_read, can_write, value, "")
 	]), "completed")
-	
+
+	# handle exceptions
 	if not _check_result(acks, "Could not write to Storage"):
+		Notifier.log_error("Writing failed")
 		emit_signal("collection_write_failed")
 		return acks
-	
+
+	# success
 	emit_signal("collection_write_success")
 	return acks.acks[0]
 
 
-# Read single object from collection
-func collection_read_object_async(collection:String, key:String, user_id:String = session.user_id): # -> ApiStorageObject
-	var result : NakamaAPI.ApiStorageObjects = yield(client.read_storage_objects_async(session, [
+## Read single object from collection by key
+##
+## @param collection string
+## @param key string
+## @param user_id string (optional, defaults to logged in user)
+func collection_read_object_async(collection:String, key:String, user_id:String = _session.user_id): # -> ApiStorageObject
+
+	# abort if not logged in
+	if not is_logged_in():
+		Notifier.notify_error("Cant read from collection","NOT LOGGED IN")
+		return
+
+	# send query
+	var result : NakamaAPI.ApiStorageObjects = yield(_client.read_storage_objects_async(_session, [
 	NakamaStorageObjectId.new(collection, key, user_id)
 	]), "completed")
-	
+
+	# handle exceptions
 	if not _check_result(result, "Could not read from Storage"):
+		Notifier.notify_error("Could not download object", result.message)
 		return result
 		
 	return result.objects[0]
 
 
-# Remove single object from collection
+## Remove single object from collection by key
+##
+## @param collection string
+## @param key string
 func collection_remove_object_asnyc(collection:String,key:String): # -> NakamaAsyncResult
-	var del : NakamaAsyncResult = yield(client.delete_storage_objects_async(session, [
+	# abort if not logged in
+	if not is_logged_in():
+		Notifier.notify_error("Cant remove from collection","NOT LOGGED IN")
+		return
+
+	# send query
+	var del : NakamaAsyncResult = yield(_client.delete_storage_objects_async(_session, [
 		NakamaStorageObjectId.new(collection, key)
 	]), "completed")
-	
-	_check_result(del, "Could not delete")
+
+	# handle exceptions
+	if not _check_result(del, "Could not remove from Storage"):
+		Notifier.notify_error("Could not remove object", del.message)
+		return del
+
+	# success
 	return del
 
 
-# List the first 100 owned objects in collection 
+## List the first 100 owned objects in collection
+##
+## TODO implement paging
+##
+## @param collection string
 func collection_list_owned_objects_async(collection:String)->Array: # -> Array : ApiStorageObject
 	# "objects" has cursor (for paging later)
+
+	# abort if not logged in
+	if not is_logged_in():
+		Notifier.notify_error("Cant list collection","NOT LOGGED IN")
+		return
+
+	# send query
 	var limit = 100 # default is 10.
-	var objects : NakamaAPI.ApiStorageObjectList = yield(client.list_storage_objects_async(session, collection, session.user_id, limit), "completed")
-	
+	var objects : NakamaAPI.ApiStorageObjectList = yield(_client.list_storage_objects_async(_session, collection, _session.user_id, limit), "completed")
+
+	# handle exceptions
 	if not _check_result(objects):
+		Notifier.log_error("Could not list collection: " + objects.message)
 		return objects
 		
 	return objects.objects
 
 
-# List the first 100 public objects
+## List the first 100 public objects
+##
+## TODO implement paging
+##
+## @param collection string
 func collection_list_public_objects_async(collection:String)->Array: # -> Array : ApiStorageObject
-	# "objects" has cursor (for paging later) 
+	# "objects" has cursor (for paging later)
+
+	# abort if not logged in
+	if not is_logged_in():
+		Notifier.notify_error("Cant list collection","NOT LOGGED IN")
+		return
+
+	# send query
 	var limit = 100 # default is 10.
-	var objects : NakamaAPI.ApiStorageObjectList = yield(client.list_storage_objects_async(session, collection, "", limit), "completed")
-	
+	var objects : NakamaAPI.ApiStorageObjectList = yield(_client.list_storage_objects_async(_session, collection, "", limit), "completed")
+
+	# handle exceptions
 	if not _check_result(objects):
+		Notifier.log_error("Could not list collection: " + objects.message)
 		return objects
 	
 	# filter for public objects
@@ -401,30 +556,30 @@ func collection_list_public_objects_async(collection:String)->Array: # -> Array 
 
 # Get own user _id
 func get_user_id()->String:
-	return session.user_id
+	return _session.user_id
 
 
 # Get own username (or display name if param)
 func get_username(prefer_display_name:bool = false)->String:
-	if prefer_display_name and account.user.display_name != "":
-		return account.user.display_name
-	return session.username
+	if prefer_display_name and _account.user.display_name != "":
+		return _account.user.display_name
+	return _session.username
 
 
 # Get own guest status
 func is_guest()->bool:
-	if not session.vars.has("guest"):
+	if not _session.vars.has("guest"):
 		return false
 		
-	return session.vars["guest"]
+	return _session.vars["guest"]
 
 
-# Check if Session is valid
+# Check if _Session is valid
 func is_logged_in()->bool:
-	if not session is NakamaSession:
+	if not _session is NakamaSession:
 		return false
 	
-	if not session.is_valid():
+	if not _session.is_valid():
 		return false
 	
 	return true
@@ -432,7 +587,7 @@ func is_logged_in()->bool:
 
 # Check if a matchmaker ticket exists
 func is_in_matchmaking()->bool:
-	if matchmaker_ticket is NakamaRTAPI.MatchmakerTicket:
+	if _matchmaker_ticket is NakamaRTAPI.MatchmakerTicket:
 		return true
 	
 	return false
@@ -440,7 +595,7 @@ func is_in_matchmaking()->bool:
 
 # Check if a match exists
 func is_in_match()->bool:
-	if joined_match is NakamaRTAPI.Match:
+	if _joined_match is NakamaRTAPI.Match:
 		return true
 	
 	return false
@@ -452,7 +607,7 @@ func is_in_match()->bool:
 # Forwards to matchmaking_matched signal
 func _on_matchmaker_matched(matched : NakamaRTAPI.MatchmakerMatched):
 	Notifier.notify_info("Matchmaker found a Match")
-	matched_match = matched
+	_matched_match = matched
 	emit_signal("matchmaking_matched", matched)
 
 
