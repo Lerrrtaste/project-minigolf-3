@@ -4,11 +4,11 @@ extends Node
 #### Game ####
 const GAME_VERSION = "0.0.5"
 enum LogLevel {
-	DEBUG, # includes full stack trace
-	VERBOSE, # includes calling function
-	INFO,
-	WARNING,
-	ERROR,
+	DEBUG, # Everything irrelevant (includes full stack trace(not yet))
+	VERBOSE, # Everything possibly relevant (includes calling scene)
+	INFO, # Not an error, but something to be aware of
+	WARNING, # Things that went wrong, but allow the game to continue
+	ERROR, # Fatal Errors
 	NONE,
 }
 const LOG_LEVEL = LogLevel.DEBUG
