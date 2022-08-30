@@ -1,19 +1,16 @@
 extends Node2D
 
-"""
-The actual map editor
-
-Parameters:
-	- load_map_id:string or created_new = true
-	- verified:bool, optional
-
-Uses socket
-
-Exits to
-- MatchPractice with verifying = true
-- EditorMenu
-
-"""
+## The actual map editor
+##
+## Parameters:
+## 	- load_map_id:string or created_new = true
+## 	- verified:bool, optional
+##
+## Uses socket
+##
+## Exits to
+## - MatchPractice with verifying = true
+## - EditorMenu
 
 onready var map = get_node("Map")
 
@@ -340,8 +337,7 @@ func save_map_async():
 	
 	# export map
 	var map_jstring = map.serialize()
-	var public = false # menu_check_public.pressed
-	var ack = yield(MapStorage.save_map_async(map_id, map_jstring,public), "completed")
+	var ack = yield(MapStorage.save_map_async(map_id, map_jstring), "completed")
 	if ack.is_exception():
 		#Notifier.notify_error("ERROR: Map saving failed", str(ack.message))
 		menu_btn_save.disabled = false
@@ -359,7 +355,6 @@ func _tilemap_set_line(tilemap, start_world:Vector2, end_world:Vector2, tile:int
 	var from_cell = tilemap.world_to_map(start_world)
 	var to_cell = tilemap.world_to_map(end_world)
 	var line_vec = to_cell - from_cell
-	var prog = Vector2()
 	for i in range(line_vec.length()+1):
 		if tilemap.has_method("editor_tile_change"):
 			print(from_cell + i * (line_vec/line_vec.length()))
@@ -372,6 +367,7 @@ func _tilemap_set_line(tilemap, start_world:Vector2, end_world:Vector2, tile:int
 
 # Set cells using a flood fill algorithm
 # needs the actual Map scene
+# TODO rename parameter map (shadows actual map)
 func _tilemap_set_flood(map, from_world:Vector2, tile:int):
 	var from_cell = map.world_to_map(from_world)
 	var x = from_cell.x

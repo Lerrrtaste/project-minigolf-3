@@ -19,6 +19,12 @@ signal practice(map_id, creator_id)
 
 const PLAYERS_REFRESH_INTERVAL_SEC = -1#15 #-1 to disable
 
+## A Card with basic map info
+##
+## Supposed for selecting maps and exploring
+## Can start practice match and add to map pool
+
+
 func _ready():
 	#visible = false 
 	
@@ -27,9 +33,6 @@ func _ready():
 	
 	#refresh_player_count()
 	
-func _process(delta):
-	pass
-
 func populate(_map_name:String, _map_id:String, _creator_id:String, _creator_name:String):
 	lbl_name.text = _map_name
 	lbl_creator.text = _creator_name
