@@ -99,12 +99,14 @@ func list_public_maps_async()->Array: # ->
 	
 	var public_maps:Array
 	for i in result:
-		var metadata_dict = JSON.parse(i.value).result["metadata"]
+		var mapdict = JSON.parse(i.value).result
+		var metadata_dict = mapdict["metadata"]
 		var entry = {
 			"map_id": i.key,
 			"creator_id": i.user_id,
 			"creator_name": metadata_dict["creator_display_name"] if metadata_dict.has("creator_display_name") else "N/A",
-			"name": metadata_dict["name"], 
+			"name": metadata_dict["name"],
+			"game_version": mapdict["game_version"]
 			}
 		public_maps.append(entry)
 	

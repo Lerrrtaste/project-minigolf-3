@@ -54,10 +54,11 @@ func refresh_map_selection():
 		var creator_name = i.creator_name
 		var map_id = i.map_id
 		var creator_id = i.creator_id
-		
+		var game_version = i.game_version
+
 		var inst = MapCard.instance()
 		box_map_cards.add_child(inst)
-		inst.populate(map_name, map_id, creator_id, creator_name)
+		inst.populate(map_name, map_id, creator_id, creator_name, game_version)
 		inst.connect("practice", self, "_on_MapCard_practice")
 		
 		map_cards.append(inst)
