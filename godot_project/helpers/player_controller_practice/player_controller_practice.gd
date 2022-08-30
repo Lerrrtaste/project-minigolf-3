@@ -39,6 +39,7 @@ func activate(): # required
 	if active:
 		Notifier.log_warning("Local Player Controller was already active!")
 	active = true
+	Notifier.log_verbose("PC activated")
 
 
 ## Draw force preview line

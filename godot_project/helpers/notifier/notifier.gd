@@ -118,11 +118,14 @@ func _log_console(level:int, message):
 	# Push to Godots Debugger if error or warning
 	if level >= Global.LogLevel.ERROR:
 		push_error(log_string)
-	elif level >= Global.LogLevel.WARNING:
+		printerr(log_string)
+		return
+
+	if level >= Global.LogLevel.WARNING:
 		push_warning(log_string)
-	else:
-		# Print to Console
-		print(log_string)
+
+	# Print to Console
+	print(log_string)
 
 	# Show Ingame Notification if DEBUGGING (FIXME dont if console_log is called by a notification)
 	# if Global.DEBUGGING:
@@ -141,7 +144,9 @@ func _spawn_notification(panel_texture:Texture, title, message, duration:float):
 	title = str(title)
 	message = str(message)
 
+	# also print to console
 	log_verbose("Notification: "+title+" - "+message)
+
 	var inst = Notification.instance()
 	#inst.get_stylebox("panel").set_texture(panel_texture)
 	var stylebox = inst.get_stylebox("panel").duplicate()
