@@ -1,22 +1,19 @@
 extends KinematicBody2D
 
-"""
-Ball
-
-Has Physics for Ball Movement
-Needs a map ref to use tile properties
-
-To activate call turn_ready()
-
-Needs PlayerController before entering tree with setup_playercontroller 
-Playercontrollers need:
-	- signal impact(pos) # required
-	- signal sync_position(pos) # required
-	- const LOCAL = true # required
-	- var active := false # required (ball is awaiting impact)
-	- func activate()
-
-"""
+## Ball
+##
+## Has Physics for Ball Movement
+## Needs a map reference to use tile properties
+##
+## To activate call turn_ready()
+##
+## Needs PlayerController before entering tree with setup_playercontroller
+## Playercontrollers need:
+## 	- signal impact(pos) # required
+## 	- signal sync_position(pos) # required
+## 	- const LOCAL = true # required
+## 	- var active := false # required (ball is awaiting impact)
+## 	- func activate()
 
 onready var lbl_player_name = get_node("LblPlayerName")
 onready var spr_arrow = get_node("SprArrow")
@@ -58,7 +55,7 @@ signal reached_finish(user_id)
 
 func _ready():
 	if not is_instance_valid(connected_pc):
-		Notifier.notify_error("Ball without PC entered Tree", "Please report")
+		Notifier.log_error("Ball without PC entered Tree")
 		return
 	
 	# name tag
@@ -70,11 +67,10 @@ func _ready():
 	connected_pc.position  = center_pos.position
 
 
-func _process(delta):
+func _physics_process(delta):
+	# show arrow if at turn
 	spr_arrow.visible = my_turn
 
-
-func _physics_process(delta):
 	# update cell properties
 	if speed > 0:
 		var _cell = map.world_to_map(_get("position"))
@@ -86,17 +82,19 @@ func _physics_process(delta):
 	if speed > 0:  # seperate because update_tile_properties can change speed (if ball resets)
 		apply_tile_properties(delta)
 		move_step(direction * speed, delta)
-	
+
+	# collision shape needs to be disabled for overlapping balls at spawn
 	if shape_body.disabled and total_distance > 10:
-		shape_body.disabled = false 
+		shape_body.disabled = false
+		Notifier.log_verbose("Ball has enabled collision shape")
 
 
 #### Match
 
-# Creates and configures the given player controller (call before entering tree)
+## Creates and configures the given player controller (call before entering tree)
 func setup_playercontroller(pc_scene:PackedScene,account=null)->void:
 	if is_instance_valid(connected_pc):
-		printerr("Ball is already controlled")
+		Notifier.log_warning("Cant setup palyercontroller: Ball is already controlled. Aborting")
 		return
 	
 	# Player Controller
@@ -114,19 +112,23 @@ func setup_playercontroller(pc_scene:PackedScene,account=null)->void:
 	else:
 		display_name = account.username
 	
-	#  pc signals
+	# pc signals
 	new_pc.connect("impact",self,"_on_PlayerController_impact")
 	new_pc.connect("sync_position", self, "_on_PlayerController_sync_position")
 
+	Notifier.log_debug("PC has been setup: " + new_pc.get_name())
 
-# called by match when this balls turn
+
+## Call if this ball is at turn
+##
+## Called by matches
 func turn_ready():
 	if my_turn:
-		Notifier.notify_error("It was already this balls turn")
+		Notifier.log_warning("It was already this balls turn")
 		return
 	
 	if connected_pc.active:
-		Notifier.notify_error("PlayerController was already active")
+		Notifier.log_warning("PlayerController was already active")
 	
 	while speed > 0:
 		yield(get_tree().create_timer(0.25),"timeout")
@@ -135,31 +137,40 @@ func turn_ready():
 	my_turn = true
 
 
-# called by finished_moving callback if it was this balls turn
+## called by finished_moving callback if it was this balls turn
 func turn_complete():
 	assert(my_turn)
 	assert(not connected_pc.active)
 	my_turn = false
+	Notifier.log_debug("Turn completed")
 	emit_signal("turn_completed", connected_pc.LOCAL)
 
 
-# called by finish map object
+## Disable collision and turns for the remainder of the match
+##
+## called by finish map object
 func reached_finish():
 	finished = true
 	shape_body.set_deferred("disabled", true)
 	
 	if connected_pc.LOCAL:
+		Notifier.log_verbose("reached the finish, broadcasting")
 		emit_signal("reached_finish",_get("position"))
+	else:
+		Notifier.log_verbose("reached finish (not broadcasting, pc is not local)")
 	
 	finish_moving()
 
 
 func player_left():
+	# The server handles skipping his turns if the player leaves
+	Notifier.notify_game("Player " + lbl_player_name.text + " left the game")
 	lbl_player_name.text += " (left)" 
 
 
 #### Movement
 
+## Move ball
 func move_step(movement,delta):
 	total_distance += movement.length() * delta
 	
@@ -178,14 +189,17 @@ func move_step(movement,delta):
 		finish_moving()
 
 
+## Collision occured
 func _handle_collision(collision:KinematicCollision2D):
+	Notifier.notify_debug("Collision: " + get_name() + " with " + collision.collider.get_name())
 	
 	if collision_blacklist.has(collision.collider):
+		Notifier.log_debug("Collision occured but was blacklisted")
 		return
 		
 	# ball to ball collision
 	if collision.collider is KinematicBody2D: # atm only balls are kinematic bodies
-		print("ball %s colliding with %s"%[self,collision.collider])
+		Notifier.log_debug("ball collision detected: %s colliding with %s"%[self,collision.collider])
 
 		var coll:Vector2 = _get("position") - collision.collider.position
 		var distance:float = coll.length()
@@ -198,9 +212,9 @@ func _handle_collision(collision:KinematicCollision2D):
 		var bcf = aci
 
 		var new_local_vel = (acf - aci) * coll 
-		print("NewLocalVel: %s"%new_local_vel)
+		# print("NewLocalVel: %s"%new_local_vel)
 		var new_collider_vel = (bcf - bci) * coll
-		print("NewRemoteVel: %s"%new_collider_vel)
+		# print("NewRemoteVel: %s"%new_collider_vel)
 		
 		direction = isometric_normalize(new_local_vel)
 		speed = new_local_vel.length() * 0.9
@@ -210,9 +224,10 @@ func _handle_collision(collision:KinematicCollision2D):
 		return
 	
 	#wall collision
+	Notifier.log_debug("wall collision detected: %s colliding with %s"%[self,collision.collider])
 	var coll_pos_delta = collision.position - _get("position")
 	#var collision_normal = coll_pos_delta.normalized()
-	var wall_tile_id = map.get_tile_id_at(collision.position - collision.normal*5) # approximation (could fail)
+	#var wall_tile_id = map.get_tile_id_at(collision.position - collision.normal*5) # approximation (could fail)
 	
 	
 	
@@ -245,8 +260,11 @@ func _handle_collision(collision:KinematicCollision2D):
 	speed *=  0.9 * (bounce if bounce_count < BOUNCE_LIMIT else 1.0)
 
 
+## Handle a collision with a another moving KinematicBody
+##
+## Called by colliding ball
 func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
-	# called by colliding ball
+	Notifier.log_debug("Collision impact called by colliding ball: %s colliding with %s"%[self,sender])
 	collision_blacklist.append(sender)
 	starting_position = _get("position")
 	#assert(_impact.length() <= 1.01) #length not longer than 1 (accounting for rounding error)
@@ -255,6 +273,7 @@ func collision_impact(new_velocity:Vector2, sender:KinematicBody2D):
 
 
 func finish_moving():
+	Notifier.log_debug("Finished moving")
 	speed = 0
 	bounce_count = 0
 	if connected_pc.LOCAL and connected_pc.has_method("send_sync_position"):
@@ -275,6 +294,7 @@ func update_tile_properties():
 		_set("position",starting_position)
 		# TODO play respawn animation
 		finish_moving()
+		Notifier.notify_debug("Ball was reset because of tile property resets_ball")
 		
 	if map.get_tile_property(_get("position"), "resets_ball_to_start"):
 		shape_body.disabled = true
@@ -282,6 +302,7 @@ func update_tile_properties():
 		_set("position",map.match_get_starting_position())
 		# TODO play respawn animation
 		finish_moving()
+		Notifier.log_debug("Ball was reset to start because of tile property resets_ball_to_start")
 	
 	var allowed_direction = map.get_tile_property(_get("position"), "allowed_direction")
 	if allowed_direction and not oneway_override_active:
@@ -289,14 +310,14 @@ func update_tile_properties():
 			# entered oneway tile in the right direction
 			set_collision_mask_bit(3, false)
 			oneway_override_active = true
+			Notifier.log_debug("Overriding oneway collision, enterd in allowed direction")
 	elif not allowed_direction and oneway_override_active:
 		# exited oneway wall
 		set_collision_mask_bit(3, true)
 		oneway_override_active = false
+		Notifier.log_debug("Activating oneway collision, direction not allowed")
 #
-		
-	
-	tile_force = map.get_tile_property(_get("position"), "force") 
+	tile_force = map.get_tile_property(_get("position"), "force")
 	tile_force_direction = map.get_tile_property(_get("position"), "force_direction")
 	tile_friction_modifier = map.get_tile_property(_get("position"),"friction")
 
@@ -351,9 +372,9 @@ func reflect_vector(vector:Vector2, normal:Vector2)->Vector2:
 	return vector - 2 * vector.dot(normal) * normal
 
 
-func isometric_normalize(direction:Vector2)->Vector2:
-	direction = direction.normalized()
-	return direction * Vector2(1,0.5)
+func isometric_normalize(_direction:Vector2)->Vector2:
+	_direction = _direction.normalized()
+	return _direction * Vector2(1,0.5)
 
 
 # Override _get/_set to fake y position (needed for ysort)
