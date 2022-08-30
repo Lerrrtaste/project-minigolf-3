@@ -1,12 +1,10 @@
 extends Node2D
 
-"""
-Practice Player Controller
-For offline Matches
+## Practice Player Controller
+##
+## For offline singlplayer Matches
 
-"""
-
-# expected interface by ball
+## Ball interface (required) TODO change to not be dependent on this
 signal impact(pos) # required
 signal sync_position(pos) # required
 const LOCAL = true # required
@@ -19,7 +17,7 @@ const MAX_SPEED_DISTANCE = 100.0  # mouse distance till full force
 func _process(delta):
 	update()
 
-
+## Process input
 func _unhandled_input(event):
 	if event is InputEventMouse:
 		if event.button_mask == BUTTON_MASK_LEFT and event.is_pressed():
@@ -34,12 +32,16 @@ func _unhandled_input(event):
 				emit_signal("impact", impact)
 
 
+## Another move is ready
+##
+## Will be activated when ball stops moving
 func activate(): # required
 	if active:
-		printerr("Local Player Controller was already active!")
+		Notifier.log_warning("Local Player Controller was already active!")
 	active = true
 
 
+## Draw force preview line
 func _draw():
 	if active:
 		var dist = min(get_local_mouse_position().length(), MAX_SPEED_DISTANCE)
