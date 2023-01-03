@@ -224,7 +224,6 @@ func _update_cached_maps():
 	for i in map_files:
 		_cached_maps.append(i.split(".map")[0])
 
-
 ## Checks if a map is known to be cached
 ##
 ## @param map_id string map id

@@ -232,7 +232,7 @@ func is_socket_connected()->bool:
 
 
 
-#### _Accounts
+#### Accounts
 
 ## Fetch an array of _accounts
 ##
@@ -249,7 +249,7 @@ func is_socket_connected()->bool:
 ##
 ## @param ids array of user_ids
 ## @return array of accounts with above schema
-func fetch_accounts_async(user_ids:Array): # -> Account Array
+func get_accounts_async(user_ids:Array): # -> Account Array
 	var result : NakamaAPI.ApiUsers = yield(_client.get_users_async(_session, user_ids), "completed")
 	
 	if not _check_result(result):

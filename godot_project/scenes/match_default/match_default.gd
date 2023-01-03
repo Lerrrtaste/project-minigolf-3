@@ -140,7 +140,7 @@ func load_map(map_id:String, map_owner_id:String="")->void:
 
 
 func get_accounts_async(expected_user_ids:Array):
-	return yield(Networker.fetch_accounts_async(expected_user_ids), "completed")
+	return yield(Networker.get_accounts_async(expected_user_ids), "completed")
 
 
 func update_ui():
@@ -165,7 +165,6 @@ func update_ui():
 				text += "\t%s:\t%s\n" % [display_name,turn_count_local[i]]
 	
 	text_score.bbcode_text = text
-
 
 func next_turn(user_id:String):
 	if current_turn_user != "": # no prev player in the first round

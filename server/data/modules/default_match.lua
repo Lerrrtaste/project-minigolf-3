@@ -84,7 +84,6 @@ function match_handler.match_join(context, dispatcher, tick, state, presences)
     return state
 end
 
-
 function match_handler.match_leave(context, dispatcher, tick, state, presences)
     -- set players joined to false
     -- broadcasts PLAYER_LEFT to all
@@ -119,7 +118,6 @@ function match_handler.match_leave(context, dispatcher, tick, state, presences)
 
     return state
     end
-
 
 function match_handler.match_loop(context, dispatcher, tick, state, messages)
         -- Messages format:
