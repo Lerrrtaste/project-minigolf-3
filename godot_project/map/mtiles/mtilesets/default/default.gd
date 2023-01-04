@@ -15,15 +15,19 @@ func _init():
 	for i in MTiles.values():
 		_MTILES_PROPERTIES[i]["tilemap_id"] = tileset.find_tile_by_name(_MTILES_PROPERTIES[i]["tname"])
 
+
 # Get MTileData object for given mtile id
 func get_mtile_data(mtile_id:int)->MTileData:
 	return MTileData.new(mtile_id, _MTILES_PROPERTIES[mtile_id])
+
 
 # Get the TileSet Resource to be used in the TileMap
 func get_mtileset_tilemap()->TileSet:
 	return load(TILESET_RES_PATH) as TileSet
 
-# Data
+
+#### Data
+
 enum MTiles {
 	EMPTY = -1,
 	GRASS = 0,

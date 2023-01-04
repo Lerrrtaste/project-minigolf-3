@@ -10,9 +10,19 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Reference",
+"class": "MObjectManager",
+"language": "GDScript",
+"path": "res://map/mobjects/mobject_manager.gd"
+}, {
+"base": "Reference",
 "class": "MTileData",
 "language": "GDScript",
 "path": "res://map/mtiles/mtile_data.gd"
+}, {
+"base": "Reference",
+"class": "MTilesManager",
+"language": "GDScript",
+"path": "res://map/mtiles/mtileset_manager.gd"
 }, {
 "base": "Camera2D",
 "class": "MatchCameraClass",
@@ -90,7 +100,9 @@ _global_script_classes=[ {
 "path": "res://addons/com.heroiclabs.nakama/api/NakamaWriteStorageObject.gd"
 } ]
 _global_script_class_icons={
+"MObjectManager": "",
 "MTileData": "",
+"MTilesManager": "",
 "MatchCameraClass": "",
 "NakamaAPI": "",
 "NakamaAsyncResult": "",
@@ -111,7 +123,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Minigolf22"
-run/main_scene="res://scenes/login/Login.tscn"
+run/main_scene="res://map/mobjects/start/Start.tscn"
 config/icon="res://icon.png"
 
 [autoload]
