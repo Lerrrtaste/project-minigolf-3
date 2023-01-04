@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/05_wall_down_right.png-08820cc6a52396430e78d296e264f308.stex"
+path="res://.import/06_wall_down_left.png-1342e814dc76e46af8c1f92051ecdaf0.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://to_refile/assets/tiles/05_wall_down_right.png"
-dest_files=[ "res://.import/05_wall_down_right.png-08820cc6a52396430e78d296e264f308.stex" ]
+source_file="res://map/mtiles/mtilesets/default/assets/06_wall_down_left.png"
+dest_files=[ "res://.import/06_wall_down_left.png-1342e814dc76e46af8c1f92051ecdaf0.stex" ]
 
 [params]
 

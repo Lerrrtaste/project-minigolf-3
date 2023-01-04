@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/03_wall_bouncy.png-b4dfc7b103281d86415d693051a6e79a.stex"
+path="res://.import/18_conveyor_down_left.png-4c37ebbe1832d8e23a5c53f995456425.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://to_refile/assets/tiles/03_wall_bouncy.png"
-dest_files=[ "res://.import/03_wall_bouncy.png-b4dfc7b103281d86415d693051a6e79a.stex" ]
+source_file="res://map/mtiles/mtilesets/default/assets/18_conveyor_down_left.png"
+dest_files=[ "res://.import/18_conveyor_down_left.png-4c37ebbe1832d8e23a5c53f995456425.stex" ]
 
 [params]
 

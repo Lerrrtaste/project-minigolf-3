@@ -1,26 +1,4 @@
-[gd_resource type="TileSet" load_steps=29 format=2]
-
-[ext_resource path="res://assets/tiles/18_conveyor_down_left.png" type="Texture" id=1]
-[ext_resource path="res://assets/tiles/16_conveyor_down_right.png" type="Texture" id=2]
-[ext_resource path="res://assets/tiles/00_grass.png" type="Texture" id=3]
-[ext_resource path="res://assets/tiles/01_wall.png" type="Texture" id=4]
-[ext_resource path="res://assets/tiles/08_ice.png" type="Texture" id=5]
-[ext_resource path="res://assets/tiles/09_sand.png" type="Texture" id=6]
-[ext_resource path="res://assets/tiles/14_conveyor_up_right.png" type="Texture" id=7]
-[ext_resource path="res://assets/tiles/11_water.png" type="Texture" id=8]
-[ext_resource path="res://assets/tiles/12_lava.png" type="Texture" id=9]
-[ext_resource path="res://assets/tiles/20_conveyor_up_left.png" type="Texture" id=10]
-[ext_resource path="res://assets/tiles/02_wall_sticky.png" type="Texture" id=11]
-[ext_resource path="res://assets/tiles/03_wall_bouncy.png" type="Texture" id=12]
-[ext_resource path="res://assets/tiles/10_mud.png" type="Texture" id=13]
-[ext_resource path="res://assets/tiles/04_wall_up_right.png" type="Texture" id=14]
-[ext_resource path="res://assets/tiles/06_wall_down_left.png" type="Texture" id=15]
-[ext_resource path="res://assets/tiles/07_wall_up_left.png" type="Texture" id=16]
-[ext_resource path="res://assets/tiles/05_wall_down_right.png" type="Texture" id=17]
-[ext_resource path="res://assets/tiles/15_conveyor_right.png" type="Texture" id=18]
-[ext_resource path="res://assets/tiles/17_conveyor_down.png" type="Texture" id=19]
-[ext_resource path="res://assets/tiles/19_conveyor_left.png" type="Texture" id=20]
-[ext_resource path="res://assets/tiles/13_conveyor_up.png" type="Texture" id=21]
+[gd_resource type="TileSet" load_steps=8 format=2]
 
 [sub_resource type="ConvexPolygonShape2D" id=1]
 points = PoolVector2Array( 16, 18, 32, 26, 16, 34, 0, 26, 0, 26 )
@@ -45,7 +23,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 
 [resource]
 0/name = "Grass"
-0/texture = ExtResource( 3 )
 0/tex_offset = Vector2( 0, -10 )
 0/modulate = Color( 1, 1, 1, 1 )
 0/region = Rect2( 0, 0, 32, 34 )
@@ -59,7 +36,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 0/shapes = [  ]
 0/z_index = 0
 1/name = "Wall"
-1/texture = ExtResource( 4 )
 1/tex_offset = Vector2( 0, -10 )
 1/modulate = Color( 1, 1, 1, 1 )
 1/region = Rect2( 0, 0, 32, 34 )
@@ -80,7 +56,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 } ]
 1/z_index = 0
 3/name = "Sand"
-3/texture = ExtResource( 6 )
 3/tex_offset = Vector2( 0, -10 )
 3/modulate = Color( 1, 1, 1, 1 )
 3/region = Rect2( 0, 0, 32, 34 )
@@ -94,7 +69,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 3/shapes = [  ]
 3/z_index = 0
 4/name = "Water"
-4/texture = ExtResource( 8 )
 4/tex_offset = Vector2( 0, -10 )
 4/modulate = Color( 1, 1, 1, 1 )
 4/region = Rect2( 0, 0, 32, 34 )
@@ -108,7 +82,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 4/shapes = [  ]
 4/z_index = 0
 5/name = "Lava"
-5/texture = ExtResource( 9 )
 5/tex_offset = Vector2( 0, -10 )
 5/modulate = Color( 1, 1, 1, 1 )
 5/region = Rect2( 0, 0, 32, 34 )
@@ -122,7 +95,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 5/shapes = [  ]
 5/z_index = 0
 6/name = "Ice"
-6/texture = ExtResource( 5 )
 6/tex_offset = Vector2( 0, -10 )
 6/modulate = Color( 1, 1, 1, 1 )
 6/region = Rect2( 0, 0, 32, 34 )
@@ -136,7 +108,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 6/shapes = [  ]
 6/z_index = 0
 7/name = "Conveyor Down Left"
-7/texture = ExtResource( 1 )
 7/tex_offset = Vector2( 0, -10 )
 7/modulate = Color( 1, 1, 1, 1 )
 7/region = Rect2( 0, 0, 32, 34 )
@@ -150,7 +121,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 7/shapes = [  ]
 7/z_index = 0
 8/name = "Conveyor Down Right"
-8/texture = ExtResource( 2 )
 8/tex_offset = Vector2( 0, -10 )
 8/modulate = Color( 1, 1, 1, 1 )
 8/region = Rect2( 0, 0, 32, 34 )
@@ -164,7 +134,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 8/shapes = [  ]
 8/z_index = 0
 9/name = "Conveyor Up Left"
-9/texture = ExtResource( 10 )
 9/tex_offset = Vector2( 0, -10 )
 9/modulate = Color( 1, 1, 1, 1 )
 9/region = Rect2( 0, 0, 32, 34 )
@@ -178,7 +147,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 9/shapes = [  ]
 9/z_index = 0
 10/name = "Conveyor Up Right"
-10/texture = ExtResource( 7 )
 10/tex_offset = Vector2( 0, -10 )
 10/modulate = Color( 1, 1, 1, 1 )
 10/region = Rect2( 0, 0, 32, 34 )
@@ -192,7 +160,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 10/shapes = [  ]
 10/z_index = 0
 11/name = "Sticky Wall"
-11/texture = ExtResource( 11 )
 11/tex_offset = Vector2( 0, -10 )
 11/modulate = Color( 1, 1, 1, 1 )
 11/region = Rect2( 0, 0, 32, 34 )
@@ -213,7 +180,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 } ]
 11/z_index = 0
 12/name = "Bouncy Wall"
-12/texture = ExtResource( 12 )
 12/tex_offset = Vector2( 0, -10 )
 12/modulate = Color( 1, 1, 1, 1 )
 12/region = Rect2( 0, 0, 32, 34 )
@@ -234,7 +200,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 } ]
 12/z_index = 0
 13/name = "Mud"
-13/texture = ExtResource( 13 )
 13/tex_offset = Vector2( 0, -10 )
 13/modulate = Color( 1, 1, 1, 1 )
 13/region = Rect2( 0, 0, 32, 34 )
@@ -248,7 +213,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 13/shapes = [  ]
 13/z_index = 0
 14/name = "Oneway Wall Up Right"
-14/texture = ExtResource( 14 )
 14/tex_offset = Vector2( 0, -10 )
 14/modulate = Color( 1, 1, 1, 1 )
 14/region = Rect2( 0, 0, 32, 34 )
@@ -269,7 +233,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 } ]
 14/z_index = 0
 15/name = "Oneway Wall Down Right"
-15/texture = ExtResource( 17 )
 15/tex_offset = Vector2( 0, -10 )
 15/modulate = Color( 1, 1, 1, 1 )
 15/region = Rect2( 0, 0, 32, 34 )
@@ -290,7 +253,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 } ]
 15/z_index = 0
 16/name = "Oneway Wall Down Left"
-16/texture = ExtResource( 15 )
 16/tex_offset = Vector2( 0, -10 )
 16/modulate = Color( 1, 1, 1, 1 )
 16/region = Rect2( 0, 0, 32, 34 )
@@ -311,7 +273,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 } ]
 16/z_index = 0
 17/name = "Oneway Wall Up Left"
-17/texture = ExtResource( 16 )
 17/tex_offset = Vector2( 0, -10 )
 17/modulate = Color( 1, 1, 1, 1 )
 17/region = Rect2( 0, 0, 32, 34 )
@@ -332,7 +293,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 } ]
 17/z_index = 0
 18/name = "Conveyor Up"
-18/texture = ExtResource( 21 )
 18/tex_offset = Vector2( 0, -10 )
 18/modulate = Color( 1, 1, 1, 1 )
 18/region = Rect2( 0, 0, 32, 34 )
@@ -346,7 +306,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 18/shapes = [  ]
 18/z_index = 0
 19/name = "Conveyor Right"
-19/texture = ExtResource( 18 )
 19/tex_offset = Vector2( 0, -10 )
 19/modulate = Color( 1, 1, 1, 1 )
 19/region = Rect2( 0, 0, 32, 34 )
@@ -360,7 +319,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 19/shapes = [  ]
 19/z_index = 0
 20/name = "Conveyor Down"
-20/texture = ExtResource( 19 )
 20/tex_offset = Vector2( 0, -10 )
 20/modulate = Color( 1, 1, 1, 1 )
 20/region = Rect2( 0, 0, 32, 34 )
@@ -374,7 +332,6 @@ points = PoolVector2Array( 18, 20, 22, 22, 6, 30, 2, 28 )
 20/shapes = [  ]
 20/z_index = 0
 21/name = "Conveyor Left"
-21/texture = ExtResource( 20 )
 21/tex_offset = Vector2( 0, -10 )
 21/modulate = Color( 1, 1, 1, 1 )
 21/region = Rect2( 0, 0, 32, 34 )

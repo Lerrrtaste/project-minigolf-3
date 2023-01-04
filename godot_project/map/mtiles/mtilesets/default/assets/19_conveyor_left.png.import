@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/10_mud.png-71a4ca2394ace971f74a6f78e1d72cd0.stex"
+path="res://.import/19_conveyor_left.png-3ead4a326bef3a97f47636451a489b92.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://to_refile/assets/tiles/10_mud.png"
-dest_files=[ "res://.import/10_mud.png-71a4ca2394ace971f74a6f78e1d72cd0.stex" ]
+source_file="res://map/mtiles/mtilesets/default/assets/19_conveyor_left.png"
+dest_files=[ "res://.import/19_conveyor_left.png-3ead4a326bef3a97f47636451a489b92.stex" ]
 
 [params]
 

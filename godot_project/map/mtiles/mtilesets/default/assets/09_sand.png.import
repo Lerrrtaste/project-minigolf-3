@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/12_lava.png-23f7adc27ee951807ef84ece512291fd.stex"
+path="res://.import/09_sand.png-d73e0701ba0ce6cf3f3b26fcde7709c8.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://to_refile/assets/tiles/12_lava.png"
-dest_files=[ "res://.import/12_lava.png-23f7adc27ee951807ef84ece512291fd.stex" ]
+source_file="res://map/mtiles/mtilesets/default/assets/09_sand.png"
+dest_files=[ "res://.import/09_sand.png-d73e0701ba0ce6cf3f3b26fcde7709c8.stex" ]
 
 [params]
 

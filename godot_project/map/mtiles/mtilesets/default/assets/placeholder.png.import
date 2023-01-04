@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/placeholder.png-5c584630aa9a39e2ce5f206e9e92a7c5.stex"
+path="res://.import/placeholder.png-3a74b8e30679023a018f017d675b804e.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://to_refile/assets/tiles/placeholder.png"
-dest_files=[ "res://.import/placeholder.png-5c584630aa9a39e2ce5f206e9e92a7c5.stex" ]
+source_file="res://map/mtiles/mtilesets/default/assets/placeholder.png"
+dest_files=[ "res://.import/placeholder.png-3a74b8e30679023a018f017d675b804e.stex" ]
 
 [params]
 

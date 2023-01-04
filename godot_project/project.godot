@@ -116,12 +116,12 @@ config/icon="res://icon.png"
 
 [autoload]
 
-Global="*res://global.gd"
-Notifier="*res://helpers/notifier/Notifier.tscn"
-Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
-Networker="*res://helpers/networker/Networker.tscn"
-MapStorage="*res://helpers/map_storage/MapStorage.tscn"
-MapData="*res://data/map_data.gd"
+Global="res://global.gd"
+Notifier="res://helpers/notifier/Notifier.tscn"
+Nakama="res://addons/com.heroiclabs.nakama/Nakama.gd"
+Networker="res://helpers/networker/Networker.tscn"
+MapStorage="res://helpers/map_storage/MapStorage.tscn"
+MapData="res://data/map_data.gd"
 
 [debug]
 
