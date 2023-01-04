@@ -1,8 +1,7 @@
-extends Reference
-
-class_name MObjectManager
+extends Node
 
 # Map Object Manager
+# Singleton
 #
 # Stores IDs, Metadata and References to the MObj Scenes
 # Other than MTiles there are no Data Objects, every MObj is its own scene

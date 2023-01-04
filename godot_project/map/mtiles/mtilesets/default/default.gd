@@ -1,4 +1,5 @@
 extends Reference
+class_name MTileset
 
 const MTILESET_ID = 1
 const TILESET_RES_PATH = "res://map/mtiles/mtilesets/default/tileset.tres"

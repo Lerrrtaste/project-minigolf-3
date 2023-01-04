@@ -10,19 +10,19 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Reference",
-"class": "MObjectManager",
-"language": "GDScript",
-"path": "res://map/mobjects/mobject_manager.gd"
-}, {
-"base": "Reference",
 "class": "MTileData",
 "language": "GDScript",
 "path": "res://map/mtiles/mtile_data.gd"
 }, {
 "base": "Reference",
-"class": "MTilesManager",
+"class": "MTileset",
 "language": "GDScript",
-"path": "res://map/mtiles/mtileset_manager.gd"
+"path": "res://map/mtiles/mtilesets/default/default.gd"
+}, {
+"base": "Reference",
+"class": "MapData",
+"language": "GDScript",
+"path": "res://map/map_data.gd"
 }, {
 "base": "Camera2D",
 "class": "MatchCameraClass",
@@ -100,9 +100,9 @@ _global_script_classes=[ {
 "path": "res://addons/com.heroiclabs.nakama/api/NakamaWriteStorageObject.gd"
 } ]
 _global_script_class_icons={
-"MObjectManager": "",
 "MTileData": "",
-"MTilesManager": "",
+"MTileset": "",
+"MapData": "",
 "MatchCameraClass": "",
 "NakamaAPI": "",
 "NakamaAsyncResult": "",
@@ -128,12 +128,8 @@ config/icon="res://icon.png"
 
 [autoload]
 
-Global="res://global.gd"
-Notifier="res://helpers/notifier/Notifier.tscn"
-Nakama="res://addons/com.heroiclabs.nakama/Nakama.gd"
-Networker="res://helpers/networker/Networker.tscn"
-MapStorage="res://helpers/map_storage/MapStorage.tscn"
-MapData="res://data/map_data.gd"
+MObjectManager="*res://map/mobjects/mobject_manager.gd"
+MTilesetManager="*res://map/mtiles/mtileset_manager.gd"
 
 [debug]
 

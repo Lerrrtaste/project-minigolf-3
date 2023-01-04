@@ -20,6 +20,7 @@ var tname
 var tilemap_id
 var mtile_id
 var layer
+var texture_path
 var special_properties = {}
 
 func _init(_mtile_id:int, data:Dictionary)->void:
@@ -28,6 +29,7 @@ func _init(_mtile_id:int, data:Dictionary)->void:
 	self.tilemap_id = data["tilemap_id"]
 	self.mtile_id = _mtile_id
 	self.layer = data["layer"]
+	self.texture_path = data["texture_path"]
 
 	# Special (optional) Properties
 	for key in data:
