@@ -9,10 +9,15 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Reference",
+"class": "MTileData",
+"language": "GDScript",
+"path": "res://map/mtiles/mtile_data.gd"
+}, {
 "base": "Camera2D",
 "class": "MatchCameraClass",
 "language": "GDScript",
-"path": "res://helpers/cameras/match_camera/match_camera.gd"
+"path": "res://to_refile/helpers/cameras/match_camera/match_camera.gd"
 }, {
 "base": "Reference",
 "class": "NakamaAPI",
@@ -85,6 +90,7 @@ _global_script_classes=[ {
 "path": "res://addons/com.heroiclabs.nakama/api/NakamaWriteStorageObject.gd"
 } ]
 _global_script_class_icons={
+"MTileData": "",
 "MatchCameraClass": "",
 "NakamaAPI": "",
 "NakamaAsyncResult": "",
