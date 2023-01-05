@@ -22,7 +22,7 @@ _global_script_classes=[ {
 "base": "Reference",
 "class": "MapData",
 "language": "GDScript",
-"path": "res://map/map_data.gd"
+"path": "res://map/map_manager/map_data.gd"
 }, {
 "base": "Camera2D",
 "class": "MatchCameraClass",
@@ -58,6 +58,11 @@ _global_script_classes=[ {
 "class": "NakamaLogger",
 "language": "GDScript",
 "path": "res://addons/com.heroiclabs.nakama/utils/NakamaLogger.gd"
+}, {
+"base": "Reference",
+"class": "NakamaMultiplayerBridge",
+"language": "GDScript",
+"path": "res://addons/com.heroiclabs.nakama/utils/NakamaMultiplayerBridge.gd"
 }, {
 "base": "NakamaAsyncResult",
 "class": "NakamaRTAPI",
@@ -110,6 +115,7 @@ _global_script_class_icons={
 "NakamaException": "",
 "NakamaHTTPAdapter": "",
 "NakamaLogger": "",
+"NakamaMultiplayerBridge": "",
 "NakamaRTAPI": "",
 "NakamaRTMessage": "",
 "NakamaSerializer": "",
@@ -130,6 +136,7 @@ config/icon="res://icon.png"
 
 MObjectManager="*res://map/mobjects/mobject_manager.gd"
 MTilesetManager="*res://map/mtiles/mtileset_manager.gd"
+Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 
 [debug]
 

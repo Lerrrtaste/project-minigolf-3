@@ -3025,6 +3025,7 @@ class ApiValidatedPurchase extends NakamaAsyncResult:
 		"product_id": {"name": "_product_id", "type": TYPE_STRING, "required": false},
 		"provider_response": {"name": "_provider_response", "type": TYPE_STRING, "required": false},
 		"purchase_time": {"name": "_purchase_time", "type": TYPE_STRING, "required": false},
+		"seen_before": {"name": "_seen_before", "type": TYPE_BOOL, "required": false},
 		"store": {"name": "_store", "type": TYPE_INT, "required": false},
 		"transaction_id": {"name": "_transaction_id", "type": TYPE_STRING, "required": false},
 		"update_time": {"name": "_update_time", "type": TYPE_STRING, "required": false},
@@ -3059,6 +3060,12 @@ class ApiValidatedPurchase extends NakamaAsyncResult:
 	var _purchase_time = null
 	func _get_purchase_time() -> String:
 		return "" if not _purchase_time is String else String(_purchase_time)
+
+	# Whether the purchase had already been validated by Nakama before.
+	var seen_before : bool setget , _get_seen_before
+	var _seen_before = null
+	func _get_seen_before() -> bool:
+		return false if not _seen_before is bool else bool(_seen_before)
 
 	# 
 	var store : int setget , _get_store
@@ -3096,6 +3103,7 @@ class ApiValidatedPurchase extends NakamaAsyncResult:
 		output += "product_id: %s, " % _product_id
 		output += "provider_response: %s, " % _provider_response
 		output += "purchase_time: %s, " % _purchase_time
+		output += "seen_before: %s, " % _seen_before
 		output += "store: %s, " % _store
 		output += "transaction_id: %s, " % _transaction_id
 		output += "update_time: %s, " % _update_time
@@ -4485,7 +4493,7 @@ class ApiClient extends Reference:
 		if p_limit != null:
 			query_params += "limit=%d&" % p_limit
 		if p_lang_tag != null:
-			query_params += "langTag=%s&" % NakamaSerializer.escape_http(p_lang_tag)
+			query_params += "lang_tag=%s&" % NakamaSerializer.escape_http(p_lang_tag)
 		if p_members != null:
 			query_params += "members=%d&" % p_members
 		if p_open != null:
@@ -4965,7 +4973,7 @@ class ApiClient extends Reference:
 		var query_params = ""
 		if p_owner_ids != null:
 			for elem in p_owner_ids:
-				query_params += "ownerIds=%s&" % elem
+				query_params += "owner_ids=%s&" % elem
 		if p_limit != null:
 			query_params += "limit=%d&" % p_limit
 		if p_cursor != null:
@@ -5077,9 +5085,9 @@ class ApiClient extends Reference:
 		if p_label != null:
 			query_params += "label=%s&" % NakamaSerializer.escape_http(p_label)
 		if p_min_size != null:
-			query_params += "minSize=%d&" % p_min_size
+			query_params += "min_size=%d&" % p_min_size
 		if p_max_size != null:
-			query_params += "maxSize=%d&" % p_max_size
+			query_params += "max_size=%d&" % p_max_size
 		if p_query != null:
 			query_params += "query=%s&" % NakamaSerializer.escape_http(p_query)
 		var uri = "%s%s%s" % [_base_uri, urlpath, "?" + query_params if query_params else ""]
@@ -5142,7 +5150,7 @@ class ApiClient extends Reference:
 		if p_limit != null:
 			query_params += "limit=%d&" % p_limit
 		if p_cacheable_cursor != null:
-			query_params += "cacheableCursor=%s&" % NakamaSerializer.escape_http(p_cacheable_cursor)
+			query_params += "cacheable_cursor=%s&" % NakamaSerializer.escape_http(p_cacheable_cursor)
 		var uri = "%s%s%s" % [_base_uri, urlpath, "?" + query_params if query_params else ""]
 		var method = "GET"
 		var headers = {}
@@ -5170,7 +5178,7 @@ class ApiClient extends Reference:
 		if p_payload != null:
 			query_params += "payload=%s&" % NakamaSerializer.escape_http(p_payload)
 		if p_http_key != null:
-			query_params += "httpKey=%s&" % NakamaSerializer.escape_http(p_http_key)
+			query_params += "http_key=%s&" % NakamaSerializer.escape_http(p_http_key)
 		var uri = "%s%s%s" % [_base_uri, urlpath, "?" + query_params if query_params else ""]
 		var method = "GET"
 		var headers = {}
@@ -5197,7 +5205,7 @@ class ApiClient extends Reference:
 		urlpath = urlpath.replace("{id}", NakamaSerializer.escape_http(p_id))
 		var query_params = ""
 		if p_http_key != null:
-			query_params += "httpKey=%s&" % NakamaSerializer.escape_http(p_http_key)
+			query_params += "http_key=%s&" % NakamaSerializer.escape_http(p_http_key)
 		var uri = "%s%s%s" % [_base_uri, urlpath, "?" + query_params if query_params else ""]
 		var method = "POST"
 		var headers = {}
@@ -5342,7 +5350,7 @@ class ApiClient extends Reference:
 		urlpath = urlpath.replace("{collection}", NakamaSerializer.escape_http(p_collection))
 		var query_params = ""
 		if p_user_id != null:
-			query_params += "userId=%s&" % NakamaSerializer.escape_http(p_user_id)
+			query_params += "user_id=%s&" % NakamaSerializer.escape_http(p_user_id)
 		if p_limit != null:
 			query_params += "limit=%d&" % p_limit
 		if p_cursor != null:
@@ -5416,13 +5424,13 @@ class ApiClient extends Reference:
 		var urlpath : String = "/v2/tournament"
 		var query_params = ""
 		if p_category_start != null:
-			query_params += "categoryStart=%d&" % p_category_start
+			query_params += "category_start=%d&" % p_category_start
 		if p_category_end != null:
-			query_params += "categoryEnd=%d&" % p_category_end
+			query_params += "category_end=%d&" % p_category_end
 		if p_start_time != null:
-			query_params += "startTime=%d&" % p_start_time
+			query_params += "start_time=%d&" % p_start_time
 		if p_end_time != null:
-			query_params += "endTime=%d&" % p_end_time
+			query_params += "end_time=%d&" % p_end_time
 		if p_limit != null:
 			query_params += "limit=%d&" % p_limit
 		if p_cursor != null:
@@ -5461,7 +5469,7 @@ class ApiClient extends Reference:
 		var query_params = ""
 		if p_owner_ids != null:
 			for elem in p_owner_ids:
-				query_params += "ownerIds=%s&" % elem
+				query_params += "owner_ids=%s&" % elem
 		if p_limit != null:
 			query_params += "limit=%d&" % p_limit
 		if p_cursor != null:
@@ -5628,7 +5636,7 @@ class ApiClient extends Reference:
 				query_params += "usernames=%s&" % elem
 		if p_facebook_ids != null:
 			for elem in p_facebook_ids:
-				query_params += "facebookIds=%s&" % elem
+				query_params += "facebook_ids=%s&" % elem
 		var uri = "%s%s%s" % [_base_uri, urlpath, "?" + query_params if query_params else ""]
 		var method = "GET"
 		var headers = {}

@@ -167,6 +167,58 @@ class ChannelPresenceEvent extends NakamaAsyncResult:
 		return "channel_presence_event"
 
 
+# Describes an error which occurred on the server.
+class Error extends NakamaAsyncResult:
+
+	const _SCHEMA = {
+		"code": {"name": "code", "type": TYPE_INT, "required": true},
+		"message": {"name": "message", "type": TYPE_STRING, "required": true},
+		"context": {"name": "context", "type": TYPE_DICTIONARY, "required": false, "content": TYPE_STRING},
+	}
+
+	# The selection of possible error codes.
+	enum Code {
+		# An unexpected result from the server.
+		RUNTIME_EXCEPTION = 0,
+		# The server received a message which is not recognised.
+		UNRECOGNIZED_PAYLOAD = 1,
+		# A message was expected but contains no content.
+		MISSING_PAYLOAD = 2,
+		# Fields in the message have an invalid format.
+		BAD_INPUT = 3,
+		# The match id was not found.
+		MATCH_NOT_FOUND = 4,
+		# The match join was rejected.
+		MATCH_JOIN_REJECTED = 5,
+		# The runtime function does not exist on the server.
+		RUNTIME_FUNCTION_NOT_FOUND = 6,
+		#The runtime function executed with an error.
+		RUNTIME_FUNCTION_EXCEPTION = 7,
+	}
+
+	# The error code which should be one of "Error.Code" enums.
+	var code : int
+
+	# A message in English to help developers debug the response.
+	var message : String
+
+	# Additional error details which may be different for each response.
+	var context : Dictionary
+
+	func _init(p_ex = null).(p_ex):
+		pass
+
+	func _to_string():
+		if is_exception(): return get_exception()._to_string()
+		return "Error<code=%s, messages=%s, context=%s>" % [code, message, context]
+
+	static func create(p_ns : GDScript, p_dict : Dictionary) -> Error:
+		return _safe_ret(NakamaSerializer.deserialize(p_ns, "Error", p_dict), Error) as Error
+
+	static func get_result_key() -> String:
+		return "error"
+
+
 # A multiplayer match.
 class Match extends NakamaAsyncResult:
 
@@ -216,7 +268,7 @@ class MatchData extends NakamaAsyncResult:
 	const _SCHEMA = {
 		"match_id": {"name": "match_id", "type": TYPE_STRING, "required": true},
 		"presence": {"name": "presence", "type": "UserPresence", "required": false},
-		"op_code": {"name": "op_code", "type": TYPE_STRING, "required": false},
+		"op_code": {"name": "op_code", "type": TYPE_INT, "required": false},
 		"data": {"name": "data", "type": TYPE_STRING, "required": false}
 	}
 
@@ -230,8 +282,14 @@ class MatchData extends NakamaAsyncResult:
 	# The user that sent this game state update.
 	var presence : UserPresence
 
-	# The byte contents of the state change.
-	var data : String
+	# The contents of the state change decoded as a UTF-8 string.
+	var data : String setget , get_data
+
+	# The raw base64-encoded contents of the state change.
+	var base64_data : String
+
+	# The contents of the state change decoded as binary data.
+	var binary_data : PoolByteArray setget , get_binary_data
 
 	func _init(p_ex = null).(p_ex):
 		pass
@@ -242,12 +300,24 @@ class MatchData extends NakamaAsyncResult:
 
 	static func create(p_ns : GDScript, p_dict : Dictionary) -> MatchData:
 		var out := _safe_ret(NakamaSerializer.deserialize(p_ns, "MatchData", p_dict), MatchData) as MatchData
-		if out.data: # Decode base64 received data
-			out.data = Marshalls.base64_to_utf8(out.data)
+		# Store the base64 data, ready to be decoded when the developer requests it.
+		if out.data:
+			out.base64_data = out.data
+			out.data = ''
 		return out
 
 	static func get_result_key() -> String:
 		return "match_data"
+
+	func get_data():
+		if not data and base64_data:
+			data = Marshalls.base64_to_utf8(base64_data)
+		return data
+
+	func get_binary_data():
+		if not binary_data and base64_data:
+			binary_data = Marshalls.base64_to_raw(base64_data)
+		return binary_data
 
 
 # A batch of join and leave presences for a match.
@@ -304,7 +374,7 @@ class MatchmakerMatched extends NakamaAsyncResult:
 
 	# The other users matched with this user and the parameters they sent.
 	var users : Array # MatchmakerUser
-	
+
 	# The current user who matched with opponents.
 	var self_user : MatchmakerUser
 
@@ -759,8 +829,12 @@ class PartyData extends NakamaAsyncResult:
 	var presence : NakamaRTAPI.UserPresence
 	# Op code value.
 	var op_code : int
-	# Data payload, if any.
-	var data : String
+	# The contents of the state change decoded as a UTF-8 string.
+	var data : String setget , get_data
+	# The raw base64-encoded contents of the state change.
+	var base64_data : String
+	# The contents of the state change decoded as binary data.
+	var binary_data : PoolByteArray setget , get_binary_data
 
 	func _init(p_ex = null).(p_ex):
 		pass
@@ -773,10 +847,25 @@ class PartyData extends NakamaAsyncResult:
 		return "PartyData<party_id=%s, presence=%s, op_code=%d, data%s>" % [party_id, presence, op_code, data]
 
 	static func create(p_ns : GDScript, p_dict : Dictionary) -> PartyData:
-		return _safe_ret(NakamaSerializer.deserialize(p_ns, "PartyData", p_dict), PartyData) as PartyData
+		var out := _safe_ret(NakamaSerializer.deserialize(p_ns, "PartyData", p_dict), PartyData) as PartyData
+		# Store the base64 data, ready to be decoded when the developer requests it.
+		if out.data:
+			out.base64_data = out.data
+			out.data = ''
+		return out
 
 	static func get_result_key() -> String:
 		return "party_data"
+
+	func get_data():
+		if not data and base64_data:
+			data = Marshalls.base64_to_utf8(base64_data)
+		return data
+
+	func get_binary_data():
+		if not binary_data and base64_data:
+			binary_data = Marshalls.base64_to_raw(base64_data)
+		return binary_data
 
 # End a party, kicking all party members and closing it. (this is both a message and a result)
 class PartyClose extends NakamaAsyncResult:
@@ -786,8 +875,8 @@ class PartyClose extends NakamaAsyncResult:
 	# Party ID to close.
 	var party_id : String
 
-	func _init(p_id : String):
-		party_id = p_id
+	func _init(p_ex = null).(p_ex):
+		pass
 
 	func serialize():
 		return NakamaSerializer.serialize(self)

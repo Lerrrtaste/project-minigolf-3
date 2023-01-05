@@ -11,14 +11,17 @@ signal closed()
 # Emitted when a socket is connected.
 signal connected()
 
+# Emitted when an error occurs while connecting.
+signal connection_error(p_error)
+
 # Emitted when a chat channel message is received
 signal received_channel_message(p_channel_message) # ApiChannelMessage
 
 # Emitted when receiving a presence change for joins and leaves with users in a chat channel.
 signal received_channel_presence(p_channel_presence) # ChannelPresenceEvent
 
-# Emitted when an error occurs on the socket.
-signal received_error(p_error)
+# Emitted when an error is received from the server.
+signal received_error(p_error) # Error
 
 # Emitted when receiving a matchmaker matched message.
 signal received_matchmaker_matched(p_matchmaker_matched) # MatchmakerMatched
@@ -98,7 +101,7 @@ func _init(p_adapter : NakamaSocketAdapter,
 	_free_adapter = p_free_adapter
 	_adapter.connect("closed", self, "_closed")
 	_adapter.connect("connected", self, "_connected")
-	_adapter.connect("received_error", self, "_error")
+	_adapter.connect("received_error", self, "_connection_error")
 	_adapter.connect("received", self, "_received")
 
 func _notification(what):
@@ -124,8 +127,8 @@ func _closed(p_error = null):
 	_resume_conn(ERR_CANT_CONNECT)
 	_clear_responses()
 
-func _error(p_error):
-	emit_signal("received_error", p_error)
+func _connection_error(p_error):
+	emit_signal("connection_error", p_error)
 	_resume_conn(p_error)
 	_clear_responses()
 
@@ -147,7 +150,10 @@ func _received(p_bytes : PoolByteArray):
 		else:
 			logger.error("Invalid call id received %s" % dict)
 	else:
-		if dict.has("channel_message"):
+		if dict.has("error"):
+			var res = NakamaRTAPI.Error.create(NakamaRTAPI, dict["error"])
+			emit_signal("received_error", res)
+		elif dict.has("channel_message"):
 			var res = NakamaAPI.ApiChannelMessage.create(NakamaAPI, dict["channel_message"])
 			emit_signal("received_channel_message", res)
 		elif dict.has("channel_presence_event"):
@@ -306,20 +312,21 @@ func connect_async(p_session : NakamaSession, p_appear_online : bool = false, p_
 # @param p_max_count - The maximum number of players to compete against in a match.
 # @param p_string_properties - A set of key/value properties to provide to searches.
 # @param p_numeric_properties - A set of key/value numeric properties to provide to searches.
+# @param p_count_multiple - Optional multiple of the count that must be satisfied.
 # Returns a task which resolves to a matchmaker ticket object.
 func add_matchmaker_async(p_query : String = "*", p_min_count : int = 2, p_max_count : int = 8,
-		p_string_props : Dictionary = {}, p_numeric_props : Dictionary = {}) -> NakamaRTAPI.MatchmakerTicket:
+		p_string_props : Dictionary = {}, p_numeric_props : Dictionary = {},
+		p_count_multiple : int = 0) -> NakamaRTAPI.MatchmakerTicket:
 	return _send_async(
-		NakamaRTMessage.MatchmakerAdd.new(p_query, p_min_count, p_max_count, p_string_props, p_numeric_props),
+		NakamaRTMessage.MatchmakerAdd.new(p_query, p_min_count, p_max_count, p_string_props, p_numeric_props, p_count_multiple),
 		NakamaRTAPI.MatchmakerTicket
 	)
 
-## <summary>
-## Create a multiplayer match on the server.
-## </summary>
-## Returns a task to represent the asynchronous operation.
-func create_match_async():
-	return _send_async(NakamaRTMessage.MatchCreate.new(), NakamaRTAPI.Match)
+# Create a multiplayer match on the server.
+# @param p_name - Optional name to use when creating the match.
+# Returns a task to represent the asynchronous operation.
+func create_match_async(p_name : String = ''):
+	return _send_async(NakamaRTMessage.MatchCreate.new(p_name), NakamaRTAPI.Match)
 
 # Subscribe to one or more users for their status updates.
 # @param p_user_ids - The IDs of users.
@@ -490,18 +497,23 @@ func accept_party_member_async(p_party_id : String, p_presence : NakamaRTAPI.Use
 # @param p_max_count - Maximum total user count to match together.
 # @param p_string_properties - String properties.
 # @param p_numeric_properties - Numeric properties.
+# @param p_count_multiple - Optional multiple of the count that must be satisfied.
 # Returns a task to represent the asynchronous operation.
 func add_matchmaker_party_async(p_party_id : String, p_query : String = "*", p_min_count : int = 2,
-	p_max_count : int = 8, p_string_properties = {}, p_numeric_properties = {}):
+	p_max_count : int = 8, p_string_properties = {}, p_numeric_properties = {}, p_count_multiple : int = 0):
 	return _send_async(
 		NakamaRTMessage.PartyMatchmakerAdd.new(p_party_id, p_min_count,
-			p_max_count, p_query, p_string_properties, p_numeric_properties))
+			p_max_count, p_query, p_string_properties, p_numeric_properties,
+			p_count_multiple if p_count_multiple > 0 else null),
+		NakamaRTAPI.PartyMatchmakerTicket)
 
 # End a party, kicking all party members and closing it.
 # @param p_party_id - The ID of the party.
 # Returns a task to represent the asynchronous operation.
 func close_party_async(p_party_id : String):
-	return _send_async(NakamaRTAPI.PartyClose.new(p_party_id))
+	var msg := NakamaRTAPI.PartyClose.new()
+	msg.party_id = p_party_id
+	return _send_async(msg)
 
 # Create a party.
 # @param p_open - Whether or not the party will require join requests to be approved by the party leader.
@@ -559,5 +571,15 @@ func remove_party_member_async(p_party_id : String, p_presence : NakamaRTAPI.Use
 # @param p_op_code - Op code value.
 # @param data - Data payload, if any.
 # Returns a task which represents the asynchronous operation.
-func send_party_data_async(p_party_id : String, p_op_code : int, p_data = null):
-	return _send_async(NakamaRTMessage.PartyDataSend.new(p_party_id, p_op_code, p_data))
+func send_party_data_async(p_party_id : String, p_op_code : int, p_data:String = ""):
+	var base64_data = null if p_data.empty() else Marshalls.utf8_to_base64(p_data)
+	return _send_async(NakamaRTMessage.PartyDataSend.new(p_party_id, p_op_code, base64_data))
+
+# Send data to a party.
+# @param p_party_id - Party ID to send to.
+# @param p_op_code - Op code value.
+# @param data - Data payload, if any.
+# Returns a task which represents the asynchronous operation.
+func send_party_data_raw_async(p_party_id : String, p_op_code : int, p_data:PoolByteArray):
+	var base64_data = null if p_data.empty() else Marshalls.raw_to_base64(p_data)
+	return _send_async(NakamaRTMessage.PartyDataSend.new(p_party_id, p_op_code, base64_data))
