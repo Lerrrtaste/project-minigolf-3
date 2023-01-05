@@ -129,14 +129,14 @@ _global_script_class_icons={
 [application]
 
 config/name="Minigolf22"
-run/main_scene="res://map/mobjects/start/Start.tscn"
+run/main_scene="res://debugging/QuickTest.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
 MObjectManager="*res://map/mobjects/mobject_manager.gd"
 MTilesetManager="*res://map/mtiles/mtileset_manager.gd"
-Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
+Networker="*res://networker/Networker.tscn"
 
 [debug]
 
@@ -145,10 +145,6 @@ multirun/window_distance=200
 multirun/add_custom_args=true
 multirun/first_window_args="dev_user_1"
 multirun/other_window_args="dev_user_2"
-
-[display]
-
-mouse_cursor/custom_image="res://assets/ui/cursor.png"
 
 [editor_plugins]
 
@@ -159,6 +155,7 @@ enabled=PoolStringArray( "res://addons/multirun/plugin.cfg" )
 scale=false
 inst=false
 multi=false
+cursor=false
 
 [importer_defaults]
 
