@@ -129,7 +129,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Minigolf22"
-run/main_scene="res://debugging/QuickTest.tscn"
+run/main_scene="res://ui/ui_manager/UiManager.tscn"
 config/icon="res://icon.png"
 
 [autoload]
@@ -137,6 +137,8 @@ config/icon="res://icon.png"
 MObjectManager="*res://map/mobjects/mobject_manager.gd"
 MTilesetManager="*res://map/mtiles/mtileset_manager.gd"
 Networker="*res://networker/Networker.tscn"
+Notifier="*res://ui/notifier/Notifier.tscn"
+Global="*res://global.gd"
 
 [debug]
 

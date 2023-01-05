@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/notification_panel3.png-d6b4f3d8caad766bb86fa1324926d79a.stex"
+path="res://.import/notification_panel2.png-adfa6634bf44232091165bdebdcd741f.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://to_refile/helpers/notifier/popup/notification_panel3.png"
-dest_files=[ "res://.import/notification_panel3.png-d6b4f3d8caad766bb86fa1324926d79a.stex" ]
+source_file="res://ui/notifier/popup/notification_panel2.png"
+dest_files=[ "res://.import/notification_panel2.png-adfa6634bf44232091165bdebdcd741f.stex" ]
 
 [params]
 

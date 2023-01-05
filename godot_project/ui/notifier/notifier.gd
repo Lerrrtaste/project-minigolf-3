@@ -14,12 +14,12 @@ extends Node
 
 var _active_notifications:Array
 
-var TexturePanelRed = preload("res://helpers/notifier/popup/notification_panel1.png")
-var TexturePanelYellow = preload("res://helpers/notifier/popup/notification_panel2.png")
-var TexturePanelBlue = preload("res://helpers/notifier/popup/notification_panel3.png")
-var TexturePanelGreen = preload("res://helpers/notifier/popup/notification_panel4.png")
-var TexturePanelWhite = preload("res://assets/ui/panels/panel_white_small.png")
-var Notification = preload("res://helpers/notifier/popup/Notification.tscn")
+var TexturePanelRed = preload("res://ui/notifier/popup/notification_panel1.png")
+var TexturePanelYellow = preload("res://ui/notifier/popup/notification_panel2.png")
+var TexturePanelBlue = preload("res://ui/notifier/popup/notification_panel3.png")
+var TexturePanelGreen = preload("res://ui/notifier/popup/notification_panel4.png")
+var TexturePanelWhite = preload("res://ui/assets/panels/panel_white_small.png")
+var Notification = preload("res://ui/notifier/popup/Notification.tscn")
 
 onready var _tween = get_node("Tween")
 
