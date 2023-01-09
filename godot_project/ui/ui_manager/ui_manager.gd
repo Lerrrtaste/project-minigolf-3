@@ -5,45 +5,77 @@ extends Control
 # The root node for everything
 # Instantiates standalone ui scenes as children
 #
-# Changes when
-# - UiManager.change_ui_state(new_state) is called
-# - networker signals like not_authenticated, authenticated, etc
+# StandaloneScene:
+# Has one standalone scene at a time
+# - It is responsible for exiting
+# - UiManager will only change scene on network state changes (not logged in, ...)
+#
+# TODO Show blocking popup for loading states
+# TODO Show fatal error / lost connection popup to reconnect
+# TODO Loading state while scenes are initializeing
 
-enum UiStates {
-	NONE,
+enum Scenes  {
 	LOGIN,
 	MAIN_MENU,
 }
-var _state = UiStates.NONE
-var _state_scene:CanvasItem
-var _loading := false
+var _current_scene:CanvasItem
 
-var _state_scene_paths = {
-	UiStates.LOGIN: "res://ui/standalone/login/Login.tscn",
-	UiStates.MAIN_MENU: "res://ui/standalone/mainmenu/MainMenu.tscn",
+const SCENE_PATHS = {
+	Scenes.LOGIN: "res://ui/standalone/login/Login.tscn",
+	Scenes.MAIN_MENU: "res://ui/standalone/mainmenu/MainMenu.tscn",
 }
 
+onready var lbl_loading_blocker = $LoadingBlocker
+onready var lbl_error_blocker = $ErrorBlocker
 
 func _ready():
-	Networker.connect("net_state_changed", self, "_on_Networker_net_state_changed")
-	change_ui_state(UiStates.LOGIN) # later check if networker is (still) authenticated
+	# Networker.connect("net_state_changed", self, "_on_Networker_net_state_changed")
+	# Networker.connect("loading_changed", self, "_on_Networker_loading_changed")
+	_change_state(UiStates.DEFAULT)
+	change_scene(Scenes.LOGIN)
 
 
-func change_ui_state(new_state):
-	Notifier.log_info("UiManager: change_ui_state: %s" % str(new_state))
-	_state = new_state
+func change_scene(standalone_scene):
+	Notifier.log_info("UiManager: Changing scene to %s" % [standalone_scene])
 
 	# remove old scene
-	if _state_scene:
-		_state_scene.queue_free()
-		_state_scene.visible = false
+	if _current_scene:
+		_current_scene.queue_free()
+		_current_scene.visible = false
 
 	# load new scene
-	_state_scene = load(_state_scene_paths[_state]).instance()
-	add_child(_state_scene)
+	if _scene_paths.has(standalone_scene):
+		var scene_path = _scene_paths[standalone_scene]
+		var scene = load(scene_path)
+		_current_scene = scene.instance()
+		add_child(_current_scene)
+		_change_state(UiStates.DEFAULT)
+	else:
+		_change_state(UiStates.EMPTY)
+		_current_scene = null
+		Notifier.log_error("UiManager: Scene %s not found" % [standalone_scene])
 
+func _change_state(new_state):
+	if _state == new_state:
+		print("UiManager: State already %s" % [new_state])
+		return
+	Notifier.log_info("UiManager: Changing state to %s" % [new_state])
+	_state = new_state
+
+	lbl_loading_blocker.visible = _state == UiStates.LOADING
+	lbl_error_blocker.visible = _state == UiStates.ERROR
+	# TODO disable input too
 
 func _on_Networker_net_state_changed(new_state):
 	match new_state:
 		Networker.NetStates.NOT_AUTHENTICATED:
-			change_ui_state(UiStates.LOGIN)
+			change_scene(Scenes.LOGIN)
+		Networker.NetStates.CONNECTION_ERROR:
+			_change_state(UiStates.ERROR)
+
+func _on_Networker_loading_changed(is_loading, request):
+	print("UiManager: Loading changed to %s" % [is_loading])
+	if is_loading:
+		_change_state(UiStates.LOADING)
+	else:
+		_change_state(UiStates.DEFAULT)
