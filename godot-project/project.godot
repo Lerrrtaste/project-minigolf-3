@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Global="*res://global.gd"
 Notifier="*res://ui/notifier/Notifier.tscn"
+Networker="*res://networker/Networker.tscn"
 
 [importer_defaults]
 
