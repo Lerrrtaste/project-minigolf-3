@@ -15,23 +15,26 @@ var _account : NakamaAPI.ApiAccount
 var _joined_match:NakamaRTAPI.Match
 var _matched_match:NakamaRTAPI.MatchmakerMatched
 
-signal socket_connected
-signal socket_connection_failed
+signal authentication_requested
+signal authentication_suceeded
+signal authentica
+# signal socket_connected
+# signal socket_connection_failed
 
-signal matchmaking_started
-signal matchmaking_ended
-signal matchmaking_matched(matched)
+# signal matchmaking_started
+# signal matchmaking_ended
+# signal matchmaking_matched(matched)
 
-signal authentication_successful
-signal authentication_failed(exception)
+# signal authentication_successful
+# signal authentication_failed(exception)
 
-signal match_join_failed
-signal match_joined(presences)
-signal match_presences_updated(_joined_match)
-signal match_state(state)
+# signal match_join_failed
+# signal match_joined(presences)
+# signal match_presences_updated(_joined_match)
+# signal match_state(state)
 
-signal collection_write_success
-signal collection_write_failed
+# signal collection_write_success
+# signal collection_write_failed
 
 enum ReadPermissions {
 	NOONE = 0,
@@ -141,7 +144,7 @@ func login_email_async(email:String, password:String): #-> Nakama_Session
 			_socket_connect_async()
 			return
 		Notifier.notify_error("Error", "Already logged in")
-		emit_signal("authentication_failed","")
+		emit_signal("authentication_successful")
 		return _session
 
 	# Login

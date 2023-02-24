@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://objects/map/map.gd" type="Script" id=1]
-[ext_resource path="res://assets/tiles/map_tileset.tres" type="TileSet" id=2]
+[ext_resource path="res://to_refile/objects/map/map.gd" type="Script" id=1]
+[ext_resource path="res://map/mtiles/mtilesets/default/tileset.tres" type="TileSet" id=2]
 
 [node name="Map" type="YSort"]
 script = ExtResource( 1 )
