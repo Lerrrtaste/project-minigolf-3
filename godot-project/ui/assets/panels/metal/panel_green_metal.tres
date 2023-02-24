@@ -1,0 +1,11 @@
+[gd_resource type="StyleBoxTexture" load_steps=2 format=3 uid="uid://w1wpd7xpnncr"]
+
+[ext_resource type="Texture2D" uid="uid://butmmomubb7h6" path="res://ui/assets/panels/metal/panel_green_metal.png" id="1"]
+
+[resource]
+texture = ExtResource("1")
+texture_margin_left = 20.0
+texture_margin_top = 20.0
+texture_margin_right = 20.0
+texture_margin_bottom = 20.0
+region_rect = Rect2(0, 0, 64, 64)

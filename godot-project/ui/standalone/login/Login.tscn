@@ -1,0 +1,127 @@
+[gd_scene load_steps=7 format=3 uid="uid://cgcd1lblbqjwq"]
+
+[ext_resource type="Theme" uid="uid://kyo26v688hek" path="res://ui/assets/buttons/small/red/button_red_small.tres" id="1"]
+[ext_resource type="Theme" uid="uid://s6wi64x2ul4s" path="res://ui/assets/buttons/big/yellow/button_yellow_big.tres" id="3"]
+[ext_resource type="StyleBox" uid="uid://cyl3dual0t5so" path="res://ui/assets/panels/light/panel_yellow_light.tres" id="3_rro77"]
+[ext_resource type="Script" path="res://ui/standalone/login/login.gd" id="6"]
+[ext_resource type="Theme" uid="uid://bi2bqfdkwovb7" path="res://ui/assets/buttons/big/green/button_green_big.tres" id="7"]
+[ext_resource type="Theme" path="res://ui/assets/general/general_ui.tres" id="11"]
+
+[node name="Login" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("11")
+script = ExtResource("6")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+anchor_left = 0.2
+anchor_top = 0.2
+anchor_right = 0.8
+anchor_bottom = 0.8
+offset_left = 100.2
+offset_top = -50.0
+offset_right = -99.8
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="PanelGuest" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = ExtResource("3_rro77")
+
+[node name="BoxGuest" type="VBoxContainer" parent="VBoxContainer/PanelGuest"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="LblGuest" type="Label" parent="VBoxContainer/PanelGuest/BoxGuest"]
+layout_mode = 2
+text = "Play as guest"
+
+[node name="LineUsernameGuest" type="LineEdit" parent="VBoxContainer/PanelGuest/BoxGuest"]
+layout_mode = 2
+placeholder_text = "Enter a Username"
+caret_blink = true
+
+[node name="BtnLoginGuest" type="Button" parent="VBoxContainer/PanelGuest/BoxGuest"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("3")
+text = "guest login"
+
+[node name="LblOr" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 5
+text = "OR"
+
+[node name="PanelEmail" type="PanelContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = ExtResource("3_rro77")
+
+[node name="BoxEmail" type="VBoxContainer" parent="VBoxContainer/PanelEmail"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="LblLogin" type="Label" parent="VBoxContainer/PanelEmail/BoxEmail"]
+layout_mode = 2
+text = "login"
+
+[node name="LineEmail" type="LineEdit" parent="VBoxContainer/PanelEmail/BoxEmail"]
+layout_mode = 2
+text = "lerrrtaste@protonmail.com"
+placeholder_text = "Email"
+caret_blink = true
+
+[node name="LinePassword" type="LineEdit" parent="VBoxContainer/PanelEmail/BoxEmail"]
+layout_mode = 2
+text = "Passw0rd"
+placeholder_text = "Password"
+secret = true
+caret_blink = true
+
+[node name="LinePasswordConfirm" type="LineEdit" parent="VBoxContainer/PanelEmail/BoxEmail"]
+visible = false
+layout_mode = 2
+placeholder_text = "Confirm Password"
+secret = true
+caret_blink = true
+
+[node name="LineUsernameRegister" type="LineEdit" parent="VBoxContainer/PanelEmail/BoxEmail"]
+visible = false
+layout_mode = 2
+placeholder_text = "Choose a Username"
+caret_blink = true
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/PanelEmail/BoxEmail"]
+layout_mode = 2
+
+[node name="BtnLoginEmail" type="Button" parent="VBoxContainer/PanelEmail/BoxEmail/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("3")
+text = "  Login  "
+
+[node name="BtnRegister" type="Button" parent="VBoxContainer/PanelEmail/BoxEmail/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 6
+theme = ExtResource("7")
+text = "Register"
+
+[node name="BtnCancel" type="Button" parent="VBoxContainer/PanelEmail/BoxEmail"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("1")
+text = "Cancel"
+
+[connection signal="pressed" from="VBoxContainer/PanelGuest/BoxGuest/BtnLoginGuest" to="." method="_on_BtnLoginGuest_pressed"]
+[connection signal="pressed" from="VBoxContainer/PanelEmail/BoxEmail/HSplitContainer/BtnLoginEmail" to="." method="_on_BtnLoginEmail_pressed"]
+[connection signal="pressed" from="VBoxContainer/PanelEmail/BoxEmail/HSplitContainer/BtnRegister" to="." method="_on_BtnRegister_pressed"]
+[connection signal="pressed" from="VBoxContainer/PanelEmail/BoxEmail/BtnCancel" to="." method="_on_BtnCancel_pressed"]

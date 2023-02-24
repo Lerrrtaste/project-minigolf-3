@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3 uid="uid://dcthutbt8kpy4"]
+
+[ext_resource type="Script" path="res://ui/ui_manager/ui_manager.gd" id="1"]
+
+[node name="UiManager" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="LoadingBlocker" type="Label" parent="."]
+layout_mode = 0
+offset_right = 309.0
+offset_bottom = 238.0
+text = "LOADONG"
+
+[node name="ErrorBlocker" type="Label" parent="."]
+layout_mode = 0
+offset_right = 309.0
+offset_bottom = 238.0
+text = "ERROR PROBLEM"

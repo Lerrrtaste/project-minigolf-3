@@ -1,0 +1,105 @@
+[gd_scene load_steps=13 format=2]
+
+[ext_resource path="res://assets/ui/buttons/small/red/button_red_small.tres" type="Theme" id=1]
+[ext_resource path="res://assets/ui/buttons/big/blue/button_blue_big.tres" type="Theme" id=2]
+[ext_resource path="res://assets/ui/fonts/font_small_button.tres" type="FontFile" id=3]
+[ext_resource path="res://assets/ui/buttons/big/yellow/button_yellow_big.tres" type="Theme" id=4]
+[ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="FontFile" id=5]
+[ext_resource path="res://scenes/editor_menu/map_item/map_item.gd" type="Script" id=6]
+[ext_resource path="res://assets/ui/fonts/data/kenney_pixel_square.ttf" type="FontFile" id=7]
+[ext_resource path="res://assets/ui/panels/panel_white_small.tres" type="StyleBox" id=8]
+[ext_resource path="res://assets/ui/icons/icon_play.png" type="Texture2D" id=9]
+
+[sub_resource type="FontFile" id=1]
+font_data = ExtResource( 5 )
+
+[sub_resource type="FontFile" id=2]
+font_data = ExtResource( 7 )
+
+[sub_resource type="FontFile" id=3]
+size = 12
+font_data = ExtResource( 7 )
+
+[node name="MapItem" type="PanelContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -383.0
+offset_bottom = -544.0
+size_flags_vertical = 0
+custom_styles/panel = ExtResource( 8 )
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 629.0
+offset_bottom = 76.0
+split_offset = 2968
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HSplitContainer"]
+offset_top = 9.0
+offset_right = 387.0
+offset_bottom = 55.0
+size_flags_vertical = 4
+
+[node name="LblName" type="Label" parent="HSplitContainer/VBoxContainer"]
+offset_right = 387.0
+offset_bottom = 18.0
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "Map Name here"
+valign = 1
+
+[node name="LblId" type="Label" parent="HSplitContainer/VBoxContainer"]
+offset_top = 22.0
+offset_right = 387.0
+offset_bottom = 46.0
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "ID 20318"
+valign = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HSplitContainer"]
+offset_left = 399.0
+offset_right = 617.0
+offset_bottom = 64.0
+size_flags_vertical = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BtnPractice" type="Button" parent="HSplitContainer/HBoxContainer"]
+offset_right = 56.0
+offset_bottom = 64.0
+theme = ExtResource( 4 )
+custom_fonts/font = ExtResource( 3 )
+disabled = true
+icon = ExtResource( 9 )
+
+[node name="BtnEditMap" type="Button" parent="HSplitContainer/HBoxContainer"]
+offset_left = 60.0
+offset_right = 136.0
+offset_bottom = 64.0
+theme = ExtResource( 2 )
+custom_fonts/font = ExtResource( 3 )
+disabled = true
+text = "Edit"
+
+[node name="BtnDelete" type="Button" parent="HSplitContainer/HBoxContainer"]
+offset_left = 140.0
+offset_top = 11.0
+offset_right = 218.0
+offset_bottom = 53.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = ExtResource( 1 )
+custom_fonts/font = SubResource( 3 )
+disabled = true
+text = "Delete"
+
+[connection signal="pressed" from="HSplitContainer/HBoxContainer/BtnPractice" to="." method="_on_BtnPractice_pressed"]
+[connection signal="pressed" from="HSplitContainer/HBoxContainer/BtnEditMap" to="." method="_on_BtnEditMap_pressed"]
+[connection signal="pressed" from="HSplitContainer/HBoxContainer/BtnDelete" to="." method="_on_BtnDelete_pressed"]

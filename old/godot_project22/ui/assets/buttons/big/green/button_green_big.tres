@@ -1,0 +1,61 @@
+[gd_resource type="Theme" load_steps=12 format=2]
+
+[ext_resource path="res://ui/assets/buttons/big/green/button_green_big1.png" type="Texture2D" id=1]
+[ext_resource path="res://ui/assets/fonts/font_big_button.tres" type="FontFile" id=2]
+[ext_resource path="res://ui/assets/buttons/big/green/button_green_big2.png" type="Texture2D" id=3]
+[ext_resource path="res://ui/assets/buttons/big/green/button_green_big3.png" type="Texture2D" id=4]
+[ext_resource path="res://ui/assets/buttons/big/green/button_green_big5.png" type="Texture2D" id=5]
+[ext_resource path="res://ui/assets/buttons/big/green/button_green_big4.png" type="Texture2D" id=6]
+
+[sub_resource type="StyleBoxTexture" id=1]
+texture = ExtResource( 1 )
+region_rect = Rect2( 0, 0, 76, 80 )
+margin_left = 16.0
+margin_right = 16.0
+margin_top = 16.0
+margin_bottom = 24.0
+
+[sub_resource type="StyleBoxTexture" id=2]
+texture = ExtResource( 3 )
+region_rect = Rect2( 0, 0, 76, 80 )
+margin_left = 16.0
+margin_right = 16.0
+margin_top = 16.0
+margin_bottom = 24.0
+
+[sub_resource type="StyleBoxTexture" id=3]
+texture = ExtResource( 4 )
+region_rect = Rect2( 0, 0, 76, 80 )
+margin_left = 16.0
+margin_right = 16.0
+margin_top = 16.0
+margin_bottom = 24.0
+
+[sub_resource type="StyleBoxTexture" id=4]
+texture = ExtResource( 6 )
+region_rect = Rect2( 0, 0, 76, 80 )
+margin_left = 16.0
+margin_right = 16.0
+margin_top = 16.0
+margin_bottom = 24.0
+
+[sub_resource type="StyleBoxTexture" id=5]
+texture = ExtResource( 5 )
+region_rect = Rect2( 0, 0, 76, 80 )
+margin_left = 16.0
+margin_right = 16.0
+margin_top = 20.0
+margin_bottom = 20.0
+
+[resource]
+Button/colors/font_color = Color( 0.262745, 0.262745, 0.262745, 1 )
+Button/colors/font_color_disabled = Color( 0, 0, 0, 0.176471 )
+Button/colors/font_color_focus = Color( 0.117647, 0.117647, 0.117647, 1 )
+Button/colors/font_color_hover = Color( 0.117647, 0.117647, 0.117647, 1 )
+Button/colors/font_color_pressed = Color( 0.101961, 0.101961, 0.101961, 0.784314 )
+Button/fonts/font = ExtResource( 2 )
+Button/styles/disabled = SubResource( 1 )
+Button/styles/focus = SubResource( 2 )
+Button/styles/hover = SubResource( 3 )
+Button/styles/normal = SubResource( 4 )
+Button/styles/pressed = SubResource( 5 )

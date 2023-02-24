@@ -1,0 +1,160 @@
+[gd_scene load_steps=14 format=2]
+
+[ext_resource path="res://scenes/editor_menu/editor_menu.gd" type="Script" id=1]
+[ext_resource path="res://assets/ui/buttons/big/blue/button_blue_big.tres" type="Theme" id=2]
+[ext_resource path="res://assets/ui/fonts/data/kenney_thick.ttf" type="FontFile" id=3]
+[ext_resource path="res://assets/ui/buttons/small/yellow/button_yellow_small.tres" type="Theme" id=4]
+[ext_resource path="res://assets/ui/fonts/font_small_button.tres" type="FontFile" id=5]
+[ext_resource path="res://assets/ui/fonts/data/kenney_pixel_square.ttf" type="FontFile" id=6]
+[ext_resource path="res://assets/ui/general/general_ui.tres" type="Theme" id=7]
+[ext_resource path="res://assets/ui/fonts/font_ui_big.tres" type="FontFile" id=8]
+[ext_resource path="res://assets/ui/panels/light/panel_blue_light.tres" type="StyleBox" id=9]
+[ext_resource path="res://assets/ui/panels/metal_dark/panel_red_metal_dark.tres" type="StyleBox" id=10]
+[ext_resource path="res://assets/ui/buttons/big/red/button_red_big.tres" type="Theme" id=11]
+
+[sub_resource type="FontFile" id=3]
+font_data = ExtResource( 6 )
+
+[sub_resource type="FontFile" id=2]
+size = 64
+font_data = ExtResource( 3 )
+
+[node name="EditorMenu" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="Control" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1024.0
+offset_bottom = 600.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PanelContainer" type="ScrollContainer" parent="Control"]
+anchor_left = 0.2
+anchor_top = 0.2
+anchor_right = 0.8
+anchor_bottom = 0.8
+custom_styles/panel = ExtResource( 9 )
+scroll_horizontal_enabled = false
+__meta__ = {
+"_edit_group_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="ContainerMaps" type="VBoxContainer" parent="Control/PanelContainer"]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 602.4
+offset_bottom = 36.0
+size_flags_horizontal = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblPlaceholder" type="Label" parent="Control/PanelContainer/ContainerMaps"]
+offset_right = 590.0
+offset_bottom = 24.0
+size_flags_vertical = 6
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 3 )
+text = "LOADING MAPS..."
+align = 1
+valign = 1
+
+[node name="BtnCreate" type="Button" parent="Control"]
+anchor_top = 0.75
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 412.0
+offset_top = 39.0
+offset_right = -428.0
+offset_bottom = -17.8
+theme = ExtResource( 2 )
+text = "NEW"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblTitle" type="Label" parent="Control"]
+anchor_right = 1.0
+anchor_bottom = 0.2
+custom_colors/font_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "Editor"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BtnBack" type="Button" parent="Control"]
+offset_right = 51.0
+offset_bottom = 53.0
+theme = ExtResource( 4 )
+text = "Back"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PopupDelete" type="Window" parent="Control"]
+anchor_right = 0.323
+anchor_bottom = 0.257
+offset_right = 68.248
+offset_bottom = -0.199997
+custom_styles/panel = ExtResource( 10 )
+exclusive = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/PopupDelete"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = 25.0
+offset_right = -25.0
+offset_bottom = -25.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LblDelete" type="Label" parent="Control/PopupDelete/VBoxContainer"]
+offset_right = 349.0
+offset_bottom = 36.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource( 7 )
+custom_fonts/font = ExtResource( 8 )
+text = "PERMANENTLY DELETE MAP?"
+align = 1
+valign = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/PopupDelete/VBoxContainer"]
+offset_top = 40.0
+offset_right = 349.0
+offset_bottom = 104.0
+alignment = 1
+
+[node name="BtnDeleteConfirm" type="Button" parent="Control/PopupDelete/VBoxContainer/HBoxContainer"]
+offset_left = 65.0
+offset_right = 177.0
+offset_bottom = 64.0
+theme = ExtResource( 11 )
+custom_fonts/font = ExtResource( 5 )
+disabled = true
+text = "delete"
+
+[node name="BtnDeleteCancel" type="Button" parent="Control/PopupDelete/VBoxContainer/HBoxContainer"]
+offset_left = 181.0
+offset_right = 283.0
+offset_bottom = 64.0
+theme = ExtResource( 2 )
+custom_fonts/font = ExtResource( 5 )
+text = "Cancel"
+
+[connection signal="pressed" from="Control/BtnCreate" to="." method="_on_BtnCreate_pressed"]
+[connection signal="pressed" from="Control/BtnBack" to="." method="_on_BtnBack_pressed"]
+[connection signal="pressed" from="Control/PopupDelete/VBoxContainer/HBoxContainer/BtnDeleteConfirm" to="." method="_on_BtnDeleteConfirm_pressed"]
+[connection signal="pressed" from="Control/PopupDelete/VBoxContainer/HBoxContainer/BtnDeleteCancel" to="." method="_on_BtnDeleteCancel_pressed"]

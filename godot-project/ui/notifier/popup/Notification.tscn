@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://vsr2ec5axkhu"]
+
+[ext_resource type="StyleBox" uid="uid://66h5ixi2vcs8" path="res://ui/assets/panels/metal/panel_red_metal.tres" id="1_4ldii"]
+
+[node name="Notification" type="PanelContainer"]
+anchors_preset = -1
+anchor_left = 0.95
+anchor_top = 0.05
+anchor_right = 0.95
+anchor_bottom = 0.05
+grow_horizontal = 0
+theme_override_styles/panel = ExtResource("1_4ldii")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="LblTitle" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Titleasd"
+
+[node name="LblMessage" type="Label" parent="VBox"]
+layout_mode = 2
+text = "Please dont cause errors"
