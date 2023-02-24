@@ -14,13 +14,19 @@ extends Node
 
 var _active_notifications:Array
 
-var TexturePanelRed = preload("res://ui/notifier/popup/notification_panel1.png")
-var TexturePanelYellow = preload("res://ui/notifier/popup/notification_panel2.png")
-var TexturePanelBlue = preload("res://ui/notifier/popup/notification_panel3.png")
-var TexturePanelGreen = preload("res://ui/notifier/popup/notification_panel4.png")
-var TexturePanelWhite = preload("res://ui/assets/panels/panel_white_small.png")
-var Notification = preload("res://ui/notifier/popup/Notification.tscn")
+# var TexturePanelRed = preload("res://ui/notifier/popup/notification_panel1.png")
+# var TexturePanelYellow = preload("res://ui/notifier/popup/notification_panel2.png")
+# var TexturePanelBlue = preload("res://ui/notifier/popup/notification_panel3.png")
+# var TexturePanelGreen = preload("res://ui/notifier/popup/notification_panel4.png")
+# var TexturePanelWhite = preload("res://ui/assets/panels/panel_white_small.png")
+#
+const TexturePanelRed = preload("res://ui/assets/panels/metal/panel_red_metal.tres")
+const TexturePanelYellow = preload("res://ui/assets/panels/metal/panel_yellow_metal.tres")
+const TexturePanelBlue = preload("res://ui/assets/panels/metal/panel_blue_metal.tres")
+const TexturePanelGreen = preload("res://ui/assets/panels/metal/panel_green_metal.tres")
+const TexturePanelWhite = preload("res://ui/assets/panels/panel_white_small.tres")
 
+var Notification = preload("res://ui/notifier/popup/Notification.tscn")
 
 
 #### Show InGame Notifications
@@ -85,9 +91,6 @@ func log_error(message = ""):
 ##
 ## NOT (Also spawns a Notification if Global.DEBUGGING is enabled)
 ## and the Log Level is high enough
-##
-## @param level Global.LogLevel
-## @param message any message that can be converted by str()
 func _log_console(level:int, message):
 	if Global.LOG_LEVEL > level:
 		return
@@ -126,27 +129,17 @@ func _log_console(level:int, message):
 	# 	notify_debug(log_string)
 
 
-## Spawn a Ingame Notification
-##
-## (Additionally logs to console with debug level)
-##
-## @param texture Texture2D depending checked notification type
-## @param title string
-## @param message string
-## @param duration float
-func _spawn_notification(panel_texture:Texture2D, title, message, duration:float):
+## Spawn a Ingame Notification (+ console log when debugging)
+func _spawn_notification(panel_texture:StyleBoxTexture, title, message, duration:float):
 	title = str(title)
 	message = str(message)
 
 	# also print to console
 	log_verbose("Notification: "+title+" - "+message)
 
+	# instantiate notification and set style
 	var inst := Notification.instantiate()
-	#inst.get_stylebox("panel").set_texture(panel_texture)
-	var stylebox = inst.get_theme_stylebox("panel").duplicate()
-	if panel_texture:
-		stylebox.set_texture(panel_texture)
-	inst.add_theme_stylebox_override("panel", stylebox)
+	inst.add_theme_stylebox_override("panel", panel_texture)
 	inst.get_node("VBox/LblTitle").text = title
 	if message == "":
 		inst.get_node("VBox/LblMessage").visible = false #text = ""
@@ -156,9 +149,12 @@ func _spawn_notification(panel_texture:Texture2D, title, message, duration:float
 	_active_notifications.push_front(inst)
 	_update_positions()
 
+	# setup fade tween
 	var tween = get_tree().create_tween()
+	tween.tween_interval(duration)
 	tween.tween_property(inst, "modulate:a", 0.0, 2.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN) #, _tween.TRANS_QUAD, _tween.EASE_IN, duration)
-	tween.finished.connect(_on_tween_finished)
+	tween.tween_callback(_on_tween_finished.bind(inst))
+	inst.mouse_entered.connect(_on_Notification_mouse_entered.bind(inst, tween))
 	tween.play()
 
 
@@ -174,15 +170,14 @@ func _update_positions():
 
 #### Callbacks
 
-func _on_Notification_mouse_entered():
-	pass
-
-
-func _on_Notification_mouse_exited():
-	pass
-
+func _on_Notification_mouse_entered(inst, tween):
+	# reset fade out tween
+	inst.modulate.a = 1.0
+	tween.stop()
+	tween.play()
 
 func _on_tween_finished(object: Object):
+	# delete instance
 	object.visible = false
 	_active_notifications.erase(object)
 	object.queue_free()

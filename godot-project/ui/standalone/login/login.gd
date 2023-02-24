@@ -25,7 +25,10 @@ func _ready():
 	# 	else:
 	# 		Networker.socket_connect_async()
 
-	Notifier.notify_info("Hello");
+	Notifier.notify_info("Hello")
+	Notifier.notify_game("Hi yourself")
+	Notifier.notify_game("Hi from game")
+	Notifier.notify_error("error says hi also")
 	# they were uncommented
 	# Networker.connect("authentication_requested",Callable(self,"_on_Networker_authentication_requested"))
 	# Networker.connect("authentication_successful",Callable(self,"_on_Networker_authentication_successful"))
