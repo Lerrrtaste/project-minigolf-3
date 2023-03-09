@@ -8,17 +8,19 @@ let
   # Allows reproducible python environments
   mach-nix = import (builtins.fetchGit {
     url = "https://github.com/DavHau/mach-nix";
-    ref = "refs/tags/3.5.0";
+    # ref = "refs/tags/3.5.0";
+    ref = "master";
   }) {
-    # pypiDataRev = "982b6cdf6552fb9296e1ade29cf65a2818cbbd6b";
-    # pypiDataSha256 = "166y0li0namv6a8ik8qq79ibck4w74x0wgypn9r7sqbb2wvcvcf3";
+    pypiDataRev = "52e77dc0078960e9dda215535424c5d4385829ca";
+    pypiDataSha256 = "167mhxa2nr9ap1b646s6cqpzinz50h4iliiyqchrraz7fqb0b0bd";
   };
 
   # Build python env from requirements.txt
   devPython = mach-nix.mkPython {
     python = devPythonVersion;
     requirements = ''
-      gdtoolkit==4.*
+      gdtoolkit>=4.0.0
+      setuptools
     '';
 
     # avoid file collision with djangorestframework-jwt
@@ -28,8 +30,4 @@ let
   };
   # pypkgs = pkgs.python3.pkgs;
 
-in mkShell {
-  buildInputs = [
-    (pkgs.callPackage ./godot4.nix { })
-  ];
-}
+in mkShell { buildInputs = [ (pkgs.callPackage ./godot4.nix { }) devPython ]; }
