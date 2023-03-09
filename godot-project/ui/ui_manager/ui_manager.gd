@@ -7,8 +7,8 @@ extends Control
 #
 # StandaloneScene:
 # Has one standalone scene at a time
-# - It is responsible for exiting
-# - UiManager will only change scene checked network state changes (not logged in, ...)
+# - UiManager should handle scene switching by listing to networker signals
+# - might add signals or expose function tough
 #
 # TODO Show blocking popup for loading states
 # TODO Show fatal error / lost connection popup to reconnect
@@ -29,13 +29,11 @@ const SCENE_PATHS = {
 @onready var lbl_error_blocker = $ErrorBlocker
 
 func _ready():
-	# Networker.connect("net_state_changed",Callable(self,"_on_Networker_net_state_changed"))
-	# Networker.connect("loading_changed",Callable(self,"_on_Networker_loading_changed"))
-	# _change_state(UiStates.DEFAULT)
-	change_scene_to_file(Scenes.LOGIN)
+	Networker.socket_connect_successful.connect(_on_Networker_socket_connect_successful)
+	change_scene_to(Scenes.LOGIN)
 
 
-func change_scene_to_file(standalone_scene):
+func change_scene_to(standalone_scene:Scenes):
 	Notifier.log_info("UiManager: Changing scene to %s" % [standalone_scene])
 
 	# remove old scene
@@ -51,11 +49,20 @@ func change_scene_to_file(standalone_scene):
 		print(packed_scene)
 		_current_scene = packed_scene.instantiate()
 		add_child(_current_scene)
+
 		# _change_state(UiStates.DEFAULT)
 	else:
 		# _change_state(UiStates.EMPTY)
 		_current_scene = null
 		Notifier.log_error("UiManager: Scene %s not found" % [standalone_scene])
+
+
+
+#### Side Effects
+
+func _on_Networker_socket_connect_successful():
+	change_scene_to(Scenes.MAIN_MENU)
+
 
 # func _change_state(new_state):
 # 	if _state == new_state:

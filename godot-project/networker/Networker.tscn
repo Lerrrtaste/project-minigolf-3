@@ -7,4 +7,5 @@
 script = ExtResource("2")
 
 [node name="Nakama" type="Node" parent="."]
+process_mode = 3
 script = ExtResource("1")

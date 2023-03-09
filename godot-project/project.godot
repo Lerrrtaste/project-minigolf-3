@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 Global="*res://global.gd"
 Notifier="*res://ui/notifier/Notifier.tscn"
 Networker="*res://networker/Networker.tscn"
+Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 
 [importer_defaults]
 

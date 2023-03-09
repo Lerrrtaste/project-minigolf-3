@@ -120,8 +120,3 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme = ExtResource("1")
 text = "Cancel"
-
-[connection signal="pressed" from="VBoxContainer/PanelGuest/BoxGuest/BtnLoginGuest" to="." method="_on_BtnLoginGuest_pressed"]
-[connection signal="pressed" from="VBoxContainer/PanelEmail/BoxEmail/HSplitContainer/BtnLoginEmail" to="." method="_on_BtnLoginEmail_pressed"]
-[connection signal="pressed" from="VBoxContainer/PanelEmail/BoxEmail/HSplitContainer/BtnRegister" to="." method="_on_BtnRegister_pressed"]
-[connection signal="pressed" from="VBoxContainer/PanelEmail/BoxEmail/BtnCancel" to="." method="_on_BtnCancel_pressed"]
