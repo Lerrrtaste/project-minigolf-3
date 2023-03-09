@@ -33,3 +33,7 @@ server/db/*
 ### Misc ###
 .scannerwork
 *.swp
+
+### Direnv ###
+.direnv
+.envrc
