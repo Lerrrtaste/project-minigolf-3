@@ -1,25 +1,18 @@
 extends Node
 
-## Notifier Helper
-##
-## Ingame Notifications:
-## - Meant for Player relevant Messages
-## - Displayed at child CanvasLayer
-## - If Global.DEBUGGING also shows Console Log Messages
-##
-## Console Logs:
-## - For me
-## - Printed only with according Global.LOG_LEVEL
-##
-
-var _active_notifications:Array
-
-# var TexturePanelRed = preload("res://ui/notifier/popup/notification_panel1.png")
-# var TexturePanelYellow = preload("res://ui/notifier/popup/notification_panel2.png")
-# var TexturePanelBlue = preload("res://ui/notifier/popup/notification_panel3.png")
-# var TexturePanelGreen = preload("res://ui/notifier/popup/notification_panel4.png")
-# var TexturePanelWhite = preload("res://ui/assets/panels/panel_white_small.png")
+# Notifier Helper
 #
+# Ingame Notifications:
+# - Meant for Player relevant Messages
+# - Displayed at child CanvasLayer
+# - If Global.DEBUGGING also shows Console Log Messages
+#
+# Console Logs:
+# - For me
+# - Printed only with according Global.LOG_LEVEL
+#
+# TODO click to close
+
 const TexturePanelRed = preload("res://ui/assets/panels/metal/panel_red_metal.tres")
 const TexturePanelYellow = preload("res://ui/assets/panels/metal/panel_yellow_metal.tres")
 const TexturePanelBlue = preload("res://ui/assets/panels/metal/panel_blue_metal.tres")
@@ -27,6 +20,9 @@ const TexturePanelGreen = preload("res://ui/assets/panels/metal/panel_green_meta
 const TexturePanelWhite = preload("res://ui/assets/panels/panel_white_small.tres")
 
 var Notification = preload("res://ui/notifier/popup/Notification.tscn")
+
+var _active_notifications:Array
+
 
 
 #### Show InGame Notifications
