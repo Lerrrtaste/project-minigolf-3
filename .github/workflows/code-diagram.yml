@@ -1,2 +1,16 @@
-actions/checkout
-githubocto/repo-visualizer
+name: Create diagram
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - 0.1.0-dev-godot4
+jobs:
+  get_data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@0.1.0-dev-godot4
+      - name: Update diagram
+        uses: githubocto/repo-visualizer@main
+        with:
+          excluded_paths: "ignore,.github"
