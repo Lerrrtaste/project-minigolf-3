@@ -36,7 +36,7 @@ const NK_PORT = 7350
 const NK_PROTOCOL = "http"
 const NK_TIMEOUT = 3
 const NK_LOG_LEVEL = NakamaLogger.LOG_LEVEL.DEBUG # {NONE, ERROR, WARNING, INFO, VERBOSE, DEBUG}
-const NK_ADDON_VERSION = "3.3.0" # primarily note for me
+const NK_ADDON_VERSION = "3.3.1" # primarily note for me
 
 const COLLECTION_MAPDATA = "mapdata-dev"
 const COLLECTION_PLAYLISTS = "playlists-dev"
