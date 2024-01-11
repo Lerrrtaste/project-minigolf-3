@@ -47,6 +47,7 @@ const SCENE_PATHS = {
 
 enum Results {
 	LOGIN_OK,
+	NOT_AUTHENTICATED,
 
 	MENU_EDITOR,
 	MENU_BROWSER,
@@ -54,7 +55,6 @@ enum Results {
 	MENU_CREATE,
 	MENU_PROFILE,
 	MENU_SETTINGS,
-	MENU_LOGOUT,
 
 	EDITOR_CREATE,
 	EDITOR_EDIT,
@@ -79,6 +79,13 @@ func change_scene_to(standalone_scene:Scenes):
 	if _current_scene:
 		_current_scene.queue_free()
 		_current_scene.visible = false
+
+	# Check Session
+	if not standalone_scene == Scenes.LOGIN and await Networker.check_session_async():
+		Networker.logout()
+		change_scene_to(Scenes.LOGIN)
+		Notifier.log_error("UiManager: Session expired")
+		return
 
 	# load new scene
 	if SCENE_PATHS.has(standalone_scene):
@@ -120,7 +127,7 @@ func _on_scene_finished(result:Results):
 			change_scene_to(Scenes.PROFILE)
 		Results.MENU_SETTINGS:
 			change_scene_to(Scenes.SETTINGS)
-		Results.MENU_LOGOUT:
+		Results.NOT_AUTHENTICATED:
 			change_scene_to(Scenes.LOGIN)
 
 		Results.MAIN_MENU:

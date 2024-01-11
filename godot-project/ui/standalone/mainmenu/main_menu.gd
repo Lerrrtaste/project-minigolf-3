@@ -13,6 +13,7 @@ extends Control
 signal scene_finished(result:int)
 
 func _ready():
+
 	# UI
 	btn_join.pressed.connect(_on_BtnJoin_pressed)
 	btn_create.pressed.connect(_on_BtnCreate_pressed)
@@ -32,7 +33,7 @@ func _on_BtnEditor_pressed():
 
 func _on_BtnLogout_pressed():
 	Networker.logout()
-	emit_signal("scene_finished", UiManager.Results.MENU_LOGOUT)
+	emit_signal("scene_finished", UiManager.Results.NOT_AUTHENTICATED)
 
 func _on_BtnJoin_pressed():
 	emit_signal("scene_finished", UiManager.Results.MENU_JOIN)

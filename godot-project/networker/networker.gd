@@ -117,12 +117,32 @@ func auth_guest(display_name:String)->void:
 
 func logout()->void:
 	clear_session()
+	await _nk_client.session_logout_async(_nk_session)
 	_nk_session = null
 	_nk_socket = null
 	_change_net_state(NetStates.NOT_AUTHENTICATED)
 
 
 #### Session Lifecycle
+
+func check_session_async()->bool:
+	# Checks if session is expired or close to expiration
+	# Tries to update session
+	# Returns true if everything is good
+	# (Call for every standalone scene)
+	if _nk_session == null:
+		return false
+
+	if _nk_session.expired:
+		Notifier.log_info("Session expired, trying to restore")
+		_nk_session = await _nk_client.session_refresh_async(_nk_session)
+
+	if _nk_session.is_exception():
+		Notifier.log_error("Session invalid: %s" % _nk_session.get_exception())
+		return false
+
+	return true
+
 
 func restore_session()->bool:
 	if not FileAccess.file_exists("user://auth_token.txt"):
@@ -133,7 +153,7 @@ func restore_session()->bool:
 	var auth_token = file.get_as_text()
 	file.close()
 
-	_nk_session = _nk_client.restore_session(auth_token)
+	_nk_session = NakamaClient.restore_session(auth_token)
 	if _nk_session.is_exception():
 		Notifier.log_error("Session restore failed: %s" % _nk_session.get_exception())
 		return false
