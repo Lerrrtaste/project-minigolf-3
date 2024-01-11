@@ -88,6 +88,7 @@ func auth_email(email:String, password:String, create_account := false, username
 		emit_signal("authentication_failed", _nk_session.get_exception())
 		return
 
+	store_session()
 	emit_signal("authentication_successful")
 
 
@@ -110,22 +111,60 @@ func auth_guest(display_name:String)->void:
 		emit_signal("authentication_failed", update.get_exception())
 		return
 
+	store_session()
 	emit_signal("authentication_successful")
 
+
+func logout()->void:
+	clear_session()
+	_nk_session = null
+	_nk_socket = null
+	_change_net_state(NetStates.NOT_AUTHENTICATED)
+
+
+#### Session Lifecycle
+
+func restore_session()->bool:
+	if not FileAccess.file_exists("user://auth_token.txt"):
+		_change_net_state(NetStates.NOT_AUTHENTICATED)
+		return false
+
+	var file = FileAccess.open("user://auth_token.txt", FileAccess.READ)
+	var auth_token = file.get_as_text()
+	file.close()
+
+	_nk_session = _nk_client.restore_session(auth_token)
+	if _nk_session.is_exception():
+		Notifier.log_error("Session restore failed: %s" % _nk_session.get_exception())
+		return false
+
+	emit_signal("authentication_successful")
+	return true
+
+func store_session()->void:
+	var file = FileAccess.open("user://auth_token.txt", FileAccess.WRITE)
+	file.store_string(_nk_session.token)
+	file.close()
+
+func clear_session()->void:
+	if not FileAccess.file_exists("user://auth_token.txt"):
+		return
+
+	DirAccess.open("user://").remove("auth_token.txt")
 
 
 #### Socket
 
 func socket_connect()->void:
-	emit_signal("socket_connect_requested", null)
-	_nk_socket = await _nk_client.create_socket_async(_nk_session, true)
+	emit_signal("socket_connect_requested")
+	_nk_socket = nakama.create_socket_from(_nk_client)
 	var connected = await _nk_socket.connect_async(_nk_session)
 
 	if connected.is_exception():
 		emit_signal("socket_connect_failed", connected.get_exception())
 		return
 
-	emit_signal("socket_connect_successful", null)
+	emit_signal("socket_connect_successful")
 
 
 
@@ -152,7 +191,6 @@ func _on_authentication_successful()->void:
 func _on_authentication_failed(error)->void:
 	Notifier.log_error("Authentication failed: %s" % error)
 	_change_net_state(NetStates.NOT_AUTHENTICATED)
-
 
 
 

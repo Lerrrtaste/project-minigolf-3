@@ -17,10 +17,15 @@ extends Control
 @onready var btn_register = get_node("VBoxContainer/PanelEmail/BoxEmail/HSplitContainer/BtnRegister")
 @onready var btn_cancel = get_node("VBoxContainer/PanelEmail/BoxEmail/BtnCancel")
 
+signal scene_finished(result:int)
+
+
+# Results:
+# OK: Authenticated and Connected
+
 
 func _ready():
 	# UI
-	print("ready?")
 	btn_cancel.pressed.connect(_on_BtnCancel_pressed)
 	btn_login_guest.pressed.connect(_on_BtnLoginGuest_pressed)
 	btn_login_email.pressed.connect(_on_BtnLoginEmail_pressed)
@@ -35,6 +40,10 @@ func _ready():
 	Networker.socket_connect_successful.connect(_on_Networker_socket_connect_successful)
 	Networker.socket_connect_failed.connect(_on_Networker_socket_connect_failed)
 
+	# Try to restore session
+	disable_inputs(true)
+	if not Networker.restore_session():
+		disable_inputs(false)
 
 	# if true: # autologin
 	# 	if not OS.get_cmdline_args().is_empty():
@@ -62,8 +71,7 @@ func _on_BtnLoginGuest_pressed():
 
 
 func _on_BtnLoginEmail_pressed():
-	print("presssss")
-	Networker.auth_email(line_email.text, line_password.text)
+	Networker.auth_email(line_email.text, line_password.text, false)
 
 
 func _on_BtnRegister_pressed():
@@ -84,7 +92,7 @@ func _on_BtnRegister_pressed():
 		Notifier.notify_error("Username too long", "Max %s chars"%Global.USERNAME_LENGTH_MAX)
 		return
 
-	# Networker.register_email_async(line_email.text, line_password.text, line_username_register.text)
+	Networker.auth_email(line_email.text, line_password.text, true, line_username_register.text)
 
 
 
@@ -97,6 +105,7 @@ func _on_Networker_authentication_requested():
 func _on_Networker_authentication_successful():
 	Notifier.notify_info("Authentication successful")
 	disable_inputs(true)
+	Networker.socket_connect()
 
 func _on_Networker_authentication_failed(error):
 	Notifier.notify_error("Authentication failed", error.message)
@@ -110,6 +119,7 @@ func _on_Networker_socket_connect_requested():
 func _on_Networker_socket_connect_successful():
 	Notifier.notify_info("Connected to server")
 	disable_inputs(true)
+	emit_signal("scene_finished", UiManager.Results.LOGIN_OK)
 
 func _on_Networker_socket_connect_failed(error):
 	Notifier.notify_error("Connection failed", error.message)

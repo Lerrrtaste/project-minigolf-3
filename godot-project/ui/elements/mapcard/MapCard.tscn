@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://54v44y40nb4"]
+
+[node name="MapCard" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="LblName" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Name"
+
+[node name="LblCreator" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Creator"
+
+[node name="LblPlays" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Plays"
+
+[node name="LblRating" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Rating"

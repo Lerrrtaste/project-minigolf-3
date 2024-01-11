@@ -83,15 +83,15 @@ caret_blink = true
 layout_mode = 2
 text = "Passw0rd"
 placeholder_text = "Password"
-secret = true
 caret_blink = true
+secret = true
 
 [node name="LinePasswordConfirm" type="LineEdit" parent="VBoxContainer/PanelEmail/BoxEmail"]
 visible = false
 layout_mode = 2
 placeholder_text = "Confirm Password"
-secret = true
 caret_blink = true
+secret = true
 
 [node name="LineUsernameRegister" type="LineEdit" parent="VBoxContainer/PanelEmail/BoxEmail"]
 visible = false

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://byxel2w41c04d"
-path="res://.godot/imported/icon_players.png-5805a0fc70e536bf7cca1e30e93fc6dc.ctex"
+path="res://.godot/imported/icon_players.png-52183378d2e56022108364e1a640293b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://to_refile/objects/map_card/icon_players.png"
-dest_files=["res://.godot/imported/icon_players.png-5805a0fc70e536bf7cca1e30e93fc6dc.ctex"]
+source_file="res://ui/elements/mapcard/icon_players.png"
+dest_files=["res://.godot/imported/icon_players.png-52183378d2e56022108364e1a640293b.ctex"]
 
 [params]
 

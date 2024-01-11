@@ -1,0 +1,9 @@
+* Minigolf 24
+
+** Features
+*** Maps
+- Name
+- ID
+- Creator
+- Plays
+- Rating

@@ -14,22 +14,61 @@ extends Control
 # TODO Show fatal error / lost connection popup to reconnect
 # TODO Loading state while scenes are initializeing
 
+class_name UiManager
+
 enum Scenes  {
 	LOGIN,
 	MAIN_MENU,
+
+	MATCH_JOIN,
+	MATCH_CREATE,
+
+	MATCH_LOBBY,
+	MATCH,
+	MATCH_END,
+
+	EDITOR_MENU,
+	EDITOR,
+
+	MAP_BROWSER,
+	MAP_DETAIL,
+	PLAYLIST,
+
+	SETTINGS,
+	PROFILE,
 }
 var _current_scene:CanvasItem
 
 const SCENE_PATHS = {
 	Scenes.LOGIN: "res://ui/standalone/login/Login.tscn",
 	Scenes.MAIN_MENU: "res://ui/standalone/mainmenu/MainMenu.tscn",
+	Scenes.EDITOR_MENU: "res://ui/standalone/editormenu/EditorMenu.tscn",
 }
+
+enum Results {
+	LOGIN_OK,
+
+	MENU_EDITOR,
+	MENU_BROWSER,
+	MENU_JOIN,
+	MENU_CREATE,
+	MENU_PROFILE,
+	MENU_SETTINGS,
+	MENU_LOGOUT,
+
+	EDITOR_CREATE,
+	EDITOR_EDIT,
+
+	MAIN_MENU,
+
+	# NOT_AUTHENTICATED,
+	# NOT_CONNECTED,
+	}
 
 @onready var lbl_loading_blocker = $LoadingBlocker
 @onready var lbl_error_blocker = $ErrorBlocker
 
 func _ready():
-	Networker.socket_connect_successful.connect(_on_Networker_socket_connect_successful)
 	change_scene_to(Scenes.LOGIN)
 
 
@@ -44,15 +83,14 @@ func change_scene_to(standalone_scene:Scenes):
 	# load new scene
 	if SCENE_PATHS.has(standalone_scene):
 		var scene_path = SCENE_PATHS[standalone_scene]
-		var packed_scene = load("res://ui/standalone/login/Login.tscn")
+		var packed_scene = load(scene_path)
 		print(scene_path)
 		print(packed_scene)
 		_current_scene = packed_scene.instantiate()
+		_current_scene.scene_finished.connect(_on_scene_finished)
 		add_child(_current_scene)
 
-		# _change_state(UiStates.DEFAULT)
 	else:
-		# _change_state(UiStates.EMPTY)
 		_current_scene = null
 		Notifier.log_error("UiManager: Scene %s not found" % [standalone_scene])
 
@@ -60,31 +98,33 @@ func change_scene_to(standalone_scene:Scenes):
 
 #### Side Effects
 
-func _on_Networker_socket_connect_successful():
-	change_scene_to(Scenes.MAIN_MENU)
+# func _on_Networker_socket_connect_successful():
+# 	change_scene_to(Scenes.MAIN_MENU)
 
+func _on_scene_finished(result:Results):
+	match result:
+		Results.LOGIN_OK:
+			change_scene_to(Scenes.MAIN_MENU)
 
-# func _change_state(new_state):
-# 	if _state == new_state:
-# 		print("UiManager: State already %s" % [new_state])
-# 		return
-# 	Notifier.log_info("UiManager: Changing state to %s" % [new_state])
-# 	_state = new_state
+		Results.MENU_JOIN:
+			change_scene_to(Scenes.MAP_BROWSER)
+		Results.MENU_CREATE:
+			change_scene_to(Scenes.MATCH_CREATE)
 
-# 	lbl_loading_blocker.visible = _state == UiStates.LOADING
-# 	lbl_error_blocker.visible = _state == UiStates.ERROR
-# 	# TODO disable input too
+		Results.MENU_EDITOR:
+			change_scene_to(Scenes.EDITOR_MENU)
+		Results.MENU_BROWSER:
+			change_scene_to(Scenes.MAP_BROWSER)
 
-# func _on_Networker_net_state_changed(new_state):
-# 	match new_state:
-# 		Networker.NetStates.NOT_AUTHENTICATED:
-# 			change_scene_to_file(Scenes.LOGIN)
-# 		Networker.NetStates.CONNECTION_ERROR:
-# 			_change_state(UiStates.ERROR)
+		Results.MENU_PROFILE:
+			change_scene_to(Scenes.PROFILE)
+		Results.MENU_SETTINGS:
+			change_scene_to(Scenes.SETTINGS)
+		Results.MENU_LOGOUT:
+			change_scene_to(Scenes.LOGIN)
 
-# func _on_Networker_loading_changed(is_loading, request):
-# 	print("UiManager: Loading changed to %s" % [is_loading])
-# 	if is_loading:
-# 		_change_state(UiStates.LOADING)
-# 	else:
-# 		_change_state(UiStates.DEFAULT)
+		Results.MAIN_MENU:
+			change_scene_to(Scenes.MAIN_MENU)
+
+		_:
+			Notifier.log_error("UiManager: scene finished with invalid result %s" % [result])
