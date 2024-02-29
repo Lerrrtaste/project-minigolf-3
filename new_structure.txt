@@ -1,0 +1,38 @@
+New Project Structure
+
+- map
+  - mtiles
+  - mobjects
+  - map_container
+  - map_card
+  
+- player
+  - ball
+  - pc_local
+  - pc_remote
+
+- game
+  - match
+    - match
+    - match_end
+    - match_lobby
+
+  - gamemode
+    - gmode_base
+    - gmode_practice
+    - gmode_normal
+
+  - camera
+
+- editor
+  - editor_menu
+  - editor
+
+- networker
+  - map_cache
+  - networker
+
+- helpers
+  - backgrounds
+  - notifier
+  
