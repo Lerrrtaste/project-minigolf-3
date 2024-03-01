@@ -81,7 +81,7 @@ func change_scene_to(standalone_scene:Scenes):
 		_current_scene.visible = false
 
 	# Check Session
-	if not standalone_scene == Scenes.LOGIN and await Networker.check_session_async():
+	if (standalone_scene != Scenes.LOGIN) and (not await Networker.check_session_async()):
 		Networker.logout()
 		change_scene_to(Scenes.LOGIN)
 		Notifier.log_error("UiManager: Session expired")
